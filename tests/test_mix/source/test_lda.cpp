@@ -55,3 +55,12 @@ TEST_F(LDATest, LDA_WithoutSign_Gets_Word_WithoutSign)
 	}
 }
 
+TEST_F(LDATest, LDA_With_OnlySign_Gets_Only_Sign)
+{
+	mix.execute(make_lda(source_address, Field{0, 0}));
+
+	ASSERT_EQ(Sign::Negative, mix.ra().sign());
+}
+
+
+

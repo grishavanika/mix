@@ -95,7 +95,7 @@ void Word::set_value(int value)
 	set_value(value, MaxField(), true/*do not ignore sign*/);
 }
 
-int Word::value(const Field& field) const
+int Word::value(const Field& field, bool ignore_sign /*= false*/) const
 {
 	std::size_t start_index = field.left() + (field.includes_sign() ? 1 : 0);
 	std::size_t end_index = field.right();
@@ -108,13 +108,13 @@ int Word::value(const Field& field) const
 		value |= mask;
 	}
 
-	const int sign_value = ((sign_ == Sign::Negative) ? -1 : 1);
+	const int sign_value = (!ignore_sign && (sign_ == Sign::Negative) ? -1 : 1);
 	return static_cast<int>(value) * sign_value;
 }
 
-int Word::value() const
+int Word::value(bool ignore_sign /*= false*/) const
 {
-	return value(MaxField());
+	return value(MaxField(), ignore_sign);
 }
 
 namespace mix {

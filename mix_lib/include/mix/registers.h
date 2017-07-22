@@ -28,6 +28,8 @@ public:
 	explicit AddressRegister();
 	explicit AddressRegister(int two_bytes_with_sign);
 
+	int value() const;
+
 	// #TODO: `sing() == Sign::Positive` should be true always
 };
 

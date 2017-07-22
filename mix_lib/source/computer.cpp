@@ -35,6 +35,36 @@ void Computer::set_memory(std::size_t address, const Word& value)
 	memory_[address] = value;
 }
 
+const Word& Computer::memory(int address, size_t index) const
+{
+	if (index != 0)
+	{
+		address += index_value(index);
+	}
+
+	return memory(address);
+}
+
+const Word& Computer::memory(int address) const
+{
+	if ((address < 0) || (address >= static_cast<int>(memory_.size())))
+	{
+		throw std::out_of_range{"Invalid Memory address"};
+	}
+
+	return memory_[static_cast<std::size_t>(address)];
+}
+
+int Computer::index_value(size_t index) const
+{
+	if ((index == 0) || (index > rindexes_.size()))
+	{
+		throw std::out_of_range{"Invalid InderRegister"};
+	}
+
+	return rindexes_[index - 1].value();
+}
+
 void Computer::execute(const Command& command)
 {
 	static_assert(k_commands_count == (Byte::k_max_value + 1),
@@ -53,7 +83,11 @@ void Computer::on_nop(const Command& /*command*/)
 {
 }
 
-void Computer::on_lda(const Command& /*command*/)
+void Computer::on_lda(const Command& command)
 {
-
+	const auto& word = memory(
+		command.address().value(),
+		command.address_index().cast_to<std::size_t>());
+	const bool ignore_sign = !command.field().includes_sign();
+	ra_.set_value(word.value(ignore_sign), command.field());
 }

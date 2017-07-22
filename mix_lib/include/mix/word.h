@@ -32,8 +32,8 @@ public:
 
 	void set_value(int value, const Field& field, bool owerwrite_sign = true);
 	void set_value(int value);
-	int value(const Field& field) const;
-	int value() const;
+	int value(const Field& field, bool ignore_sign = false) const;
+	int value(bool ignore_sign = false) const;
 
 	static Field MaxField();
 

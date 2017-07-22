@@ -24,6 +24,12 @@ private:
 	void on_lda(const Command& command);
 
 private:
+	const Word& memory(int address, size_t index) const;
+	const Word& memory(int address) const;
+
+	int index_value(size_t index) const;
+
+private:
 	Register ra_;
 	Register rx_;
 	std::array<IndexRegister, k_index_registers_count> rindexes_;

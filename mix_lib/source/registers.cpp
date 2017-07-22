@@ -53,3 +53,8 @@ AddressRegister::AddressRegister(int two_bytes_with_sign)
 		Field{4, 5},
 		true/*overwrite sign*/);
 }
+
+int AddressRegister::value() const
+{
+	return IndexRegister::value(Field{4, 5});
+}
