@@ -101,3 +101,8 @@ TEST_F(LDATest, LDA_With_CustomFild_WithSign_ShiftedRight)
 	ASSERT_EQ(source_cell.byte(2), mix.ra().byte(4));
 	ASSERT_EQ(source_cell.byte(3), mix.ra().byte(5));
 }
+
+
+// #TODO: add tests for other registers
+// #TODO: add cases when address is negative and everything is
+// fixed by index register, e.g.: make_lda(-200, 1)

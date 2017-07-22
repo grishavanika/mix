@@ -10,5 +10,11 @@ Command make_lda(int address, const Field& field);
 Command make_lda(int address, std::size_t index_register);
 Command make_lda(int address);
 
+Command make_sta(int address, const Field& field, std::size_t index_register);
+Command make_sta(int address, const Field& field);
+Command make_sta(int address, std::size_t index_register);
+Command make_sta(int address);
+
+
 } // namespace mix
 

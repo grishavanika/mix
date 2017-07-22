@@ -16,16 +16,16 @@ public:
 	void execute(const Command& command);
 
 	void set_memory(std::size_t address, const Word& value);
+	const Word& memory(std::size_t address) const;
 
 	const Register& ra() const;
-	const Register& rx() const;
+	void set_ra(const Register& ra);
 
-	const IndexRegister& ri1() const;
-	const IndexRegister& ri2() const;
-	const IndexRegister& ri3() const;
-	const IndexRegister& ri4() const;
-	const IndexRegister& ri5() const;
-	const IndexRegister& ri6() const;
+	const Register& rx() const;
+	void set_rx(const Register& rx);
+
+	const IndexRegister& ri(std::size_t index) const;
+	void set_ri(std::size_t index, const IndexRegister& ri);
 
 private:
 	void on_nop(const Command& command);

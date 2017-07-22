@@ -42,11 +42,7 @@ IndexRegister::IndexRegister(Sign sign, const Byte& b4, const Byte& b5)
 	set_byte(5, b5);
 }
 
-AddressRegister::AddressRegister()
-{
-}
-
-AddressRegister::AddressRegister(int two_bytes_with_sign)
+IndexRegister::IndexRegister(int two_bytes_with_sign)
 {
 	set_value(
 		two_bytes_with_sign,
@@ -54,7 +50,7 @@ AddressRegister::AddressRegister(int two_bytes_with_sign)
 		true/*overwrite sign*/);
 }
 
-int AddressRegister::value() const
+int IndexRegister::value() const
 {
-	return IndexRegister::value(Field{4, 5});
+	return Register::value(Field{4, 5});
 }

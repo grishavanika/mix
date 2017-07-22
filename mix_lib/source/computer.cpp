@@ -47,34 +47,9 @@ const Register& Computer::rx() const
 	return rx_;
 }
 
-const IndexRegister& Computer::ri1() const
+const IndexRegister& Computer::ri(std::size_t index) const
 {
-	return index_register(1);
-}
-
-const IndexRegister& Computer::ri2() const
-{
-	return index_register(2);
-}
-
-const IndexRegister& Computer::ri3() const
-{
-	return index_register(3);
-}
-
-const IndexRegister& Computer::ri4() const
-{
-	return index_register(4);
-}
-
-const IndexRegister& Computer::ri5() const
-{
-	return index_register(5);
-}
-
-const IndexRegister& Computer::ri6() const
-{
-	return index_register(6);
+	return index_register(index);
 }
 
 void Computer::set_memory(std::size_t address, const Word& value)
@@ -221,4 +196,24 @@ void Computer::on_sta(const Command& command)
 	word.set_value(
 		ra_.value(source_field),
 		source_field.shift_bytes_left());
+}
+
+void Computer::set_ra(const Register& ra)
+{
+	ra_ = ra;
+}
+
+void Computer::set_rx(const Register& rx)
+{
+	rx_ = rx;
+}
+
+void Computer::set_ri(std::size_t index, const IndexRegister& ri)
+{
+	index_register(index) = ri;
+}
+
+const Word& Computer::memory(std::size_t address) const
+{
+	return memory_at(static_cast<int>(address));
 }
