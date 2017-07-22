@@ -2,7 +2,7 @@
 
 using namespace mix;
 
-Field Word::MaxField()
+/*static*/ Field Word::MaxField()
 {
 	return Field{0, k_bytes_count};
 }

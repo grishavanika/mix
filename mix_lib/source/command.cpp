@@ -27,9 +27,9 @@ Command::Command(
 	word_.set_byte(5, id);
 }
 
-const Byte& Command::id() const
+std::size_t Command::id() const
 {
-	return word_.byte(5);
+	return word_.byte(5).cast_to<std::size_t>();
 }
 
 const Byte& Command::field_byte() const
@@ -37,9 +37,9 @@ const Byte& Command::field_byte() const
 	return word_.byte(4);
 }
 
-const Byte& Command::address_index() const
+std::size_t Command::address_index() const
 {
-	return word_.byte(3);
+	return word_.byte(3).cast_to<std::size_t>();
 }
 
 const Field& Command::field() const
@@ -52,8 +52,8 @@ const Word& Command::to_word() const
 	return word_;
 }
 
-const AddressRegister& Command::address() const
+int Command::address() const
 {
-	return address_;
+	return address_.value();
 }
 

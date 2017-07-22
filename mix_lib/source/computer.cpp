@@ -15,6 +15,22 @@ Computer::k_command_actions = {
 	/*06*/nullptr,
 	/*07*/nullptr,
 	/*08*/&Computer::on_lda,
+	/*09*/&Computer::on_ld1,
+	/*10*/&Computer::on_ld2,
+	/*11*/&Computer::on_ld3,
+	/*12*/&Computer::on_ld4,
+	/*13*/&Computer::on_ld5,
+	/*14*/&Computer::on_ld6,
+	/*15*/&Computer::on_ldx,
+	/*16*/nullptr,
+	/*17*/nullptr,
+	/*18*/nullptr,
+	/*19*/nullptr,
+	/*20*/nullptr,
+	/*21*/nullptr,
+	/*22*/nullptr,
+	/*23*/nullptr,
+	/*23*/&Computer::on_sta,
 };
 
 Computer::Computer()
@@ -24,6 +40,41 @@ Computer::Computer()
 const Register& Computer::ra() const
 {
 	return ra_;
+}
+
+const Register& Computer::rx() const
+{
+	return rx_;
+}
+
+const IndexRegister& Computer::ri1() const
+{
+	return index_register(1);
+}
+
+const IndexRegister& Computer::ri2() const
+{
+	return index_register(2);
+}
+
+const IndexRegister& Computer::ri3() const
+{
+	return index_register(3);
+}
+
+const IndexRegister& Computer::ri4() const
+{
+	return index_register(4);
+}
+
+const IndexRegister& Computer::ri5() const
+{
+	return index_register(5);
+}
+
+const IndexRegister& Computer::ri6() const
+{
+	return index_register(6);
 }
 
 void Computer::set_memory(std::size_t address, const Word& value)
@@ -39,13 +90,19 @@ const Word& Computer::memory_with_index(int address, size_t index) const
 {
 	if (index != 0)
 	{
-		address += index_value(index);
+		address += index_register(index).value();
 	}
 
-	return memory(address);
+	return memory_at(address);
 }
 
-const Word& Computer::memory(int address) const
+Word& Computer::memory_with_index(int address, size_t index)
+{
+	return const_cast<Word&>(
+		static_cast<const Computer&>(*this).memory_with_index(address, index));
+}
+
+const Word& Computer::memory_at(int address) const
 {
 	if ((address < 0) || (address >= static_cast<int>(memory_.size())))
 	{
@@ -55,14 +112,20 @@ const Word& Computer::memory(int address) const
 	return memory_[static_cast<std::size_t>(address)];
 }
 
-int Computer::index_value(size_t index) const
+const IndexRegister& Computer::index_register(size_t index) const
 {
 	if ((index == 0) || (index > rindexes_.size()))
 	{
 		throw std::out_of_range{"Invalid InderRegister"};
 	}
+	
+	return rindexes_[index - 1];
+}
 
-	return rindexes_[index - 1].value();
+IndexRegister& Computer::index_register(size_t index)
+{
+	return const_cast<IndexRegister&>(
+		static_cast<const Computer&>(*this).index_register(index));
 }
 
 void Computer::execute(const Command& command)
@@ -70,7 +133,7 @@ void Computer::execute(const Command& command)
 	static_assert(k_commands_count == (Byte::k_max_value + 1),
 		"Command actions array should have all possible variations of command IDs");
 
-	auto callback = k_command_actions[command.id().cast_to<std::size_t>()];
+	auto callback = k_command_actions[command.id()];
 	if (!callback)
 	{
 		throw std::exception{"Not implemented"};
@@ -83,20 +146,79 @@ void Computer::on_nop(const Command& /*command*/)
 {
 }
 
-void Computer::on_lda(const Command& command)
+void Computer::load_register(Register& r, const Command& command)
 {
-	const auto& word = memory_with_index(
-		command.address().value(),
-		command.address_index().cast_to<std::size_t>());
+	const auto& word = memory_with_index(command.address(), command.address_index());
 	const auto& source_field = command.field();
-	
+
 	if (source_field.has_only_sign())
 	{
-		ra_.set_sign(word.sign());
+		r.set_sign(word.sign());
 		return;
 	}
 
-	ra_.set_value(
+	r.set_value(
 		word.value(source_field),
 		source_field.shift_bytes_right());
+}
+
+void Computer::load_index_register(std::size_t index, const Command& command)
+{
+	load_register(index_register(index), command);
+}
+
+void Computer::on_lda(const Command& command)
+{
+	load_register(ra_, command);
+}
+
+void Computer::on_ldx(const Command& command)
+{
+	load_register(rx_, command);
+}
+
+void Computer::on_ld1(const Command& command)
+{
+	load_index_register(1, command);
+}
+
+void Computer::on_ld2(const Command& command)
+{
+	load_index_register(2, command);
+}
+
+void Computer::on_ld3(const Command& command)
+{
+	load_index_register(3, command);
+}
+
+void Computer::on_ld4(const Command& command)
+{
+	load_index_register(4, command);
+}
+
+void Computer::on_ld5(const Command& command)
+{
+	load_index_register(5, command);
+}
+
+void Computer::on_ld6(const Command& command)
+{
+	load_index_register(6, command);
+}
+
+void Computer::on_sta(const Command& command)
+{
+	auto& word = memory_with_index(command.address(), command.address_index());
+	const auto& source_field = command.field();
+
+	if (source_field.has_only_sign())
+	{
+		word.set_sign(ra_.sign());
+		return;
+	}
+
+	word.set_value(
+		ra_.value(source_field),
+		source_field.shift_bytes_left());
 }

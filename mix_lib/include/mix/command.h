@@ -16,10 +16,10 @@ public:
 		const Byte& address_index,
 		const Field& field);
 
-	const Byte& id() const;
+	std::size_t id() const;
 	const Field& field() const;
-	const AddressRegister& address() const;
-	const Byte& address_index() const;
+	int address() const;
+	std::size_t address_index() const;
 
 	const Word& to_word() const;
 

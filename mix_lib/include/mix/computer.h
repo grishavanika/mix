@@ -18,16 +18,39 @@ public:
 	void set_memory(std::size_t address, const Word& value);
 
 	const Register& ra() const;
+	const Register& rx() const;
+
+	const IndexRegister& ri1() const;
+	const IndexRegister& ri2() const;
+	const IndexRegister& ri3() const;
+	const IndexRegister& ri4() const;
+	const IndexRegister& ri5() const;
+	const IndexRegister& ri6() const;
 
 private:
 	void on_nop(const Command& command);
 	void on_lda(const Command& command);
+	void on_ld1(const Command& command);
+	void on_ld2(const Command& command);
+	void on_ld3(const Command& command);
+	void on_ld4(const Command& command);
+	void on_ld5(const Command& command);
+	void on_ld6(const Command& command);
+	void on_ldx(const Command& command);
+
+	void on_sta(const Command& command);
+
+private:
+	void load_register(Register& r, const Command& command);
+	void load_index_register(std::size_t index, const Command& command);
 
 private:
 	const Word& memory_with_index(int address, size_t index) const;
-	const Word& memory(int address) const;
+	Word& memory_with_index(int address, size_t index);
+	const Word& memory_at(int address) const;
 
-	int index_value(size_t index) const;
+	const IndexRegister& index_register(size_t index) const;
+	IndexRegister& index_register(size_t index);
 
 private:
 	Register ra_;
