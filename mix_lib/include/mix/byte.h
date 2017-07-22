@@ -76,9 +76,33 @@ public:
 			(value <= static_cast<Number>(k_max_value));
 	}
 
+	static Byte min()
+	{
+		return Byte{k_min_value};
+	}
+
+	static Byte max()
+	{
+		return Byte{k_max_value};
+	}
+
 private:
 	NarrowType value_;
 };
+
+inline bool operator==(const Byte& lhs, const Byte& rhs)
+{
+	return (lhs.value() == rhs.value());
+}
+
+inline bool operator!=(const Byte& lhs, const Byte& rhs)
+{
+	return !(lhs == rhs);
+}
+
+// #TODO: std::numeric_limits<> specialization
+
+
 
 } // namespace mix
 

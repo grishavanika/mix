@@ -110,4 +110,19 @@ TEST(Byte, SetValuesOutOfRangeThrowsOverflowError)
 	ASSERT_EQ(byte.value(), 1);
 }
 
+TEST(Byte, BytesWithSameValuesAreEqual)
+{
+	ASSERT_EQ(Byte{0}, Byte{0});
+	ASSERT_EQ(Byte{1}, Byte{1});
+	ASSERT_EQ(Byte{32}, Byte{32});
+	ASSERT_EQ(Byte::min(), Byte::min());
+	ASSERT_EQ(Byte::max(), Byte::max());
+}
 
+TEST(Byte, BytesWithDifferentValuesAreDifferent)
+{
+	ASSERT_NE(Byte{1}, Byte{0});
+	ASSERT_NE(Byte{2}, Byte{3});
+	ASSERT_NE(Byte{32}, Byte{42});
+	ASSERT_NE(Byte::min(), Byte::max());
+}
