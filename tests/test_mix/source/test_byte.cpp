@@ -68,3 +68,46 @@ TEST(Byte, CantHoldValuesUnderMaximumPossibleValue)
 		ASSERT_FALSE(Byte::CanHoldValue(value));
 	}
 }
+
+TEST(Byte, SetValuesInRangeDoesNotThrow)
+{
+	Byte byte;
+	byte.set(1);
+	ASSERT_EQ(byte.cast_to<int>(), 1);
+	ASSERT_EQ(byte.value(), 1);
+
+	byte.set(42);
+	ASSERT_EQ(byte.cast_to<int>(), 42);
+	ASSERT_EQ(byte.value(), 42);
+
+	byte.set(Byte::k_min_value);
+	ASSERT_EQ(byte.value(), Byte::k_min_value);
+
+	byte.set(Byte::k_max_value);
+	ASSERT_EQ(byte.value(), Byte::k_max_value);
+}
+
+TEST(Byte, SetValuesOutOfRangeThrowsOverflowError)
+{
+	Byte byte;
+	byte.set(1);
+	ASSERT_EQ(byte.value(), 1);
+
+	ASSERT_THROW(
+	{
+		byte.set(Byte::k_max_value + 42);
+	}
+	, std::overflow_error);
+	
+	ASSERT_EQ(byte.value(), 1);
+
+	ASSERT_THROW(
+	{
+		byte.set(Byte::k_min_value - 42);
+	}
+	, std::overflow_error);
+
+	ASSERT_EQ(byte.value(), 1);
+}
+
+
