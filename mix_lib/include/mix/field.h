@@ -18,6 +18,8 @@ public:
 	std::size_t left() const;
 	std::size_t right() const;
 
+	std::size_t bytes_count() const;
+
 private:
 	std::size_t left_;
 	std::size_t right_;

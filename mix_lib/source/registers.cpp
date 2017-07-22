@@ -1,4 +1,5 @@
 #include <mix/registers.h>
+#include <mix/field.h>
 
 using namespace mix;
 
@@ -39,4 +40,16 @@ IndexRegister::IndexRegister(Sign sign, const Byte& b4, const Byte& b5)
 	set_sign(sign);
 	set_byte(4, b4);
 	set_byte(5, b5);
+}
+
+AddressRegister::AddressRegister()
+{
+}
+
+AddressRegister::AddressRegister(int two_bytes_with_sign)
+{
+	set_value(
+		two_bytes_with_sign,
+		Field{4, 5},
+		true/*overwrite sign*/);
 }

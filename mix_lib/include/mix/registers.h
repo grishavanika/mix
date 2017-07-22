@@ -25,6 +25,9 @@ class AddressRegister : public IndexRegister
 public:
 	using IndexRegister::IndexRegister;
 
+	explicit AddressRegister();
+	explicit AddressRegister(int two_bytes_with_sign);
+
 	// #TODO: `sing() == Sign::Positive` should be true always
 };
 
