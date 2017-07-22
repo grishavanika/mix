@@ -77,8 +77,13 @@ void Word::set_value(std::size_t value, Sign sign, const Field& field, bool ower
 		set_sign(sign);
 	}
 
-	std::size_t start_index = field.left() + (field.includes_sign() ? 1 : 0);
-	std::size_t end_index = field.right();
+	if (field.has_only_sign())
+	{
+		return;
+	}
+
+	std::size_t start_index = field.left_byte_index();
+	std::size_t end_index = field.right_byte_index();
 
 	for ( ; start_index <= end_index; ++start_index)
 	{
@@ -97,8 +102,8 @@ void Word::set_value(int value)
 
 int Word::value(const Field& field, bool ignore_sign /*= false*/) const
 {
-	std::size_t start_index = field.left() + (field.includes_sign() ? 1 : 0);
-	std::size_t end_index = field.right();
+	std::size_t start_index = field.left_byte_index();
+	std::size_t end_index = field.right_byte_index();
 
 	std::size_t value = 0;
 	for (std::size_t i = 0; start_index <= end_index; ++start_index, ++i)
@@ -108,8 +113,13 @@ int Word::value(const Field& field, bool ignore_sign /*= false*/) const
 		value |= mask;
 	}
 
-	const int sign_value = (!ignore_sign && (sign_ == Sign::Negative) ? -1 : 1);
-	return static_cast<int>(value) * sign_value;
+	if (field.includes_sign() && !ignore_sign)
+	{
+		const auto sign_value = ((sign_ == Sign::Negative) ? -1 : 1);
+		return static_cast<int>(value) * sign_value;
+	}
+
+	return static_cast<int>(value);
 }
 
 int Word::value(bool ignore_sign /*= false*/) const

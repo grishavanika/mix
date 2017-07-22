@@ -40,12 +40,13 @@ bool Field::includes_sign() const
 	return (left_ == 0) && (right_ >= 0);
 }
 
-std::size_t Field::left() const
+std::size_t Field::left_byte_index() const
 {
-	return left_;
+	const bool need_shift = (left_ == 0) && (left_ < right_);
+	return left_ + (need_shift ? 1 : 0);
 }
 
-std::size_t Field::right() const
+std::size_t Field::right_byte_index() const
 {
 	return right_;
 }
@@ -59,3 +60,15 @@ std::size_t Field::bytes_count() const
 	}
 	return length;
 }
+
+Field Field::shift_bytes_right() const
+{
+	if (has_only_sign())
+	{
+		return *this;
+	}
+
+	const auto shift_right = Word::k_bytes_count - right_byte_index();
+	return Field{left_byte_index() + shift_right, Word::k_bytes_count};
+}
+

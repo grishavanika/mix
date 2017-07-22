@@ -35,7 +35,7 @@ void Computer::set_memory(std::size_t address, const Word& value)
 	memory_[address] = value;
 }
 
-const Word& Computer::memory(int address, size_t index) const
+const Word& Computer::memory_with_index(int address, size_t index) const
 {
 	if (index != 0)
 	{
@@ -85,9 +85,18 @@ void Computer::on_nop(const Command& /*command*/)
 
 void Computer::on_lda(const Command& command)
 {
-	const auto& word = memory(
+	const auto& word = memory_with_index(
 		command.address().value(),
 		command.address_index().cast_to<std::size_t>());
-	const bool ignore_sign = !command.field().includes_sign();
-	ra_.set_value(word.value(ignore_sign), command.field());
+	const auto& source_field = command.field();
+	
+	if (source_field.has_only_sign())
+	{
+		ra_.set_sign(word.sign());
+		return;
+	}
+
+	ra_.set_value(
+		word.value(source_field),
+		source_field.shift_bytes_right());
 }

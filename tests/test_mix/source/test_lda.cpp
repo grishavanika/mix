@@ -62,5 +62,42 @@ TEST_F(LDATest, LDA_With_OnlySign_Gets_Only_Sign)
 	ASSERT_EQ(Sign::Negative, mix.ra().sign());
 }
 
+TEST_F(LDATest, LDA_With_FirstByte_Is_ShiftedRight)
+{
+	mix.execute(make_lda(source_address, Field{1, 1}));
 
+	ASSERT_EQ(Sign::Positive, mix.ra().sign());
 
+	ASSERT_EQ(source_cell.byte(1), mix.ra().byte(5));
+}
+
+TEST_F(LDATest, LDA_With_CustomFild_ShiftedRight)
+{
+	mix.execute(make_lda(source_address, Field{4, 4}));
+
+	ASSERT_EQ(Sign::Positive, mix.ra().sign());
+
+	ASSERT_EQ(source_cell.byte(4), mix.ra().byte(5));
+}
+
+TEST_F(LDATest, LDA_With_CustomFild_MapsToTheSameField_If_CantBe_ShiftedRight)
+{
+	mix.execute(make_lda(source_address, Field{3, 5}));
+
+	ASSERT_EQ(Sign::Positive, mix.ra().sign());
+
+	ASSERT_EQ(source_cell.byte(3), mix.ra().byte(3));
+	ASSERT_EQ(source_cell.byte(4), mix.ra().byte(4));
+	ASSERT_EQ(source_cell.byte(5), mix.ra().byte(5));
+}
+
+TEST_F(LDATest, LDA_With_CustomFild_WithSign_ShiftedRight)
+{
+	mix.execute(make_lda(source_address, Field{0, 3}));
+
+	ASSERT_EQ(Sign::Negative, mix.ra().sign());
+
+	ASSERT_EQ(source_cell.byte(1), mix.ra().byte(3));
+	ASSERT_EQ(source_cell.byte(2), mix.ra().byte(4));
+	ASSERT_EQ(source_cell.byte(3), mix.ra().byte(5));
+}

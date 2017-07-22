@@ -15,10 +15,12 @@ public:
 	bool has_only_sign() const;
 	bool includes_sign() const;
 
-	std::size_t left() const;
-	std::size_t right() const;
+	std::size_t left_byte_index() const;
+	std::size_t right_byte_index() const;
 
 	std::size_t bytes_count() const;
+
+	Field shift_bytes_right() const;
 
 private:
 	std::size_t left_;
