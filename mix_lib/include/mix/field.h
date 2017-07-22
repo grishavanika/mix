@@ -21,7 +21,6 @@ public:
 	std::size_t bytes_count() const;
 
 	Field shift_bytes_right() const;
-	Field shift_bytes_left() const;
 
 private:
 	std::size_t left_;

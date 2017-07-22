@@ -71,14 +71,3 @@ Field Field::shift_bytes_right() const
 	const auto shift_right = Word::k_bytes_count - right_byte_index();
 	return Field{left_byte_index() + shift_right, Word::k_bytes_count};
 }
-
-Field Field::shift_bytes_left() const
-{
-	if (has_only_sign())
-	{
-		return *this;
-	}
-
-	const auto shift_left = left_byte_index() - 1;
-	return Field{1, right_byte_index() - shift_left};
-}

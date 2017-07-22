@@ -126,6 +126,10 @@ void Computer::load_register(Register& r, const Command& command)
 	const auto& word = memory_with_index(command.address(), command.address_index());
 	const auto& source_field = command.field();
 
+	// #TODO: we need this kind of special handling since
+	// word.value(Field{0, 0}) will return 0 even if word's
+	// sign is negative since there is no such thing as
+	// negative integer zero
 	if (source_field.has_only_sign())
 	{
 		r.set_sign(word.sign());
@@ -194,8 +198,8 @@ void Computer::on_sta(const Command& command)
 	}
 
 	word.set_value(
-		ra_.value(source_field),
-		source_field.shift_bytes_left());
+		ra_.value(source_field.shift_bytes_right()),
+		source_field);
 }
 
 void Computer::set_ra(const Register& ra)
