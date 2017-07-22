@@ -45,3 +45,26 @@ TEST(Byte, ConstructionFromNumbersOutOfRangeThrowsOverflowError)
 	, std::overflow_error);
 }
 
+TEST(Byte, CanHoldValuesInRange)
+{
+	for (auto value = Byte::k_min_value; value <= Byte::k_max_value; ++value)
+	{
+		ASSERT_TRUE(Byte::CanHoldValue(value));
+	}
+}
+
+TEST(Byte, CantHoldValuesUnderMinimumPossibleValue)
+{
+	for (int value = Byte::k_min_value - 42; value < Byte::k_min_value; ++value)
+	{
+		ASSERT_FALSE(Byte::CanHoldValue(value));
+	}
+}
+
+TEST(Byte, CantHoldValuesUnderMaximumPossibleValue)
+{
+	for (int value = Byte::k_max_value + 1; value < Byte::k_max_value + 64; ++value)
+	{
+		ASSERT_FALSE(Byte::CanHoldValue(value));
+	}
+}
