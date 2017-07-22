@@ -11,10 +11,10 @@ Command::Command(const Word& word)
 }
 
 Command::Command(
+	const Byte& id,
 	const AddressRegister& address,
 	const Byte& address_index,
-	const Field& field,
-	const Byte& command)
+	const Field& field)
 		: word_{}
 		, field_{field}
 		, address_{address}
@@ -24,10 +24,10 @@ Command::Command(
 	word_.set_byte(2, address_.byte(5));
 	word_.set_byte(3, address_index);
 	word_.set_byte(4, field_.to_byte());
-	word_.set_byte(5, command);
+	word_.set_byte(5, id);
 }
 
-const Byte& Command::command() const
+const Byte& Command::id() const
 {
 	return word_.byte(5);
 }

@@ -40,10 +40,14 @@ public:
 private:
 	void set_value(std::size_t value, Sign sign, const Field& field, bool owerwrite_sign);
 
+	friend bool operator==(const Word& lhs, const Word& rhs);
+
 private:
 	std::array<Byte, k_bytes_count> bytes_;
 	Sign sign_;
 };
+
+bool operator==(const Word& lhs, const Word& rhs);
 
 } // namespace mix
 

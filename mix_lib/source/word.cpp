@@ -117,3 +117,14 @@ int Word::value() const
 	return value(MaxField());
 }
 
+namespace mix {
+
+bool operator==(const Word& lhs, const Word& rhs)
+{
+	return (lhs.sign_ == rhs.sign_) &&
+		(lhs.bytes_ == rhs.bytes_);
+}
+
+} // namespace mix
+
+

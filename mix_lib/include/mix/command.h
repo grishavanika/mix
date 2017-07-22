@@ -11,12 +11,12 @@ public:
 	explicit Command(const Word& word);
 	
 	explicit Command(
+		const Byte& id,
 		const AddressRegister& address,
 		const Byte& address_index,
-		const Field& field,
-		const Byte& command);
+		const Field& field);
 
-	const Byte& command() const;
+	const Byte& id() const;
 	const Field& field() const;
 	const AddressRegister& address() const;
 	const Byte& address_index() const;
