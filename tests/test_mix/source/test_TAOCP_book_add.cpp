@@ -21,11 +21,12 @@ Command MakeADD(int address, const WordField& field = Word::MaxField(), std::siz
 {
 	return Command{1, address, index_register, field};
 }
+} // namespace
 
-class ADD_TAOCP_Book_Test : public ::testing::Test
+TEST(ADD_TAOCP_Book_Test, Register_A_Bytes_Sum)
 {
-private:
-	void SetUp() override
+	Computer mix;
+
 	{
 		Register ra;
 		ra.set_byte(1, Byte{1});
@@ -36,14 +37,6 @@ private:
 		mix.set_ra(ra);
 	}
 
-protected:
-	Computer mix;
-};
-
-} // namespace
-
-TEST_F(ADD_TAOCP_Book_Test, Register_A_Bytes_Sum)
-{
 	mix.execute(MakeSTA(2000));
 	mix.execute(MakeLDA(2000, WordField{5, 5}));
 
@@ -52,5 +45,37 @@ TEST_F(ADD_TAOCP_Book_Test, Register_A_Bytes_Sum)
 	mix.execute(MakeADD(2000, WordField{2, 2}));
 	mix.execute(MakeADD(2000, WordField{1, 1}));
 
-	ASSERT_EQ(5, mix.ra().value());
+	const auto result = mix.ra().value();
+	const auto expected_result = 1 * 5;
+	ASSERT_EQ(expected_result, result);
 }
+
+TEST(ADD_TAOCP_Book_Test, Simple_Addition)
+{
+	Computer mix;
+
+	{
+		Register ra;
+		ra.set_value(1234, WordField{0, 2});
+		ra.set_byte(3, Byte{1});
+		ra.set_value(150, WordField{4, 5});
+		mix.set_ra(ra);
+	}
+
+	{
+		Word w;
+		w.set_value(100, WordField{0, 2});
+		w.set_byte(3, Byte{5});
+		w.set_value(50, WordField{4, 5});
+		mix.set_memory(1000, w);
+	}
+
+	mix.execute(MakeADD(1000));
+
+	{
+		ASSERT_EQ(1334, mix.ra().value(WordField{0, 2}));
+		ASSERT_EQ(6, mix.ra().value(WordField{3, 3}));
+		ASSERT_EQ(200, mix.ra().value(WordField{4, 5}));
+	}
+}
+
