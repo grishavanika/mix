@@ -25,15 +25,17 @@ Command MakeADD(int address, const WordField& field = Word::MaxField(), std::siz
 
 TEST(ADD_TAOCP_Book_Test, Register_A_Bytes_Sum)
 {
+	const auto k_byte{Byte::Max()};
+
 	Computer mix;
 
 	{
 		Register ra;
-		ra.set_byte(1, Byte{1});
-		ra.set_byte(2, Byte{1});
-		ra.set_byte(3, Byte{1});
-		ra.set_byte(4, Byte{1});
-		ra.set_byte(5, Byte{1});
+		ra.set_byte(1, k_byte);
+		ra.set_byte(2, k_byte);
+		ra.set_byte(3, k_byte);
+		ra.set_byte(4, k_byte);
+		ra.set_byte(5, k_byte);
 		mix.set_ra(ra);
 	}
 
@@ -46,7 +48,7 @@ TEST(ADD_TAOCP_Book_Test, Register_A_Bytes_Sum)
 	mix.execute(MakeADD(2000, WordField{1, 1}));
 
 	const auto result = mix.ra().value();
-	const auto expected_result = 1 * 5;
+	const auto expected_result = k_byte.value() * 5;
 	ASSERT_EQ(expected_result, result);
 }
 

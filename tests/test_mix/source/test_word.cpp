@@ -118,7 +118,7 @@ TEST(Word, Set_Max_WordValue_Leads_ToAllBytesMax)
 
 	for (std::size_t i = 1; i <= Word::k_bytes_count; ++i)
 	{
-		ASSERT_EQ(w.byte(i), Byte::max()) << "Index: " << i;
+		ASSERT_EQ(w.byte(i), Byte::Max()) << "Index: " << i;
 	}
 }
 

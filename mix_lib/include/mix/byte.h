@@ -76,12 +76,12 @@ public:
 			(value <= static_cast<Number>(k_max_value));
 	}
 
-	static Byte min()
+	static Byte Min()
 	{
 		return Byte{k_min_value};
 	}
 
-	static Byte max()
+	static Byte Max()
 	{
 		return Byte{k_max_value};
 	}

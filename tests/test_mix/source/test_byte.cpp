@@ -115,8 +115,8 @@ TEST(Byte, Bytes_WithSameValues_AreEqual)
 	ASSERT_EQ(Byte{0}, Byte{0});
 	ASSERT_EQ(Byte{1}, Byte{1});
 	ASSERT_EQ(Byte{32}, Byte{32});
-	ASSERT_EQ(Byte::min(), Byte::min());
-	ASSERT_EQ(Byte::max(), Byte::max());
+	ASSERT_EQ(Byte::Min(), Byte::Min());
+	ASSERT_EQ(Byte::Max(), Byte::Max());
 }
 
 TEST(Byte, Bytes_WithDifferentValues_AreDifferent)
@@ -124,5 +124,5 @@ TEST(Byte, Bytes_WithDifferentValues_AreDifferent)
 	ASSERT_NE(Byte{1}, Byte{0});
 	ASSERT_NE(Byte{2}, Byte{3});
 	ASSERT_NE(Byte{32}, Byte{42});
-	ASSERT_NE(Byte::min(), Byte::max());
+	ASSERT_NE(Byte::Min(), Byte::Max());
 }
