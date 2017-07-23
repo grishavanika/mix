@@ -1,11 +1,20 @@
 #include <mix/computer.h>
-#include <mix/commands_factory.h>
 
 #include <gtest/gtest.h>
 
 using namespace mix;
 
 namespace {
+
+Command make_command(std::size_t id, int address, const WordField& field, std::size_t index_register)
+{
+	return Command{Byte{id}, AddressRegister{address}, Byte{index_register}, field};
+}
+
+Command make_sta(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
+{
+	return make_command(24, address, field, index_register);
+}
 
 class STATest : public ::testing::Test
 {

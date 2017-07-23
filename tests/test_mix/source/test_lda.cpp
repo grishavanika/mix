@@ -1,5 +1,4 @@
 #include <mix/computer.h>
-#include <mix/commands_factory.h>
 
 #include <gtest/gtest.h>
 
@@ -7,7 +6,6 @@ using namespace mix;
 
 namespace {
 
-// Common format of test Word
 Word make_test_word(int address, int b3, int b4, int b5)
 {
 	Word data;
@@ -16,6 +14,16 @@ Word make_test_word(int address, int b3, int b4, int b5)
 	data.set_byte(4, Byte{b4});
 	data.set_byte(5, Byte{b5});
 	return data;
+}
+
+Command make_command(std::size_t id, int address, const WordField& field, std::size_t index_register)
+{
+	return Command{Byte{id}, AddressRegister{address}, Byte{index_register}, field};
+}
+
+Command make_lda(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
+{
+	return make_command(8, address, field, index_register);
 }
 
 class LDATest : public ::testing::Test
