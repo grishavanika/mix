@@ -45,14 +45,16 @@ void Word::set_value(int value, const Field& field, bool owerwrite_sign /*= true
 	const auto field_bytes = field.bytes_count();
 	if (field_bytes > k_bytes_count)
 	{
-		throw std::logic_error{"Too big `Field` was specified. "
+		throw std::logic_error{
+			"Too big `Field` was specified. "
 			"Impossible to set to `Word`"};
 	}
 
 	const auto field_bits = field_bytes * Byte::k_bits_count;
 	if (field_bits >= (sizeof(int) * CHAR_BIT))
 	{
-		throw std::logic_error{"Too big `Field` was specified. "
+		throw std::logic_error{
+			"Too big `Field` was specified. "
 			"Impossible to set from `int`"};
 	}
 
@@ -63,7 +65,8 @@ void Word::set_value(int value, const Field& field, bool owerwrite_sign /*= true
 	if (!field.has_only_sign() &&
 		(max_int_for_field < abs_value))
 	{
-		throw std::logic_error{"Too big int was specified. "
+		throw std::logic_error{
+			"Too big `int` was specified. "
 			"Impossible to set to given `Field`"};
 	}
 
@@ -82,14 +85,13 @@ void Word::set_value(std::size_t value, Sign sign, const Field& field, bool ower
 		return;
 	}
 
-	std::size_t start_index = field.left_byte_index();
-	std::size_t end_index = field.right_byte_index();
 
-	for ( ; start_index <= end_index; ++start_index)
+	for (auto index = field.left_byte_index(), end = field.right_byte_index();
+		index <= end; ++index)
 	{
 		// #TODO: maybe provide Byte::set_with_overdlow() function ?
 		const auto byte_value = value & Byte::k_max_value;
-		set_byte(start_index, Byte{byte_value});
+		set_byte(index, Byte{byte_value});
 		
 		value >>= Byte::k_bits_count;
 	}
