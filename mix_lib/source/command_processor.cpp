@@ -24,14 +24,14 @@ CommandProcessor::k_command_actions = {
 	/*13*/&CommandProcessor::ld5,
 	/*14*/&CommandProcessor::ld6,
 	/*15*/&CommandProcessor::ldx,
-	/*16*/nullptr,
-	/*17*/nullptr,
-	/*18*/nullptr,
-	/*19*/nullptr,
-	/*20*/nullptr,
-	/*21*/nullptr,
-	/*22*/nullptr,
-	/*23*/nullptr,
+	/*16*/&CommandProcessor::ldan,
+	/*17*/&CommandProcessor::ld1n,
+	/*18*/&CommandProcessor::ld2n,
+	/*19*/&CommandProcessor::ld3n,
+	/*20*/&CommandProcessor::ld4n,
+	/*21*/&CommandProcessor::ld5n,
+	/*22*/&CommandProcessor::ld6n,
+	/*23*/&CommandProcessor::ldxn,
 	/*24*/&CommandProcessor::sta,
 	/*25*/&CommandProcessor::st1,
 	/*26*/&CommandProcessor::st2,
@@ -82,6 +82,14 @@ void CommandProcessor::load_register(Register& r, const Command& command)
 	r.set_value(word.value(source_field), source_field.shift_bytes_right());
 }
 
+void CommandProcessor::load_register_reverse_sign(Register& r, const Command& command)
+{
+	const auto& word = memory(command);
+	const auto& source_field = command.word_field();
+
+	r.set_value(word.value(source_field).reverse_sign(), source_field.shift_bytes_right());
+}
+
 void CommandProcessor::store_register(Register& r, const Command& command)
 {
 	auto& word = memory(command);
@@ -93,6 +101,11 @@ void CommandProcessor::store_register(Register& r, const Command& command)
 void CommandProcessor::load_index_register(std::size_t index, const Command& command)
 {
 	load_register(mix_.index_register(index), command);
+}
+
+void CommandProcessor::load_index_register_reverse_sign(std::size_t index, const Command& command)
+{
+	load_register_reverse_sign(mix_.index_register(index), command);
 }
 
 void CommandProcessor::lda(const Command& command)
@@ -133,6 +146,46 @@ void CommandProcessor::ld5(const Command& command)
 void CommandProcessor::ld6(const Command& command)
 {
 	load_index_register(6, command);
+}
+
+void CommandProcessor::ldan(const Command& command)
+{
+	load_register_reverse_sign(mix_.ra_, command);
+}
+
+void CommandProcessor::ldxn(const Command& command)
+{
+	load_register_reverse_sign(mix_.rx_, command);
+}
+
+void CommandProcessor::ld1n(const Command& command)
+{
+	load_index_register_reverse_sign(1, command);
+}
+
+void CommandProcessor::ld2n(const Command& command)
+{
+	load_index_register_reverse_sign(2, command);
+}
+
+void CommandProcessor::ld3n(const Command& command)
+{
+	load_index_register_reverse_sign(3, command);
+}
+
+void CommandProcessor::ld4n(const Command& command)
+{
+	load_index_register_reverse_sign(4, command);
+}
+
+void CommandProcessor::ld5n(const Command& command)
+{
+	load_index_register_reverse_sign(5, command);
+}
+
+void CommandProcessor::ld6n(const Command& command)
+{
+	load_index_register_reverse_sign(6, command);
 }
 
 void CommandProcessor::sta(const Command& command)

@@ -16,6 +16,8 @@ public:
 	Type value() const;
 	Sign sign() const;
 
+	WordValue reverse_sign() const;
+
 private:
 	Type value_;
 	Sign sign_;

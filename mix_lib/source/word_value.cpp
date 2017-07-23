@@ -29,3 +29,10 @@ Sign WordValue::sign() const
 	return sign_;
 }
 
+WordValue WordValue::reverse_sign() const
+{
+	const auto sign = ((sign_ == Sign::Negative) ? Sign::Positive : Sign::Negative);
+	const auto value = value_ * -1;
+	return WordValue{sign, value};
+}
+

@@ -18,6 +18,7 @@ public:
 	void process(const Command& command);
 
 	void nop(const Command& command);
+
 	void lda(const Command& command);
 	void ld1(const Command& command);
 	void ld2(const Command& command);
@@ -26,6 +27,15 @@ public:
 	void ld5(const Command& command);
 	void ld6(const Command& command);
 	void ldx(const Command& command);
+
+	void ldan(const Command& command);
+	void ld1n(const Command& command);
+	void ld2n(const Command& command);
+	void ld3n(const Command& command);
+	void ld4n(const Command& command);
+	void ld5n(const Command& command);
+	void ld6n(const Command& command);
+	void ldxn(const Command& command);
 
 	void sta(const Command& command);
 	void st1(const Command& command);
@@ -40,8 +50,10 @@ public:
 
 private:
 	void load_register(Register& r, const Command& command);
+	void load_register_reverse_sign(Register& r, const Command& command);
 	void store_register(Register& r, const Command& command);
 	void load_index_register(std::size_t index, const Command& command);
+	void load_index_register_reverse_sign(std::size_t index, const Command& command);
 
 	Word& memory(const Command& command);
 
