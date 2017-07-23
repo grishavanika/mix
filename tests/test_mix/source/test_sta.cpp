@@ -7,14 +7,9 @@ using namespace mix;
 
 namespace {
 
-Command make_command(std::size_t id, int address, const WordField& field, std::size_t index_register)
+Command MakeSTA(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
 {
-	return Command{Byte{id}, AddressRegister{address}, Byte{index_register}, field};
-}
-
-Command make_sta(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
-{
-	return make_command(24, address, field, index_register);
+	return Command{24, address, index_register, field};
 }
 
 class STATest : public ::testing::Test
@@ -52,19 +47,19 @@ protected:
 
 TEST_F(STATest, Default_STA_Stores_All_Word)
 {
-	mix.execute(make_sta(dest_address));
+	mix.execute(MakeSTA(dest_address));
 	ASSERT_EQ(mix.ra(), mix.memory(static_cast<std::size_t>(dest_address)));
 }
 
 TEST_F(STATest, XXXX)
 {
-	mix.execute(make_sta(dest_address, WordField{2, 2}));
+	mix.execute(MakeSTA(dest_address, WordField{2, 2}));
 	ASSERT_EQ(mix.ra().byte(5), mix.memory(static_cast<std::size_t>(dest_address)).byte(2));
 }
 
 TEST_F(STATest, XXXX1)
 {
-	mix.execute(make_sta(dest_address, WordField{2, 3}));
+	mix.execute(MakeSTA(dest_address, WordField{2, 3}));
 	ASSERT_EQ(mix.ra().byte(5), mix.memory(static_cast<std::size_t>(dest_address)).byte(3));
 	ASSERT_EQ(mix.ra().byte(4), mix.memory(static_cast<std::size_t>(dest_address)).byte(2));
 }

@@ -11,9 +11,9 @@ public:
 	explicit Command(const Word& word);
 	
 	explicit Command(
-		const Byte& id,
-		const AddressRegister& address,
-		const Byte& address_index,
+		std::size_t id,
+		int address,
+		std::size_t address_index,
 		const WordField& field);
 
 	std::size_t id() const;

@@ -124,3 +124,5 @@ TEST(Word, Set_Max_WordValue_Leads_ToAllBytesMax)
 		ASSERT_EQ(w.byte(i), Byte::max()) << "Index: " << i;
 	}
 }
+
+// #TODO: add test cases for Word::value()

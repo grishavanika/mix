@@ -52,5 +52,7 @@ IndexRegister::IndexRegister(int two_bytes_with_sign)
 
 WordValue IndexRegister::value() const
 {
-	return Register::value(WordField{4, 5});
+	return Register::value(
+		WordField{4, 5},
+		true/*take into account sign*/);
 }

@@ -160,5 +160,6 @@ TEST(WordField, Shift_Bytes_Right_Aligns_To_RightMost_Possible_Index)
 	{
 		auto shifted = pair.original.shift_bytes_right();
 		ASSERT_EQ(pair.expected, shifted);
+		ASSERT_EQ(Word::k_bytes_count, pair.expected.right_byte_index());
 	}
 }

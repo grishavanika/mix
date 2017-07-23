@@ -2,6 +2,13 @@
 
 using namespace mix;
 
+namespace {
+int SignToInt(Sign sign)
+{
+	return (sign == Sign::Negative) ? -1 : 1;
+}
+} // namespace
+
 /*static*/ WordField Word::MaxField()
 {
 	return WordField{0, k_bytes_count};
@@ -16,6 +23,11 @@ Word::Word()
 Sign Word::sign() const
 {
 	return sign_;
+}
+
+int Word::sign_value() const
+{
+	return SignToInt(sign_);
 }
 
 void Word::set_sign(Sign sign)
@@ -99,10 +111,10 @@ void Word::set_value(WordValue value)
 	set_value(value, MaxField(), true/*do not ignore sign*/);
 }
 
-WordValue Word::value(const WordField& field, bool ignore_sign /*= false*/) const
+WordValue Word::value(const WordField& field, bool take_sign /*= false*/) const
 {
 	auto sign = sign_;
-	if (!field.includes_sign() || ignore_sign)
+	if (!take_sign && !field.includes_sign())
 	{
 		sign = Sign::Positive;
 	}
@@ -123,13 +135,12 @@ WordValue Word::value(const WordField& field, bool ignore_sign /*= false*/) cons
 		value |= mask;
 	}
 
-	const auto sign_value = ((sign == Sign::Negative) ? -1 : 1);
-	return WordValue{sign, static_cast<int>(value) * sign_value};
+	return WordValue{sign, static_cast<int>(value) * SignToInt(sign)};
 }
 
-WordValue Word::value(bool ignore_sign /*= false*/) const
+WordValue Word::value() const
 {
-	return value(MaxField(), ignore_sign);
+	return value(MaxField());
 }
 
 namespace mix {

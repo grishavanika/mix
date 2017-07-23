@@ -20,6 +20,7 @@ public:
 	explicit Word();
 
 	Sign sign() const;
+	int sign_value() const;
 	void set_sign(Sign sign);
 
 	// Starting from 1:
@@ -33,8 +34,8 @@ public:
 
 	void set_value(WordValue value, const WordField& field, bool owerwrite_sign = true);
 	void set_value(WordValue value);
-	WordValue value(const WordField& field, bool ignore_sign = false) const;
-	WordValue value(bool ignore_sign = false) const;
+	WordValue value(const WordField& field, bool take_sign = false) const;
+	WordValue value() const;
 
 	static WordField MaxField();
 
