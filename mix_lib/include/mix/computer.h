@@ -39,9 +39,19 @@ private:
 	void on_ldx(const Command& command);
 
 	void on_sta(const Command& command);
+	void on_st1(const Command& command);
+	void on_st2(const Command& command);
+	void on_st3(const Command& command);
+	void on_st4(const Command& command);
+	void on_st5(const Command& command);
+	void on_st6(const Command& command);
+	void on_stx(const Command& command);
+	void on_stz(const Command& command);
+	void on_stj(const Command& command);
 
 private:
 	void load_register(Register& r, const Command& command);
+	void store_register(Register& r, const Command& command);
 	void load_index_register(std::size_t index, const Command& command);
 
 private:
