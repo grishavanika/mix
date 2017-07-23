@@ -125,4 +125,36 @@ TEST(Word, Set_Max_WordValue_Leads_ToAllBytesMax)
 	}
 }
 
-// #TODO: add test cases for Word::value()
+TEST(Word, Value_For_Field_Without_Sign_Ignores_Word_Sign)
+{
+	{
+		Word w;
+		w.set_value(-200, WordField{0, 2});
+		ASSERT_EQ(Sign::Negative, w.sign());
+
+		ASSERT_EQ(200, w.value(WordField{1, 2}));
+	}
+
+	{
+		Word w;
+		w.set_value(-2000);
+		ASSERT_GE(w.value(WordField{1, 2}), 0);
+	}
+}
+
+TEST(Word, Value_With_TakeSign_Flag_For_Field_Without_Sign_Takes_Word_Sign)
+{
+	{
+		Word w;
+		w.set_value(-200, WordField{0, 2});
+		ASSERT_EQ(Sign::Negative, w.sign());
+
+		ASSERT_EQ(-200, w.value(WordField{1, 2}, true/*take sign*/));
+	}
+
+	{
+		Word w;
+		w.set_value(-20000);
+		ASSERT_LE(w.value(WordField{1, 2}, true/*take sign*/), 0);
+	}
+}

@@ -95,7 +95,10 @@ void CommandProcessor::store_register(Register& r, const Command& command)
 	auto& word = memory(command);
 	const auto& source_field = command.word_field();
 
-	word.set_value(r.value(source_field.shift_bytes_right()), source_field);
+	word.set_value(
+		r.value(source_field.shift_bytes_right()),
+		source_field,
+		false/*do not overwrite sign*/);
 }
 
 void CommandProcessor::load_index_register(std::size_t index, const Command& command)

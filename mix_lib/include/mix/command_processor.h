@@ -17,6 +17,10 @@ public:
 
 	void process(const Command& command);
 
+	// #TODO: these concrete functions should validate
+	// command's ID passed via `command`.
+	// Otherwise, it's make sense to hide them and
+	// let the client uses general `process()` function
 	void nop(const Command& command);
 
 	void lda(const Command& command);
