@@ -71,3 +71,11 @@ WordField WordField::shift_bytes_right() const
 	const auto shift_right = Word::k_bytes_count - right_byte_index();
 	return WordField{left_byte_index() + shift_right, Word::k_bytes_count};
 }
+
+namespace mix {
+bool operator==(const WordField& lhs, const WordField& rhs)
+{
+	return (lhs.left_ == rhs.left_) &&
+		(lhs.right_ == rhs.right_);
+}
+} // namespace mix

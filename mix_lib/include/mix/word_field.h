@@ -11,9 +11,9 @@ public:
 
 	Byte to_byte() const;
 
-	// For case, when (0:0)
+	// For case when (0:0) was specified
 	bool has_only_sign() const;
-	// For case, when (0:...5)
+	// For (0:...5) case
 	bool includes_sign() const;
 
 	std::size_t left_byte_index() const;
@@ -24,9 +24,14 @@ public:
 	WordField shift_bytes_right() const;
 
 private:
+	friend bool operator==(const WordField& lhs, const WordField& rhs);
+
+private:
 	std::size_t left_;
 	std::size_t right_;
 };
+
+bool operator==(const WordField& lhs, const WordField& rhs);
 
 } // namespace mix
 
