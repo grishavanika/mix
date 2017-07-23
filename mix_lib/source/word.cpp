@@ -38,10 +38,8 @@ void Word::set_byte(std::size_t index, const Byte& byte)
 	self_byte = byte;
 }
 
-void Word::set_value(int value, const WordField& field, bool owerwrite_sign /*= true*/)
+void Word::set_value(WordValue value, const WordField& field, bool owerwrite_sign /*= true*/)
 {
-	const auto sign = (value >= 0) ? Sign::Positive : Sign::Negative;
-
 	const auto field_bytes = field.bytes_count();
 	if (field_bytes > k_bytes_count)
 	{
@@ -70,7 +68,7 @@ void Word::set_value(int value, const WordField& field, bool owerwrite_sign /*= 
 			"Impossible to set to given `Field`"};
 	}
 
-	set_value(abs_value, sign, field, field.includes_sign() || owerwrite_sign);
+	set_value(abs_value, value.sign(), field, field.includes_sign() || owerwrite_sign);
 }
 
 void Word::set_value(std::size_t value, Sign sign, const WordField& field, bool owerwrite_sign)
@@ -85,7 +83,6 @@ void Word::set_value(std::size_t value, Sign sign, const WordField& field, bool 
 		return;
 	}
 
-
 	for (auto index = field.left_byte_index(), end = field.right_byte_index();
 		index <= end; ++index)
 	{
@@ -97,17 +94,28 @@ void Word::set_value(std::size_t value, Sign sign, const WordField& field, bool 
 	}
 }
 
-void Word::set_value(int value)
+void Word::set_value(WordValue value)
 {
 	set_value(value, MaxField(), true/*do not ignore sign*/);
 }
 
-int Word::value(const WordField& field, bool ignore_sign /*= false*/) const
+WordValue Word::value(const WordField& field, bool ignore_sign /*= false*/) const
 {
+	auto sign = sign_;
+	if (!field.includes_sign() || ignore_sign)
+	{
+		sign = Sign::Positive;
+	}
+
+	if (field.has_only_sign())
+	{
+		return WordValue{sign, 0};
+	}
+
+	std::size_t value = 0;
 	std::size_t start_index = field.left_byte_index();
 	std::size_t end_index = field.right_byte_index();
 
-	std::size_t value = 0;
 	for (std::size_t i = 0; start_index <= end_index; ++start_index, ++i)
 	{
 		std::size_t mask = byte(start_index).cast_to<std::size_t>();
@@ -115,16 +123,11 @@ int Word::value(const WordField& field, bool ignore_sign /*= false*/) const
 		value |= mask;
 	}
 
-	if (field.includes_sign() && !ignore_sign)
-	{
-		const auto sign_value = ((sign_ == Sign::Negative) ? -1 : 1);
-		return static_cast<int>(value) * sign_value;
-	}
-
-	return static_cast<int>(value);
+	const auto sign_value = ((sign == Sign::Negative) ? -1 : 1);
+	return WordValue{sign, static_cast<int>(value) * sign_value};
 }
 
-int Word::value(bool ignore_sign /*= false*/) const
+WordValue Word::value(bool ignore_sign /*= false*/) const
 {
 	return value(MaxField(), ignore_sign);
 }

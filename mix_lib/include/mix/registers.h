@@ -16,7 +16,7 @@ public:
 	explicit IndexRegister(Sign sign, const Byte& b4, const Byte& b5);
 
 	void set_byte(std::size_t index, const Byte& byte);
-	int value() const;
+	WordValue value() const;
 
 private:
 	bool is_undefined_index(std::size_t index) const;

@@ -50,7 +50,7 @@ IndexRegister::IndexRegister(int two_bytes_with_sign)
 		true/*overwrite sign*/);
 }
 
-int IndexRegister::value() const
+WordValue IndexRegister::value() const
 {
 	return Register::value(WordField{4, 5});
 }

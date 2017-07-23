@@ -31,10 +31,10 @@ public:
 		"Selected bytes count is too big to implement value()/set_value() functions. "
 		"Either decrease bytes count or change int to more capable signed type");
 
-	void set_value(int value, const WordField& field, bool owerwrite_sign = true);
-	void set_value(int value);
-	int value(const WordField& field, bool ignore_sign = false) const;
-	int value(bool ignore_sign = false) const;
+	void set_value(WordValue value, const WordField& field, bool owerwrite_sign = true);
+	void set_value(WordValue value);
+	WordValue value(const WordField& field, bool ignore_sign = false) const;
+	WordValue value(bool ignore_sign = false) const;
 
 	static WordField MaxField();
 
