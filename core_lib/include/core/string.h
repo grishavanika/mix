@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <cwchar>
 
-namespace note {
+namespace mix {
 
 namespace internal {
 
@@ -78,5 +78,5 @@ std::basic_string<Elem> Sprintf(const Elem* format, ...)
 std::string UTF16ToUTF8(const std::wstring& utf16);
 std::wstring UTF8ToUTF16(const std::string& utf8);
 
-} // namespace note
+} // namespace mix
 

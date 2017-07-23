@@ -3,7 +3,7 @@
 // #TODO: define NOMINMAX and LEAN_AND_MEAN with CMake
 #include <Windows.h>
 
-namespace note {
+namespace mix {
 namespace {
 bool WideStringToMultibyte(const std::wstring& wstr, std::string& str, UINT code_page)
 {
@@ -70,4 +70,4 @@ std::wstring UTF8ToUTF16(const std::string& utf8)
 	return utf16;
 }
 
-} // namespace note
+} // namespace mix
