@@ -1,15 +1,16 @@
 #include <mix/registers.h>
 #include <mix/general_enums.h>
-#include <mix/command.h>
 
 namespace mix {
+
+class CommandProcessor;
+class Command;
 
 class Computer
 {
 public:
 	static constexpr std::size_t k_index_registers_count = 6;
 	static constexpr std::size_t k_memory_words_count = 4000;
-	static constexpr std::size_t k_commands_count = 64;
 
 	explicit Computer();
 
@@ -28,33 +29,6 @@ public:
 	void set_ri(std::size_t index, const IndexRegister& ri);
 
 private:
-	void on_nop(const Command& command);
-	void on_lda(const Command& command);
-	void on_ld1(const Command& command);
-	void on_ld2(const Command& command);
-	void on_ld3(const Command& command);
-	void on_ld4(const Command& command);
-	void on_ld5(const Command& command);
-	void on_ld6(const Command& command);
-	void on_ldx(const Command& command);
-
-	void on_sta(const Command& command);
-	void on_st1(const Command& command);
-	void on_st2(const Command& command);
-	void on_st3(const Command& command);
-	void on_st4(const Command& command);
-	void on_st5(const Command& command);
-	void on_st6(const Command& command);
-	void on_stx(const Command& command);
-	void on_stz(const Command& command);
-	void on_stj(const Command& command);
-
-private:
-	void load_register(Register& r, const Command& command);
-	void store_register(Register& r, const Command& command);
-	void load_index_register(std::size_t index, const Command& command);
-
-private:
 	const Word& memory_with_index(int address, size_t index) const;
 	Word& memory_with_index(int address, size_t index);
 	const Word& memory_at(int address) const;
@@ -63,6 +37,9 @@ private:
 	IndexRegister& index_register(size_t index);
 
 private:
+	// #TODO: make this relationship thru interface
+	friend class CommandProcessor;
+
 	Register ra_;
 	Register rx_;
 	std::array<IndexRegister, k_index_registers_count> rindexes_;
@@ -72,9 +49,6 @@ private:
 	OverflowFlag overflow_flag_;
 
 	std::array<Word, k_memory_words_count> memory_;
-
-	using CommandAction = void (Computer::*)(const Command& command);
-	static const std::array<CommandAction, k_commands_count> k_command_actions;
 };
 
 

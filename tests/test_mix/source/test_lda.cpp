@@ -1,4 +1,5 @@
 #include <mix/computer.h>
+#include <mix/command.h>
 
 #include <gtest/gtest.h>
 
