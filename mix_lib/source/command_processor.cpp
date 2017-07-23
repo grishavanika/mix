@@ -2,6 +2,8 @@
 #include <mix/computer.h>
 #include <mix/command.h>
 
+#include <core/assert.h>
+
 using namespace mix;
 
 /*static*/ const std::array<
@@ -10,7 +12,7 @@ using namespace mix;
 CommandProcessor::k_command_actions = {
 	/*00*/&CommandProcessor::nop,
 	/*01*/&CommandProcessor::add,
-	/*02*/nullptr,
+	/*02*/&CommandProcessor::sub,
 	/*03*/nullptr,
 	/*04*/nullptr,
 	/*05*/nullptr,
@@ -45,6 +47,30 @@ CommandProcessor::k_command_actions = {
 	/*34*/nullptr,
 };
 
+namespace {
+
+int SignValue(int v)
+{
+	return (v < 0) ? -1 : 1;
+}
+
+bool CalculateWordAddOverflow(int lhs, int rhs, int& overflow_part)
+{
+	assert(SignValue(lhs) == SignValue(rhs));
+
+	const auto abs_rhs = std::abs(rhs);
+	const auto part_without_overflow = (Word::k_max_abs_value - static_cast<std::size_t>(std::abs(lhs)));
+
+	const bool overflow = (part_without_overflow < abs_rhs);
+	if (overflow)
+	{
+		overflow_part = abs_rhs - static_cast<int>(part_without_overflow) - 1;
+		overflow_part *= SignValue(lhs);
+	}
+
+	return overflow;
+}
+} // namespace
 
 CommandProcessor::CommandProcessor(Computer& mix)
 	: mix_{mix}
@@ -247,12 +273,49 @@ void CommandProcessor::stj(const Command& command)
 	store_register(mix_.rj_, command);
 }
 
-void CommandProcessor::add(const Command& command)
+void CommandProcessor::do_safe_add_without_overflow_check(int value, int prev_value)
 {
-	const int value = memory(command).value(command.word_field());
-	const int prev_value = mix_.ra_.value();
+	const int result = value + prev_value;
 
-	// #TODO: overflow flag
-	mix_.ra_.set_value(value + prev_value);
+	if (result == 0)
+	{
+		// We should not touch sign value when,
+		// hence setting only absolute part without changin sign
+		mix_.ra_.set_zero_abs_value();
+	}
+	else
+	{
+		mix_.ra_.set_value(result);
+	}
 }
 
+void CommandProcessor::do_add(const WordValue& value)
+{
+	const int prev_value = mix_.ra_.value();
+	const bool overflow_possible = (value.sign() == mix_.ra_.sign());
+	
+	if (overflow_possible)
+	{
+		int overflow_result = 0;
+		if (CalculateWordAddOverflow(value, prev_value, overflow_result))
+		{
+			mix_.ra_.set_value(overflow_result);
+			mix_.set_overflow();
+			return;
+		}
+	}
+
+	do_safe_add_without_overflow_check(value, prev_value);
+}
+
+void CommandProcessor::add(const Command& command)
+{
+	const auto value = memory(command).value(command.word_field());
+	do_add(value);
+}
+
+void CommandProcessor::sub(const Command& command)
+{
+	const auto value = memory(command).value(command.word_field());
+	do_add(value.reverse_sign());
+}

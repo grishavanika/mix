@@ -7,6 +7,7 @@ class Computer;
 class Command;
 class Register;
 class Word;
+class WordValue;
 
 class CommandProcessor
 {
@@ -53,6 +54,7 @@ public:
 	void stj(const Command& command);
 
 	void add(const Command& command);
+	void sub(const Command& command);
 
 private:
 	void load_register(Register& r, const Command& command);
@@ -62,6 +64,9 @@ private:
 	void load_index_register_reverse_sign(std::size_t index, const Command& command);
 
 	Word& memory(const Command& command);
+
+	void do_add(const WordValue& source);
+	void do_safe_add_without_overflow_check(int value, int prev_value);
 
 private:
 	Computer& mix_;

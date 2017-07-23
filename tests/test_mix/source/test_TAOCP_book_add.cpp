@@ -80,4 +80,3 @@ TEST(ADD_TAOCP_Book_Test, Simple_Addition)
 		ASSERT_EQ(200, mix.ra().value(WordField{4, 5}));
 	}
 }
-

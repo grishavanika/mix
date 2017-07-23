@@ -98,3 +98,19 @@ const Word& Computer::memory(std::size_t address) const
 {
 	return memory_at(static_cast<int>(address));
 }
+
+OverflowFlag Computer::overflow_flag() const
+{
+	return overflow_flag_;
+}
+
+bool Computer::has_overflow() const
+{
+	return (overflow_flag_ == OverflowFlag::Overflow);
+}
+
+void Computer::set_overflow()
+{
+	overflow_flag_ = OverflowFlag::Overflow;
+}
+

@@ -28,6 +28,10 @@ public:
 	const IndexRegister& ri(std::size_t index) const;
 	void set_ri(std::size_t index, const IndexRegister& ri);
 
+	OverflowFlag overflow_flag() const;
+	bool has_overflow() const;
+	void set_overflow();
+
 private:
 	const Word& memory_with_index(int address, size_t index) const;
 	Word& memory_with_index(int address, size_t index);
