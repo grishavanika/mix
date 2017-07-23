@@ -5,7 +5,7 @@
 
 using namespace mix;
 
-TEST(Word, DefaultWordIsPositiveWithAllBytesZero)
+TEST(Word, Default_Word_Is_Positive_With_AllBytesZero)
 {
 	const Word w;
 	ASSERT_EQ(w.sign(), Sign::Positive);
@@ -16,7 +16,7 @@ TEST(Word, DefaultWordIsPositiveWithAllBytesZero)
 	}
 }
 
-TEST(Word, SetBytePositiveValueWithByteFieldSetsOnlyExpectedByte)
+TEST(Word, Set_OneByteField_PositiveValue_SetsOnly_Expected_One_Byte)
 {
 	Word w;
 	const Byte expected_byte{42};
@@ -34,7 +34,7 @@ TEST(Word, SetBytePositiveValueWithByteFieldSetsOnlyExpectedByte)
 	}
 }
 
-TEST(Word, SetByteNegativeValueWithByteFieldSetsExpectedByteAndSign)
+TEST(Word, Set_OneByteField_NegativeValue_Sets_Expected_One_Byte_And_Sign)
 {
 	Word w;
 	const Byte expected_byte{42};
@@ -52,7 +52,7 @@ TEST(Word, SetByteNegativeValueWithByteFieldSetsExpectedByteAndSign)
 	}
 }
 
-TEST(Word, SetByteNegativeValueWithByteFieldAndIgnoreSignFlagSetsOnlyExpectedByte)
+TEST(Word, Set_OneByteField_NegativeValue_With_IgnoreSign_Flag_SetsOnly_Expected_One_Byte)
 {
 	Word w;
 	const Byte expected_byte{42};
@@ -68,17 +68,19 @@ TEST(Word, SetByteNegativeValueWithByteFieldAndIgnoreSignFlagSetsOnlyExpectedByt
 	}
 }
 
-TEST(Word, SetByteNegativeValueWithSignFieldAndIgnoreSignFlagSetsSign)
+TEST(Word, Set_SignField_NegativeValue_With_IgnoreSign_Flag_SetsOnly_Sign)
 {
 	Word w;
 	const WordField sign_field{0, 0};
 	w.set_value(-1, sign_field, false/*ignore sign*/);
 	ASSERT_EQ(w.sign(), Sign::Negative);
+	ASSERT_EQ(0, w.value());
 	w.set_value(1, sign_field, false/*ignore sign*/);
 	ASSERT_EQ(w.sign(), Sign::Positive);
+	ASSERT_EQ(0, w.value());
 }
 
-TEST(Word, SetValueForTwoBytesWithSignLeadsToSameBytesContentButDifferentSigns)
+TEST(Word, Set_TwoByte_Field_Value_LeadsTo_SameBytes_Content_But_DifferentSigns)
 {
 	const WordField field{0, 2};
 
@@ -100,7 +102,7 @@ TEST(Word, SetValueForTwoBytesWithSignLeadsToSameBytesContentButDifferentSigns)
 	ASSERT_EQ(2000, w2.value(field));
 }
 
-TEST(Word, SetValueForDifferentIndexesDoesNotChangesBytesContent)
+TEST(Word, Set_TwoBytes_Field_Value_ForDifferentIndexes_DoesNotChanges_BytesContent)
 {
 	Word w;
 	w.set_value(2000, WordField{1, 2}, false/*ignore sign*/);
@@ -110,7 +112,7 @@ TEST(Word, SetValueForDifferentIndexesDoesNotChangesBytesContent)
 	ASSERT_EQ(w.byte(2), w.byte(4));
 }
 
-TEST(Word, SetMaxValueLeadsToAllBytesMax)
+TEST(Word, Set_Max_WordValue_Leads_ToAllBytesMax)
 {
 	Word w;
 	int value = static_cast<int>(Word::k_max_abs_value);

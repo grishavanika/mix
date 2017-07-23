@@ -4,7 +4,7 @@
 
 using namespace mix;
 
-TEST(Byte, ConstructionFromNumbersInRangeDoesNotThrow)
+TEST(Byte, Construction_FromNumbers_InRange_DoesNot_Throw)
 {
 	{
 		Byte default_byte;
@@ -28,7 +28,7 @@ TEST(Byte, ConstructionFromNumbersInRangeDoesNotThrow)
 	}
 }
 
-TEST(Byte, ConstructionFromNumbersOutOfRangeThrowsOverflowError)
+TEST(Byte, Construction_FromNumbers_OutOfRange_Throws_OverflowError)
 {
 	ASSERT_THROW(
 	{
@@ -45,7 +45,7 @@ TEST(Byte, ConstructionFromNumbersOutOfRangeThrowsOverflowError)
 	, std::overflow_error);
 }
 
-TEST(Byte, CanHoldValuesInRange)
+TEST(Byte, CanHold_Values_InRange)
 {
 	for (auto value = Byte::k_min_value; value <= Byte::k_max_value; ++value)
 	{
@@ -53,7 +53,7 @@ TEST(Byte, CanHoldValuesInRange)
 	}
 }
 
-TEST(Byte, CantHoldValuesUnderMinimumPossibleValue)
+TEST(Byte, CantHold_Values_Under_MinimumPossible_Value)
 {
 	for (int value = Byte::k_min_value - 42; value < Byte::k_min_value; ++value)
 	{
@@ -61,7 +61,7 @@ TEST(Byte, CantHoldValuesUnderMinimumPossibleValue)
 	}
 }
 
-TEST(Byte, CantHoldValuesUnderMaximumPossibleValue)
+TEST(Byte, CantHold_Values_Under_MaximumPossible_Value)
 {
 	for (int value = Byte::k_max_value + 1; value < Byte::k_max_value + 64; ++value)
 	{
@@ -69,7 +69,7 @@ TEST(Byte, CantHoldValuesUnderMaximumPossibleValue)
 	}
 }
 
-TEST(Byte, SetValuesInRangeDoesNotThrow)
+TEST(Byte, SetValues_InRange_DoesNot_Throw)
 {
 	Byte byte;
 	byte.set(1);
@@ -87,7 +87,7 @@ TEST(Byte, SetValuesInRangeDoesNotThrow)
 	ASSERT_EQ(byte.value(), Byte::k_max_value);
 }
 
-TEST(Byte, SetValuesOutOfRangeThrowsOverflowError)
+TEST(Byte, SetValues_OutOfRange_Throws_OverflowError)
 {
 	Byte byte;
 	byte.set(1);
@@ -110,7 +110,7 @@ TEST(Byte, SetValuesOutOfRangeThrowsOverflowError)
 	ASSERT_EQ(byte.value(), 1);
 }
 
-TEST(Byte, BytesWithSameValuesAreEqual)
+TEST(Byte, Bytes_WithSameValues_AreEqual)
 {
 	ASSERT_EQ(Byte{0}, Byte{0});
 	ASSERT_EQ(Byte{1}, Byte{1});
@@ -119,7 +119,7 @@ TEST(Byte, BytesWithSameValuesAreEqual)
 	ASSERT_EQ(Byte::max(), Byte::max());
 }
 
-TEST(Byte, BytesWithDifferentValuesAreDifferent)
+TEST(Byte, Bytes_WithDifferentValues_AreDifferent)
 {
 	ASSERT_NE(Byte{1}, Byte{0});
 	ASSERT_NE(Byte{2}, Byte{3});
