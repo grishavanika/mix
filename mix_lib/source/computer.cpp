@@ -124,7 +124,7 @@ void Computer::on_nop(const Command& /*command*/)
 void Computer::load_register(Register& r, const Command& command)
 {
 	const auto& word = memory_with_index(command.address(), command.address_index());
-	const auto& source_field = command.field();
+	const auto& source_field = command.word_field();
 
 	// #TODO: we need this kind of special handling since
 	// word.value(Field{0, 0}) will return 0 even if word's
@@ -189,7 +189,7 @@ void Computer::on_ld6(const Command& command)
 void Computer::on_sta(const Command& command)
 {
 	auto& word = memory_with_index(command.address(), command.address_index());
-	const auto& source_field = command.field();
+	const auto& source_field = command.word_field();
 
 	if (source_field.has_only_sign())
 	{

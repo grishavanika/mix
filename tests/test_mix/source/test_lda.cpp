@@ -11,7 +11,7 @@ namespace {
 Word make_test_word(int address, int b3, int b4, int b5)
 {
 	Word data;
-	data.set_value(address, Field{0, 2});
+	data.set_value(address, WordField{0, 2});
 	data.set_byte(3, Byte{b3});
 	data.set_byte(4, Byte{b4});
 	data.set_byte(5, Byte{b5});
@@ -44,7 +44,7 @@ TEST_F(LDATest, Default_LDA_Gets_All_Word)
 
 TEST_F(LDATest, LDA_WithoutSign_Gets_Word_WithoutSign)
 {
-	mix.execute(make_lda(source_address, Field{1, 5}));
+	mix.execute(make_lda(source_address, WordField{1, 5}));
 	
 	ASSERT_EQ(Sign::Positive, mix.ra().sign());
 	
@@ -57,14 +57,14 @@ TEST_F(LDATest, LDA_WithoutSign_Gets_Word_WithoutSign)
 
 TEST_F(LDATest, LDA_With_OnlySign_Gets_Only_Sign)
 {
-	mix.execute(make_lda(source_address, Field{0, 0}));
+	mix.execute(make_lda(source_address, WordField{0, 0}));
 
 	ASSERT_EQ(Sign::Negative, mix.ra().sign());
 }
 
 TEST_F(LDATest, LDA_With_FirstByte_Is_ShiftedRight)
 {
-	mix.execute(make_lda(source_address, Field{1, 1}));
+	mix.execute(make_lda(source_address, WordField{1, 1}));
 
 	ASSERT_EQ(Sign::Positive, mix.ra().sign());
 
@@ -73,7 +73,7 @@ TEST_F(LDATest, LDA_With_FirstByte_Is_ShiftedRight)
 
 TEST_F(LDATest, LDA_With_CustomFild_ShiftedRight)
 {
-	mix.execute(make_lda(source_address, Field{4, 4}));
+	mix.execute(make_lda(source_address, WordField{4, 4}));
 
 	ASSERT_EQ(Sign::Positive, mix.ra().sign());
 
@@ -82,7 +82,7 @@ TEST_F(LDATest, LDA_With_CustomFild_ShiftedRight)
 
 TEST_F(LDATest, LDA_With_CustomFild_MapsToTheSameField_If_CantBe_ShiftedRight)
 {
-	mix.execute(make_lda(source_address, Field{3, 5}));
+	mix.execute(make_lda(source_address, WordField{3, 5}));
 
 	ASSERT_EQ(Sign::Positive, mix.ra().sign());
 
@@ -93,7 +93,7 @@ TEST_F(LDATest, LDA_With_CustomFild_MapsToTheSameField_If_CantBe_ShiftedRight)
 
 TEST_F(LDATest, LDA_With_CustomFild_WithSign_ShiftedRight)
 {
-	mix.execute(make_lda(source_address, Field{0, 3}));
+	mix.execute(make_lda(source_address, WordField{0, 3}));
 
 	ASSERT_EQ(Sign::Negative, mix.ra().sign());
 

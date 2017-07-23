@@ -1,6 +1,6 @@
 #pragma once
 #include <mix/word.h>
-#include <mix/field.h>
+#include <mix/word_field.h>
 #include <mix/registers.h>
 
 namespace mix {
@@ -14,10 +14,10 @@ public:
 		const Byte& id,
 		const AddressRegister& address,
 		const Byte& address_index,
-		const Field& field);
+		const WordField& field);
 
 	std::size_t id() const;
-	const Field& field() const;
+	const WordField& word_field() const;
 	int address() const;
 	std::size_t address_index() const;
 
@@ -28,7 +28,7 @@ private:
 
 private:
 	Word word_;
-	Field field_;
+	WordField field_;
 	AddressRegister address_;
 };
 

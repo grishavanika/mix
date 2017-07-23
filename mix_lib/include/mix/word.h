@@ -1,7 +1,8 @@
 #pragma once
 #include <mix/byte.h>
 #include <mix/general_enums.h>
-#include <mix/field.h>
+#include <mix/word_field.h>
+#include <mix/word_value.h>
 
 #include <array>
 
@@ -30,15 +31,15 @@ public:
 		"Selected bytes count is too big to implement value()/set_value() functions. "
 		"Either decrease bytes count or change int to more capable signed type");
 
-	void set_value(int value, const Field& field, bool owerwrite_sign = true);
+	void set_value(int value, const WordField& field, bool owerwrite_sign = true);
 	void set_value(int value);
-	int value(const Field& field, bool ignore_sign = false) const;
+	int value(const WordField& field, bool ignore_sign = false) const;
 	int value(bool ignore_sign = false) const;
 
-	static Field MaxField();
+	static WordField MaxField();
 
 private:
-	void set_value(std::size_t value, Sign sign, const Field& field, bool owerwrite_sign);
+	void set_value(std::size_t value, Sign sign, const WordField& field, bool owerwrite_sign);
 
 	friend bool operator==(const Word& lhs, const Word& rhs);
 

@@ -48,13 +48,13 @@ TEST_F(STATest, Default_STA_Stores_All_Word)
 
 TEST_F(STATest, XXXX)
 {
-	mix.execute(make_sta(dest_address, Field{2, 2}));
+	mix.execute(make_sta(dest_address, WordField{2, 2}));
 	ASSERT_EQ(mix.ra().byte(5), mix.memory(static_cast<std::size_t>(dest_address)).byte(2));
 }
 
 TEST_F(STATest, XXXX1)
 {
-	mix.execute(make_sta(dest_address, Field{2, 3}));
+	mix.execute(make_sta(dest_address, WordField{2, 3}));
 	ASSERT_EQ(mix.ra().byte(5), mix.memory(static_cast<std::size_t>(dest_address)).byte(3));
 	ASSERT_EQ(mix.ra().byte(4), mix.memory(static_cast<std::size_t>(dest_address)).byte(2));
 }

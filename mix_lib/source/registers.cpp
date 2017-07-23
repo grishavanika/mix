@@ -1,5 +1,5 @@
 #include <mix/registers.h>
-#include <mix/field.h>
+#include <mix/word_field.h>
 
 using namespace mix;
 
@@ -46,11 +46,11 @@ IndexRegister::IndexRegister(int two_bytes_with_sign)
 {
 	set_value(
 		two_bytes_with_sign,
-		Field{4, 5},
+		WordField{4, 5},
 		true/*overwrite sign*/);
 }
 
 int IndexRegister::value() const
 {
-	return Register::value(Field{4, 5});
+	return Register::value(WordField{4, 5});
 }

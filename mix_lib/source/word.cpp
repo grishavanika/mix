@@ -2,9 +2,9 @@
 
 using namespace mix;
 
-/*static*/ Field Word::MaxField()
+/*static*/ WordField Word::MaxField()
 {
-	return Field{0, k_bytes_count};
+	return WordField{0, k_bytes_count};
 }
 
 Word::Word()
@@ -38,7 +38,7 @@ void Word::set_byte(std::size_t index, const Byte& byte)
 	self_byte = byte;
 }
 
-void Word::set_value(int value, const Field& field, bool owerwrite_sign /*= true*/)
+void Word::set_value(int value, const WordField& field, bool owerwrite_sign /*= true*/)
 {
 	const auto sign = (value >= 0) ? Sign::Positive : Sign::Negative;
 
@@ -73,7 +73,7 @@ void Word::set_value(int value, const Field& field, bool owerwrite_sign /*= true
 	set_value(abs_value, sign, field, field.includes_sign() || owerwrite_sign);
 }
 
-void Word::set_value(std::size_t value, Sign sign, const Field& field, bool owerwrite_sign)
+void Word::set_value(std::size_t value, Sign sign, const WordField& field, bool owerwrite_sign)
 {
 	if (owerwrite_sign)
 	{
@@ -102,7 +102,7 @@ void Word::set_value(int value)
 	set_value(value, MaxField(), true/*do not ignore sign*/);
 }
 
-int Word::value(const Field& field, bool ignore_sign /*= false*/) const
+int Word::value(const WordField& field, bool ignore_sign /*= false*/) const
 {
 	std::size_t start_index = field.left_byte_index();
 	std::size_t end_index = field.right_byte_index();

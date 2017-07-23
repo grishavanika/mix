@@ -5,7 +5,7 @@ using namespace mix;
 
 Command::Command(const Word& word)
 	: word_{word}
-	, field_{Field::FromByte(field_byte())}
+	, field_{WordField::FromByte(field_byte())}
 	, address_{word.sign(), word.byte(1), word.byte(2)}
 {
 }
@@ -14,7 +14,7 @@ Command::Command(
 	const Byte& id,
 	const AddressRegister& address,
 	const Byte& address_index,
-	const Field& field)
+	const WordField& field)
 		: word_{}
 		, field_{field}
 		, address_{address}
@@ -42,7 +42,7 @@ std::size_t Command::address_index() const
 	return word_.byte(3).cast_to<std::size_t>();
 }
 
-const Field& Command::field() const
+const WordField& Command::word_field() const
 {
 	return field_;
 }

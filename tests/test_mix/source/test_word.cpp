@@ -1,5 +1,5 @@
 #include <mix/word.h>
-#include <mix/field.h>
+#include <mix/word_field.h>
 
 #include <gtest/gtest.h>
 
@@ -26,7 +26,7 @@ TEST(Word, SetBytePositiveValueWithByteFieldSetsOnlyExpectedByte)
 	{
 		w.set_sign(Sign::Negative);
 
-		const Field field{byte_index, byte_index};
+		const WordField field{byte_index, byte_index};
 		w.set_value(value, field, true/*overwrite sign*/);
 		ASSERT_EQ(w.byte(byte_index), expected_byte)
 			<< "Index: " << byte_index;
@@ -44,7 +44,7 @@ TEST(Word, SetByteNegativeValueWithByteFieldSetsExpectedByteAndSign)
 	{
 		w.set_sign(Sign::Positive);
 
-		const Field field{byte_index, byte_index};
+		const WordField field{byte_index, byte_index};
 		w.set_value(value, field, true/*overwrite sign*/);
 		ASSERT_EQ(w.byte(byte_index), expected_byte)
 			<< "Index: " << byte_index;
@@ -60,7 +60,7 @@ TEST(Word, SetByteNegativeValueWithByteFieldAndIgnoreSignFlagSetsOnlyExpectedByt
 
 	for (std::size_t byte_index = 1; byte_index <= Word::k_bytes_count; ++byte_index)
 	{
-		const Field field{byte_index, byte_index};
+		const WordField field{byte_index, byte_index};
 		w.set_value(value, field, false/*ignore sign*/);
 		ASSERT_EQ(w.byte(byte_index), expected_byte)
 			<< "Index: " << byte_index;
@@ -71,7 +71,7 @@ TEST(Word, SetByteNegativeValueWithByteFieldAndIgnoreSignFlagSetsOnlyExpectedByt
 TEST(Word, SetByteNegativeValueWithSignFieldAndIgnoreSignFlagSetsSign)
 {
 	Word w;
-	const Field sign_field{0, 0};
+	const WordField sign_field{0, 0};
 	w.set_value(-1, sign_field, false/*ignore sign*/);
 	ASSERT_EQ(w.sign(), Sign::Negative);
 	w.set_value(1, sign_field, false/*ignore sign*/);
@@ -80,7 +80,7 @@ TEST(Word, SetByteNegativeValueWithSignFieldAndIgnoreSignFlagSetsSign)
 
 TEST(Word, SetValueForTwoBytesWithSignLeadsToSameBytesContentButDifferentSigns)
 {
-	const Field field{0, 2};
+	const WordField field{0, 2};
 
 	Word w1;
 	w1.set_value(-2000, field, false/*ignore sign*/);
@@ -103,8 +103,8 @@ TEST(Word, SetValueForTwoBytesWithSignLeadsToSameBytesContentButDifferentSigns)
 TEST(Word, SetValueForDifferentIndexesDoesNotChangesBytesContent)
 {
 	Word w;
-	w.set_value(2000, Field{1, 2}, false/*ignore sign*/);
-	w.set_value(2000, Field{3, 4}, false/*ignore sign*/);
+	w.set_value(2000, WordField{1, 2}, false/*ignore sign*/);
+	w.set_value(2000, WordField{3, 4}, false/*ignore sign*/);
 
 	ASSERT_EQ(w.byte(1), w.byte(3));
 	ASSERT_EQ(w.byte(2), w.byte(4));

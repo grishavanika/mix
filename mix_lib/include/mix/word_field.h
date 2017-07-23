@@ -3,16 +3,17 @@
 
 namespace mix {
 
-class Field
+class WordField
 {
 public:
-	explicit Field(std::size_t left, std::size_t right);
+	explicit WordField(std::size_t left, std::size_t right);
+	static WordField FromByte(const Byte& byte);
 
 	Byte to_byte() const;
-	
-	static Field FromByte(const Byte& byte);
 
+	// For case, when (0:0)
 	bool has_only_sign() const;
+	// For case, when (0:...5)
 	bool includes_sign() const;
 
 	std::size_t left_byte_index() const;
@@ -20,7 +21,7 @@ public:
 
 	std::size_t bytes_count() const;
 
-	Field shift_bytes_right() const;
+	WordField shift_bytes_right() const;
 
 private:
 	std::size_t left_;
