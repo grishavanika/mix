@@ -156,9 +156,21 @@ TEST(Word, Value_With_TakeSign_Flag_For_Field_Without_Sign_Takes_Word_Sign)
 	}
 }
 
-TEST(Word, Result_Value_Is_The_Same_As_Source_After_Set)
+TEST(Word, SetValue_Uses_Big_Endian)
 {
 	Word w;
 	w.set_value(1);
 	ASSERT_EQ(1, w.value());
+	ASSERT_EQ(Byte{1}, w.byte(Word::k_bytes_count));
+}
+
+TEST(Word, Set_Zero_Absolute_Value_Does_Not_Change_Sign)
+{
+	Word w;
+	w.set_value(-1);
+	ASSERT_EQ(Sign::Negative, w.sign());
+	ASSERT_NE(0, w.value());
+	w.set_zero_abs_value();
+	ASSERT_EQ(Sign::Negative, w.sign());
+	ASSERT_EQ(0, w.value());
 }

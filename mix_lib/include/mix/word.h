@@ -34,10 +34,14 @@ public:
 
 	void set_value(WordValue value, const WordField& field, bool owerwrite_sign = true);
 	void set_value(WordValue value);
+
+	void set_zero_abs_value();
+
 	WordValue value(const WordField& field, bool take_sign = false) const;
 	WordValue value() const;
 
 	static WordField MaxField();
+	static WordField MaxFieldWithoutSign();
 
 private:
 	void set_value(std::size_t value, Sign sign, const WordField& field, bool owerwrite_sign);

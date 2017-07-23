@@ -14,6 +14,11 @@ int SignToInt(Sign sign)
 	return WordField{0, k_bytes_count};
 }
 
+/*static*/ WordField Word::MaxFieldWithoutSign()
+{
+	return WordField{1, k_bytes_count};
+}
+
 Word::Word()
 	: bytes_{}
 	, sign_{Sign::Positive}
@@ -111,6 +116,11 @@ void Word::set_value(std::size_t value, Sign sign, const WordField& field, bool 
 void Word::set_value(WordValue value)
 {
 	set_value(value, MaxField(), true/*do not ignore sign*/);
+}
+
+void Word::set_zero_abs_value()
+{
+	set_value(0, MaxFieldWithoutSign(), false/*ignore sign*/);
 }
 
 WordValue Word::value(const WordField& field, bool take_sign /*= false*/) const

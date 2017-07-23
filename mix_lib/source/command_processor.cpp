@@ -78,65 +78,20 @@ void CommandProcessor::load_register(Register& r, const Command& command)
 {
 	const auto& word = memory(command);
 	const auto& source_field = command.word_field();
+	const auto dest_field = source_field.shift_bytes_right();
 
-#if(1)
-	auto dest_field = source_field.shift_bytes_right();
+	r.set_zero_abs_value();
 	r.set_value(word.value(source_field), dest_field);
-	
-	// Zero rest of bytes.
-	// #TODO: this way of setting the value looks like
-	// very inefficient. Maybe it's better to iterate over
-	// `source_field` bytes directly ?
-	std::size_t until_byte = dest_field.has_only_sign()
-		? Word::k_bytes_count
-		: dest_field.left_byte_index() - 1;
-	for (std::size_t i = 1; i <= until_byte; ++i)
-	{
-		r.set_byte(i, Byte{0});
-	}
-#else
-	if (source_field.includes_sign())
-	{
-		r.set_sign(word.sign());
-	}
-
-	if (source_field.has_only_sign())
-	{
-		std::size_t until_byte = Word::k_bytes_count;
-		for (std::size_t i = 1; i <= until_byte; ++i)
-		{
-			r.set_byte(i, Byte{0});
-		}
-
-		return;
-	}
-
-	auto dest_field = source_field.shift_bytes_right();
-	auto diff = dest_field.right_byte_index() - source_field.right_byte_index();
-
-	std::size_t until_byte = dest_field.left_byte_index() - 1;
-	for (std::size_t i = 1; i <= until_byte; ++i)
-	{
-		r.set_byte(i, Byte{0});
-	}
-
-	for (auto i = source_field.left_byte_index();
-		i <= source_field.right_byte_index();
-		++i)
-	{
-		r.set_byte(i + diff, word.byte(i));
-	}
-#endif
 }
 
 void CommandProcessor::load_register_reverse_sign(Register& r, const Command& command)
 {
 	const auto& word = memory(command);
 	const auto& source_field = command.word_field();
+	const auto dest_field = source_field.shift_bytes_right();
 
-	r.set_value(word.value(source_field).reverse_sign(), source_field.shift_bytes_right());
-	
-	// #TODO: set to zero rest of bytes as in `load_register()`
+	r.set_zero_abs_value();
+	r.set_value(word.value(source_field).reverse_sign(), dest_field);	
 }
 
 void CommandProcessor::store_register(Register& r, const Command& command)
