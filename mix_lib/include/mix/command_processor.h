@@ -52,6 +52,8 @@ public:
 	void stz(const Command& command);
 	void stj(const Command& command);
 
+	void add(const Command& command);
+
 private:
 	void load_register(Register& r, const Command& command);
 	void load_register_reverse_sign(Register& r, const Command& command);

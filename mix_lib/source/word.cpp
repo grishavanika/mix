@@ -95,12 +95,14 @@ void Word::set_value(std::size_t value, Sign sign, const WordField& field, bool 
 		return;
 	}
 
-	for (auto index = field.left_byte_index(), end = field.right_byte_index();
-		index <= end; ++index)
+	std::size_t start = field.left_byte_index();
+	std::size_t end = field.right_byte_index();
+
+	for ( ; end >= start; --end)
 	{
 		// #TODO: maybe provide Byte::set_with_overdlow() function ?
 		const auto byte_value = value & Byte::k_max_value;
-		set_byte(index, Byte{byte_value});
+		set_byte(end, Byte{byte_value});
 		
 		value >>= Byte::k_bits_count;
 	}
@@ -125,12 +127,12 @@ WordValue Word::value(const WordField& field, bool take_sign /*= false*/) const
 	}
 
 	std::size_t value = 0;
-	std::size_t start_index = field.left_byte_index();
-	std::size_t end_index = field.right_byte_index();
+	std::size_t start = field.left_byte_index();
+	std::size_t end = field.right_byte_index();
 
-	for (std::size_t i = 0; start_index <= end_index; ++start_index, ++i)
+	for (std::size_t i = 0; end >= start; --end, ++i)
 	{
-		std::size_t mask = byte(start_index).cast_to<std::size_t>();
+		std::size_t mask = byte(end).cast_to<std::size_t>();
 		mask <<= (i * Byte::k_bits_count);
 		value |= mask;
 	}

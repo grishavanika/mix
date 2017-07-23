@@ -9,7 +9,7 @@ using namespace mix;
 	CommandProcessor::k_commands_count>
 CommandProcessor::k_command_actions = {
 	/*00*/&CommandProcessor::nop,
-	/*01*/nullptr,
+	/*01*/&CommandProcessor::add,
 	/*02*/nullptr,
 	/*03*/nullptr,
 	/*04*/nullptr,
@@ -79,7 +79,20 @@ void CommandProcessor::load_register(Register& r, const Command& command)
 	const auto& word = memory(command);
 	const auto& source_field = command.word_field();
 
-	r.set_value(word.value(source_field), source_field.shift_bytes_right());
+	auto dest_field = source_field.shift_bytes_right();
+	r.set_value(word.value(source_field), dest_field);
+	
+	// Zero rest of bytes.
+	// #TODO: this way of setting the value looks like
+	// very inefficient. Maybe it's better to iterate over
+	// `source_field` bytes directly ?
+	std::size_t until_byte = dest_field.has_only_sign()
+		? Word::k_bytes_count
+		: dest_field.left_byte_index() - 1;
+	for (std::size_t i = 1; i <= until_byte; ++i)
+	{
+		r.set_byte(i, Byte{0});
+	}
 }
 
 void CommandProcessor::load_register_reverse_sign(Register& r, const Command& command)
@@ -242,3 +255,13 @@ void CommandProcessor::stj(const Command& command)
 	// #TODO: default WordField should be (0, 2) instead of (0, 5)
 	store_register(mix_.rj_, command);
 }
+
+void CommandProcessor::add(const Command& command)
+{
+	const int value = memory(command).value(command.word_field());
+	const int prev_value = mix_.ra_.value();
+
+	// #TODO: overflow flag
+	mix_.ra_.set_value(value + prev_value);
+}
+

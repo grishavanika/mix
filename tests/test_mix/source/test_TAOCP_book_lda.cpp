@@ -30,6 +30,10 @@ private:
 		source_address = 2000;
 		source_cell = MakeTestWord(-80, 3, 5, 4);
 		mix.set_memory(static_cast<int>(source_address), source_cell);
+
+		Register ra;
+		ra.set_value(Word::k_max_abs_value);
+		mix.set_ra(ra);
 	}
 
 protected:

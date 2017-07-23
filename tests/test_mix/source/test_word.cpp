@@ -95,9 +95,6 @@ TEST(Word, Set_TwoByte_Field_Value_LeadsTo_SameBytes_Content_But_DifferentSigns)
 	ASSERT_EQ(w1.byte(1), w2.byte(1));
 	ASSERT_EQ(w1.byte(2), w2.byte(2));
 
-	ASSERT_EQ(-2000, w1.value());
-	ASSERT_EQ(2000, w2.value());
-
 	ASSERT_EQ(-2000, w1.value(field));
 	ASSERT_EQ(2000, w2.value(field));
 }
@@ -157,4 +154,11 @@ TEST(Word, Value_With_TakeSign_Flag_For_Field_Without_Sign_Takes_Word_Sign)
 		w.set_value(-20000);
 		ASSERT_LE(w.value(WordField{1, 2}, true/*take sign*/), 0);
 	}
+}
+
+TEST(Word, Result_Value_Is_The_Same_As_Source_After_Set)
+{
+	Word w;
+	w.set_value(1);
+	ASSERT_EQ(1, w.value());
 }
