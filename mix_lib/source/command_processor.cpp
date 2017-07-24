@@ -9,7 +9,7 @@ using namespace mix;
 /*static*/ const std::array<
 	CommandProcessor::CommandAction,
 	CommandProcessor::k_commands_count>
-CommandProcessor::k_command_actions = {
+CommandProcessor::k_command_actions = {{
 	/*00*/&CommandProcessor::nop,
 	/*01*/&CommandProcessor::add,
 	/*02*/&CommandProcessor::sub,
@@ -45,7 +45,7 @@ CommandProcessor::k_command_actions = {
 	/*32*/&CommandProcessor::stj,
 	/*33*/&CommandProcessor::stz,
 	/*34*/nullptr,
-};
+}};
 
 namespace {
 
@@ -58,13 +58,13 @@ bool CalculateWordAddOverflow(int lhs, int rhs, int& overflow_part)
 {
 	assert(SignValue(lhs) == SignValue(rhs));
 
-	const auto abs_rhs = std::abs(rhs);
+	const auto abs_rhs = static_cast<std::size_t>(std::abs(rhs));
 	const auto part_without_overflow = (Word::k_max_abs_value - static_cast<std::size_t>(std::abs(lhs)));
 
 	const bool overflow = (part_without_overflow < abs_rhs);
 	if (overflow)
 	{
-		overflow_part = abs_rhs - static_cast<int>(part_without_overflow) - 1;
+		overflow_part = static_cast<int>(abs_rhs - part_without_overflow - 1);
 		overflow_part *= SignValue(lhs);
 	}
 

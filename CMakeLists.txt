@@ -9,14 +9,28 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # TODO: wrap this into a function(s)
 
+set(clang_on_msvc OFF)
+set(only_msvc ON)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+	set(clang_on_msvc ON)
+	set(only_msvc OFF)
+endif()
+
 # TODO: when using clang, we have MSVC turned on too
-if(MSVC)
+if (only_msvc)
 	# Force to always compile with W4 and WX
 	if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
 		string(REGEX REPLACE "/W[0-4]" "/WX /W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 	else()
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
 	endif()
+endif()
+
+if (clang_on_msvc)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHa")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-argument")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-command-line-argument")
 endif()
 
 # Remove unneeded configurations

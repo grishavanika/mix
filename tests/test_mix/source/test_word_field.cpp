@@ -56,57 +56,57 @@ TEST(WordField, Field_With_Zero_Index_Affects_To_Sign_Properties)
 TEST(WordField, SignOnly_Field_Has_Zero_Bytes_Count)
 {
 	WordField sign_only_field{0, 0};
-	ASSERT_EQ(0, sign_only_field.bytes_count());
+	ASSERT_EQ(0u, sign_only_field.bytes_count());
 
 	WordField field_with_bytes{0, 1};
-	ASSERT_NE(0, field_with_bytes.bytes_count());
+	ASSERT_NE(0u, field_with_bytes.bytes_count());
 }
 
 TEST(WordField, Field_With_Non_Zero_Index_Has_Non_Zero_Bytes_Count)
 {
-	ASSERT_EQ(5, WordField(0, 5).bytes_count());
-	ASSERT_EQ(5, WordField(1, 5).bytes_count());
-	ASSERT_EQ(4, WordField(2, 5).bytes_count());
-	ASSERT_EQ(3, WordField(3, 5).bytes_count());
-	ASSERT_EQ(2, WordField(4, 5).bytes_count());
-	ASSERT_EQ(1, WordField(5, 5).bytes_count());
-	ASSERT_EQ(1, WordField(1, 1).bytes_count());
-	ASSERT_EQ(1, WordField(2, 2).bytes_count());
-	ASSERT_EQ(2, WordField(3, 4).bytes_count());
+	ASSERT_EQ(5u, WordField(0, 5).bytes_count());
+	ASSERT_EQ(5u, WordField(1, 5).bytes_count());
+	ASSERT_EQ(4u, WordField(2, 5).bytes_count());
+	ASSERT_EQ(3u, WordField(3, 5).bytes_count());
+	ASSERT_EQ(2u, WordField(4, 5).bytes_count());
+	ASSERT_EQ(1u, WordField(5, 5).bytes_count());
+	ASSERT_EQ(1u, WordField(1, 1).bytes_count());
+	ASSERT_EQ(1u, WordField(2, 2).bytes_count());
+	ASSERT_EQ(2u, WordField(3, 4).bytes_count());
 }
 
 TEST(WordField, SignOnly_Field_Has_Zero_Left_And_Right_Bytes_Indexes)
 {
 	WordField sign_only_field{0, 0};
-	ASSERT_EQ(0, sign_only_field.left_byte_index());
-	ASSERT_EQ(0, sign_only_field.right_byte_index());
+	ASSERT_EQ(0u, sign_only_field.left_byte_index());
+	ASSERT_EQ(0u, sign_only_field.right_byte_index());
 }
 
 TEST(WordField, Field_With_Non_Zero_Right_Index_Has_Valid_Left_Byte_Index)
 {
-	ASSERT_EQ(1, WordField(0, 1).left_byte_index());
-	ASSERT_EQ(1, WordField(0, 2).left_byte_index());
-	ASSERT_EQ(1, WordField(0, 5).left_byte_index());
+	ASSERT_EQ(1u, WordField(0, 1).left_byte_index());
+	ASSERT_EQ(1u, WordField(0, 2).left_byte_index());
+	ASSERT_EQ(1u, WordField(0, 5).left_byte_index());
 }
 
 TEST(WordField, Field_With_Non_Zero_Indexes_Has_Valid_Byte_Indexes)
 {
 	{
 		WordField f{1, 1};
-		ASSERT_EQ(1, f.left_byte_index());
-		ASSERT_EQ(1, f.right_byte_index());
+		ASSERT_EQ(1u, f.left_byte_index());
+		ASSERT_EQ(1u, f.right_byte_index());
 	}
 
 	{
 		WordField f{1, 2};
-		ASSERT_EQ(1, f.left_byte_index());
-		ASSERT_EQ(2, f.right_byte_index());
+		ASSERT_EQ(1u, f.left_byte_index());
+		ASSERT_EQ(2u, f.right_byte_index());
 	}
 
 	{
 		WordField f{5, 5};
-		ASSERT_EQ(5, f.left_byte_index());
-		ASSERT_EQ(5, f.right_byte_index());
+		ASSERT_EQ(5u, f.left_byte_index());
+		ASSERT_EQ(5u, f.right_byte_index());
 	}
 }
 

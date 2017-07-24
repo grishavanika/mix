@@ -37,7 +37,7 @@ bool WordField::has_only_sign() const
 
 bool WordField::includes_sign() const
 {
-	return (left_ == 0) && (right_ >= 0);
+	return (left_ == 0);
 }
 
 std::size_t WordField::left_byte_index() const

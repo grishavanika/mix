@@ -20,7 +20,7 @@ int SignToInt(Sign sign)
 }
 
 Word::Word()
-	: bytes_{}
+	: bytes_()
 	, sign_{Sign::Positive}
 {
 }
