@@ -24,8 +24,8 @@ public:
 private:
 	template<typename Number>
 	static constexpr bool CanBeNarrowedToByte =
-		std::is_integral_v<Number> &&
-		!std::is_same_v<Number, bool>;
+		std::is_integral<Number>::value &&
+		!std::is_same<Number, bool>::value;
 
 	template<typename Number>
 	static constexpr bool CanBeConvertedTo =

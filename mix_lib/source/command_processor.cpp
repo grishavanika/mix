@@ -85,7 +85,7 @@ void CommandProcessor::process(const Command& command)
 	auto callback = k_command_actions[command.id()];
 	if (!callback)
 	{
-		throw std::exception{"Not implemented"};
+		throw std::runtime_error{"Not implemented"};
 	}
 
 	(*this.*callback)(command);

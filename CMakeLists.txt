@@ -16,7 +16,16 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	set(only_msvc OFF)
 endif()
 
-# TODO: when using clang, we have MSVC turned on too
+set(gcc OFF)
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+	set(only_msvc OFF)
+	set(gcc ON)
+endif()
+
+if (gcc)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z")	
+endif()
+
 if (only_msvc)
 	# Force to always compile with W4 and WX
 	if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")

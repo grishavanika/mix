@@ -2,6 +2,18 @@
 
 using namespace mix;
 
+#if defined(__GNUC__)
+
+// #TODO: work-around for MinGW linker error. Is it only for GCC on Windows ?
+const unsigned int Byte::k_bits_count;
+const Byte::NarrowType Byte::k_min_value;
+const Byte::NarrowType Byte::k_max_value;
+
+const std::size_t Word::k_bytes_count;
+const std::size_t Word::k_bits_count;
+const std::size_t Word::k_max_abs_value;
+#endif
+
 namespace {
 int SignToInt(Sign sign)
 {
