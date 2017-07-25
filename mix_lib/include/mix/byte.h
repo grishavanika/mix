@@ -5,6 +5,8 @@
 
 #include <climits>
 
+build error for test
+
 namespace mix {
 
 class Byte
