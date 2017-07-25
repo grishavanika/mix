@@ -32,7 +32,7 @@ if NOT %errorlevel% == 0 (
 	)
 
 :: Check with tests
-ctest -C %config%
+ctest -C %config% --verbose
 if NOT %errorlevel% == 0 (
 	goto:eof
 	)
