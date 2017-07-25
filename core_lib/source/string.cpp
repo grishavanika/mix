@@ -11,7 +11,6 @@ char* StringWriteInto(std::string& str, std::size_t length_with_null)
 {
 	if (length_with_null <= 1)
 	{
-		assert(!"StringWriteInto(): minimum string length with null should be 2");
 		return nullptr;
 	}
 
@@ -27,8 +26,12 @@ std::string Sprintf(const char* format, ...)
 	va_list args;
 	va_start(args, format);
 
-#if defined(_MSVC)
+#if defined(_MSC_VER)
+#  pragma warning(push)
+	// This function or variable may be unsafe
+#  pragma warning(disable:4996)
 	int length = _vsnprintf(nullptr, 0, format, args);
+#  pragma warning(pop)
 #else
 	int length = 1 * 1024;
 #endif

@@ -67,10 +67,13 @@ set_target_properties(mix_exe PROPERTIES FOLDER app)
 
 # tests
 add_subdirectory(tests/test_mix)
+add_subdirectory(tests/test_core)
 set_target_properties(test_mix PROPERTIES FOLDER tests)
+set_target_properties(test_core PROPERTIES FOLDER tests)
 
 enable_testing()
 add_test(NAME mix COMMAND test_mix)
+add_test(NAME core COMMAND test_core)
 
 # Note: to use it with clang you need to install latest one
 # from http://llvm.org/builds/ (5.0.0 for the moment)
