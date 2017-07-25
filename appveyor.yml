@@ -1,5 +1,8 @@
 version: 1.0.{build}
-image: Visual Studio 2017
+
+environment:
+  matrix:
+    - msvc_ver: Visual Studio 15 2017
 
 configuration:
   - Debug
@@ -14,9 +17,9 @@ clone_folder: c:\projects\mix
 build_script:
   - set build_folder=build_msvc_%platform%
   - mkdir %build_folder%
-  - cd %build_msvc%
-  - if "%platform%"=="x86" (set generator="Visual Studio 15 2017")
-  - if "%platform%"=="x64" (set generator="Visual Studio 15 2017 Win64")
+  - cd %build_folder%
+  - if "%platform%"=="x86" (set generator="%msvc_ver%")
+  - if "%platform%"=="x64" (set generator="%msvc_ver% Win64")
   - cmake -G %generator% ..
   - cmake --build . --config %configuration%
 
