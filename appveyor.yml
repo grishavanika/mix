@@ -1,15 +1,24 @@
 version: 1.0.{build}
 image: Visual Studio 2017
+
 configuration:
   - Debug
   - Release
+
 platform:
+  - x86
   - x64
+
 clone_folder: c:\projects\mix
+
 build_script:
-  - mkdir build_msvc
-  - cd build_msvc
-  - cmake -G "Visual Studio 15 2017 Win64" ..
-  - cmake --build . --config %CONFIGURATION%
+  - set build_folder=build_msvc_%platform%
+  - mkdir %build_folder%
+  - cd %build_msvc%
+  - if "%platform%"=="x86" (set generator="Visual Studio 15 2017")
+  - if "%platform%"=="x64" (set generator="Visual Studio 15 2017 Win64")
+  - cmake -G %generator% ..
+  - cmake --build . --config %configuration%
+
 test_script:
-  - ctest -C %CONFIGURATION% --verbose
+  - ctest -C %configuration% --verbose
