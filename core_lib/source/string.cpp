@@ -1,73 +1,54 @@
 #include <core/string.h>
 
-// #TODO: define NOMINMAX and LEAN_AND_MEAN with CMake
-#include <Windows.h>
+#include <cstdio>
+#include <cstdarg>
+#include <cassert>
 
-namespace mix {
-namespace {
-bool WideStringToMultibyte(const std::wstring& wstr, std::string& str, UINT code_page)
+namespace core {
+
+// From somewhere inside chrome...
+char* StringWriteInto(std::string& str, std::size_t length_with_null)
 {
-	if(wstr.empty())
+	if (length_with_null <= 1)
 	{
-		str.clear();
-		return true;
+		assert(!"StringWriteInto(): minimum string length with null should be 2");
+		return nullptr;
 	}
 
-	auto input_length = static_cast<int>(wstr.size());
-	int bytes_count = ::WideCharToMultiByte(
-		code_page, 0, &wstr[0], input_length, nullptr, 0, nullptr, nullptr);
-	if(bytes_count == 0)
+	str.reserve(length_with_null);
+	str.resize(length_with_null - 1);
+	return &str[0];
+}
+
+std::string Sprintf(const char* format, ...)
+{
+	std::string str;
+
+	va_list args;
+	va_start(args, format);
+
+#if defined(_MSVC)
+	int length = _vsnprintf(nullptr, 0, format, args);
+#else
+	int length = 1 * 1024;
+#endif
+
+	if (length <= 0)
 	{
-		return false;
+		return str;
 	}
 
-	int writed_bytes = ::WideCharToMultiByte(
-		code_page, 0, &wstr[0], input_length,
-		internal::StringWriteInto(str, bytes_count + 1),
-		bytes_count, nullptr, nullptr);
-	return (writed_bytes == bytes_count);
+	length = vsnprintf(
+		StringWriteInto(str, length + 1),
+		length + 1,
+		format,
+		args);
+
+	va_end(args);
+
+
+	str.resize(length);
+	return str;
 }
 
-bool MultibyteStringToWide(const std::string& mstr,
-	std::wstring& wstr, UINT code_page, DWORD flags = 0)
-{
-	if(mstr.empty())
-	{
-		wstr.clear();
-		return true;
-	}
-
-	auto input_length = static_cast<int>(mstr.size());
-	int length = ::MultiByteToWideChar(code_page, flags,
-		&mstr[0], input_length, nullptr, 0);
-	if(length == 0)
-	{
-		return false;
-	}
-	
-	int writen_chars = ::MultiByteToWideChar(
-		code_page, flags, &mstr[0], input_length,
-		internal::StringWriteInto(wstr, length + 1), length);
-
-	return (writen_chars == length);
-}
-
-} // namespace
-
-std::string UTF16ToUTF8(const std::wstring& utf16)
-{
-	std::string utf8;
-	bool ok = WideStringToMultibyte(utf16, utf8, CP_UTF8);
-	assert(ok);
-	return utf8;
-}
-
-std::wstring UTF8ToUTF16(const std::string& utf8)
-{
-	std::wstring utf16;
-	bool ok = MultibyteStringToWide(utf8, utf16, CP_UTF8);
-	assert(ok);
-	return utf16;
-}
-
-} // namespace mix
+} // namespace core
