@@ -1,0 +1,15 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+configuration:
+  - Debug
+  - Release
+platform:
+  - x64
+clone_folder: c:\projects\mix
+build_script:
+  - mkdir build_msvc
+  - cd build_msvc
+  - cmake -G "Visual Studio 15 2017 Win64" ..
+  - cmake --build . --config %CONFIGURATION%
+test_script:
+  - ctest -C %CONFIGURATION% --verbose
