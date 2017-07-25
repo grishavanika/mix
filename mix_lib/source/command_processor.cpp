@@ -2,7 +2,7 @@
 #include <mix/computer.h>
 #include <mix/command.h>
 
-#include <core/assert.h>
+#include <cassert>
 
 using namespace mix;
 
@@ -280,7 +280,7 @@ void CommandProcessor::do_safe_add_without_overflow_check(int value, int prev_va
 	if (result == 0)
 	{
 		// We should not touch sign value when,
-		// hence setting only absolute part without changin sign
+		// hence setting only absolute part without changing sign
 		mix_.ra_.set_zero_abs_value();
 	}
 	else

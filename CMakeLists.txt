@@ -9,6 +9,9 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # TODO: wrap this into a function(s)
 
+# TODO: correctly detect this flags on *nix
+# TODO: enable c++14 or higher on *nix
+
 set(clang_on_msvc OFF)
 set(only_msvc ON)
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
