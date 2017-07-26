@@ -3,13 +3,15 @@
 
 #include <gtest/gtest.h>
 
+#include <cassert>
+
 using namespace mix;
 
 namespace {
 
 struct LDParam
 {
-	std::size_t address;
+	int address;
 	WordValue value;
 	WordField field;
 
@@ -22,22 +24,34 @@ struct LDParam
 
 	Command make_lda() const
 	{
-		return Command{8, static_cast<int>(address), 0, field};
+		return Command{8, address, 0, field};
 	}
 
 	Command make_ldx() const
 	{
-		return Command{15, static_cast<int>(address), 0, field};
+		return Command{15, address, 0, field};
 	}
 
 	Command make_ldan() const
 	{
-		return Command{16, static_cast<int>(address), 0, field};
+		return Command{16, address, 0, field};
 	}
 
 	Command make_ldxn() const
 	{
-		return Command{23, static_cast<int>(address), 0, field};
+		return Command{23, address, 0, field};
+	}
+
+	Command make_ldi(std::size_t index) const
+	{
+		assert((index >= 1) && (index <= 8));
+		return Command{8 + index, address, 0, field};
+	}
+
+	Command make_ldin(std::size_t index) const
+	{
+		assert((index >= 1) && (index <= 8));
+		return Command{16 + index, address, 0, field};
 	}
 };
 
@@ -56,8 +70,11 @@ Sign ReverseSign(Sign sign)
 } // namespace
 
 // #TODO: LD* commands with non-zero index register
+// #TODO: implement zero set behavior of LDI* with 1, 2, 3 bytes field
 
-TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_For_LDA_LDX)
+#define MIX_LDI_UB_IMPLEMENTED	0
+
+TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_Of_Registers)
 {
 	const auto& param = GetParam();
 	param.setup_data(mix);
@@ -65,25 +82,60 @@ TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_For_LDA_LDX)
 	mix.execute(param.make_lda());
 	mix.execute(param.make_ldx());
 
+	for (std::size_t index = 1; index <= 6; ++index)
+	{
+		mix.execute(param.make_ldi(index));
+	}
+
 	const int expected_abs_value = std::abs(int(param.value));
 	const Sign expected_sign = param.field.includes_sign()
 		? param.value.sign()
 		: Sign::Positive;
 
 	ASSERT_EQ(expected_abs_value, std::abs(int(mix.ra().value())));
+	ASSERT_EQ(expected_sign, mix.ra().sign());
+
+	ASSERT_EQ(expected_sign, mix.rx().sign());
 	ASSERT_EQ(expected_abs_value, std::abs(int(mix.rx().value())));
 
-	ASSERT_EQ(expected_sign, mix.ra().sign());
-	ASSERT_EQ(expected_sign, mix.rx().sign());
+	// Index registers has only 2 bytes.
+	// Setting value to 1, 2, 3 indexes is UB
+	const bool well_defined_behaviour_for_index_registers = (param.field.bytes_count() <= 2);
+
+	for (std::size_t index = 1; index <= 6; ++index)
+	{
+		const IndexRegister& ri = mix.ri(index);
+		if (well_defined_behaviour_for_index_registers)
+		{
+			ASSERT_EQ(expected_abs_value, std::abs(int(ri.value())));
+			ASSERT_EQ(expected_sign, ri.sign());
+		}
+		else
+		{
+			// Sign is the same as it should be
+			ASSERT_EQ(expected_sign, ri.sign());
+			// ... but 1, 2, 3 bytes are zero
+#if (MIX_LDI_UB_IMPLEMENTED)
+			ASSERT_EQ(ri.byte(1), Byte{0});
+			ASSERT_EQ(ri.byte(2), Byte{0});
+			ASSERT_EQ(ri.byte(3), Byte{0});
+#endif
+		}
+	}
 }
 
-TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_For_LDAN_LDXN_With_Reverse_Sign)
+TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_Of_Registers_With_Reverse_Sign)
 {
 	const auto& param = GetParam();
 	param.setup_data(mix);
 
 	mix.execute(param.make_ldan());
 	mix.execute(param.make_ldxn());
+
+	for (std::size_t index = 1; index <= 6; ++index)
+	{
+		mix.execute(param.make_ldin(index));
+	}
 
 	const int expected_abs_value = std::abs(int(param.value));
 	const Sign sign = param.field.includes_sign()
@@ -92,13 +144,36 @@ TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_For_LDAN_LDXN_With
 	const Sign expected_sign = ReverseSign(sign);
 
 	ASSERT_EQ(expected_abs_value, std::abs(int(mix.ra().value())));
-	ASSERT_EQ(expected_abs_value, std::abs(int(mix.rx().value())));
-
 	ASSERT_EQ(expected_sign, mix.ra().sign());
+	
+	ASSERT_EQ(expected_abs_value, std::abs(int(mix.rx().value())));
 	ASSERT_EQ(expected_sign, mix.rx().sign());
+
+	const bool well_defined_behaviour_for_index_registers = (param.field.bytes_count() <= 2);
+
+	for (std::size_t index = 1; index <= 6; ++index)
+	{
+		const IndexRegister& ri = mix.ri(index);
+		if (well_defined_behaviour_for_index_registers)
+		{
+			ASSERT_EQ(expected_abs_value, std::abs(int(ri.value())));
+			ASSERT_EQ(expected_sign, ri.sign());
+		}
+		else
+		{
+			// Sign is the same as it should be
+			ASSERT_EQ(expected_sign, ri.sign());
+			// ... but 1, 2, 3 bytes are zero
+#if (MIX_LDI_UB_IMPLEMENTED)
+			ASSERT_EQ(ri.byte(1), Byte{0});
+			ASSERT_EQ(ri.byte(2), Byte{0});
+			ASSERT_EQ(ri.byte(3), Byte{0});
+#endif
+		}
+	}
 }
 
-INSTANTIATE_TEST_CASE_P(Registers_A_X_Default_Field,
+INSTANTIATE_TEST_CASE_P(Load_With_Default_Field,
 	LDTest,
 	::testing::Values(
 		/*00*/LDParam{1, WordValue{0}, Word::MaxField()},
@@ -130,7 +205,7 @@ INSTANTIATE_TEST_CASE_P(Registers_A_X_Default_Field,
 		/*26*/LDParam{26, WordValue{-1'073'741'823}, Word::MaxField()}
 	));
 
-INSTANTIATE_TEST_CASE_P(Registers_A_X_Partial_Field,
+INSTANTIATE_TEST_CASE_P(Load_With_Partial_Field,
 	LDTest,
 	::testing::Values(
 		/*00*/LDParam{1, WordValue{Sign::Positive, 0}, WordField{0, 0}},
