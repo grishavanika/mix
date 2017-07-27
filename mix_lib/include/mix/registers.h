@@ -18,6 +18,8 @@ public:
 	void set_byte(std::size_t index, const Byte& byte);
 	WordValue value() const;
 
+	void zero_unspecified_bytes();
+
 private:
 	bool is_undefined_index(std::size_t index) const;
 };

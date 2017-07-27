@@ -133,12 +133,16 @@ void CommandProcessor::store_register(Register& r, const Command& command)
 
 void CommandProcessor::load_index_register(std::size_t index, const Command& command)
 {
-	load_register(mix_.index_register(index), command);
+	auto& ri = mix_.index_register(index);
+	load_register(ri, command);
+	ri.zero_unspecified_bytes();
 }
 
 void CommandProcessor::load_index_register_reverse_sign(std::size_t index, const Command& command)
 {
-	load_register_reverse_sign(mix_.index_register(index), command);
+	auto& ri = mix_.index_register(index);
+	load_register_reverse_sign(ri, command);
+	ri.zero_unspecified_bytes();
 }
 
 void CommandProcessor::lda(const Command& command)

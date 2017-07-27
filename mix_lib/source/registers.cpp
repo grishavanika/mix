@@ -13,13 +13,21 @@ void IndexRegister::set_byte(std::size_t index, const Byte& byte)
 	Register::set_byte(index, byte);
 }
 
+void IndexRegister::zero_unspecified_bytes()
+{
+	for (std::size_t i = 1; i <= 3; ++i)
+	{
+		Register::set_byte(i, Byte{0});
+	}
+}
+
 bool IndexRegister::is_undefined_index(std::size_t index) const
 {
 	switch (index)
 	{
-	case 0:
 	case 1:
 	case 2:
+	case 3:
 		return true;
 	}
 	return false;

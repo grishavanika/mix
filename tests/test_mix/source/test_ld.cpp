@@ -1,6 +1,8 @@
 #include <mix/computer.h>
 #include <mix/command.h>
 
+#include <tuple>
+
 #include <gtest/gtest.h>
 
 #include <cassert>
@@ -8,6 +10,11 @@
 using namespace mix;
 
 namespace {
+
+Sign ReverseSign(Sign sign)
+{
+	return ((sign == Sign::Negative) ? Sign::Positive : Sign::Negative);
+}
 
 struct LDParam
 {
@@ -53,6 +60,63 @@ struct LDParam
 		assert((index >= 1) && (index <= 8));
 		return Command{16 + index, address, 0, field};
 	}
+
+	std::tuple<int, Sign> expected_value(bool reverse_sign) const
+	{
+		const int expected_abs_value = std::abs(int(value));
+		const Sign expected_sign = field.includes_sign()
+			? value.sign()
+			: Sign::Positive;
+		const auto sign = reverse_sign ? ReverseSign(expected_sign) : expected_sign;
+		return {expected_abs_value, sign};
+	}
+
+	bool check_register(const Register& r, std::tuple<int, Sign> expected_value) const
+	{
+		bool result = true;
+		result &= (std::get<0>(expected_value) == std::abs(int(r.value())));
+		result &= (std::get<1>(expected_value) == r.value().sign());
+		return result;
+	}
+
+	bool check_index_register(
+		const IndexRegister& ri,
+		std::tuple<int, Sign> expected_value,
+		const Word& ideal_value) const
+	{
+		// Index registers has only 2 bytes.
+		// Setting value to 1, 2, 3 indexes is UB
+		const bool well_defined_behaviour_for_index_registers = (field.bytes_count() <= 2);
+
+		if (well_defined_behaviour_for_index_registers)
+		{
+			return check_register(ri, expected_value);
+		}
+		else
+		{
+			return validate_index_register_UB_state(ri, expected_value, ideal_value);
+		}
+	}
+
+	bool validate_index_register_UB_state(
+		const IndexRegister& ri,
+		std::tuple<int, Sign> expected_value,
+		const Word& ideal_value) const
+	{
+		bool result = true;
+		// Sign is the same as it should be
+		result &= (std::get<1>(expected_value) == ri.sign());
+		// ... but 1, 2, 3 bytes are zero
+		result &= (ri.byte(1) == Byte{0});
+		result &= (ri.byte(2) == Byte{0});
+		result &= (ri.byte(3) == Byte{0});
+
+		// ... and value is truncated value of Field(4, 5)
+		const int abs_ri_value = std::abs(int(ri.value()));
+		const int word_part_value = ideal_value.value(WordField{4, 5});
+		result &= (abs_ri_value == word_part_value);
+		return result;
+	}
 };
 
 class LDTest :
@@ -62,17 +126,9 @@ protected:
 	Computer mix;
 };
 
-Sign ReverseSign(Sign sign)
-{
-	return ((sign == Sign::Negative) ? Sign::Positive : Sign::Negative);
-}
-
 } // namespace
 
 // #TODO: LD* commands with non-zero index register
-// #TODO: implement zero set behavior of LDI* with 1, 2, 3 bytes field
-
-#define MIX_LDI_UB_IMPLEMENTED	0
 
 TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_Of_Registers)
 {
@@ -87,40 +143,15 @@ TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_Of_Registers)
 		mix.execute(param.make_ldi(index));
 	}
 
-	const int expected_abs_value = std::abs(int(param.value));
-	const Sign expected_sign = param.field.includes_sign()
-		? param.value.sign()
-		: Sign::Positive;
+	const auto expected_value = param.expected_value(false/*DO not reverse original sign*/);
 
-	ASSERT_EQ(expected_abs_value, std::abs(int(mix.ra().value())));
-	ASSERT_EQ(expected_sign, mix.ra().sign());
-
-	ASSERT_EQ(expected_sign, mix.rx().sign());
-	ASSERT_EQ(expected_abs_value, std::abs(int(mix.rx().value())));
-
-	// Index registers has only 2 bytes.
-	// Setting value to 1, 2, 3 indexes is UB
-	const bool well_defined_behaviour_for_index_registers = (param.field.bytes_count() <= 2);
+	ASSERT_TRUE(param.check_register(mix.ra(), expected_value));
+	ASSERT_TRUE(param.check_register(mix.rx(), expected_value));
 
 	for (std::size_t index = 1; index <= 6; ++index)
 	{
 		const IndexRegister& ri = mix.ri(index);
-		if (well_defined_behaviour_for_index_registers)
-		{
-			ASSERT_EQ(expected_abs_value, std::abs(int(ri.value())));
-			ASSERT_EQ(expected_sign, ri.sign());
-		}
-		else
-		{
-			// Sign is the same as it should be
-			ASSERT_EQ(expected_sign, ri.sign());
-			// ... but 1, 2, 3 bytes are zero
-#if (MIX_LDI_UB_IMPLEMENTED)
-			ASSERT_EQ(ri.byte(1), Byte{0});
-			ASSERT_EQ(ri.byte(2), Byte{0});
-			ASSERT_EQ(ri.byte(3), Byte{0});
-#endif
-		}
+		EXPECT_TRUE(param.check_index_register(ri, expected_value, mix.ra()));
 	}
 }
 
@@ -137,39 +168,15 @@ TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_Of_Registers_With_
 		mix.execute(param.make_ldin(index));
 	}
 
-	const int expected_abs_value = std::abs(int(param.value));
-	const Sign sign = param.field.includes_sign()
-		? param.value.sign()
-		: Sign::Positive;
-	const Sign expected_sign = ReverseSign(sign);
+	const auto expected_value = param.expected_value(true/*reverse original sign*/);
 
-	ASSERT_EQ(expected_abs_value, std::abs(int(mix.ra().value())));
-	ASSERT_EQ(expected_sign, mix.ra().sign());
-	
-	ASSERT_EQ(expected_abs_value, std::abs(int(mix.rx().value())));
-	ASSERT_EQ(expected_sign, mix.rx().sign());
-
-	const bool well_defined_behaviour_for_index_registers = (param.field.bytes_count() <= 2);
+	ASSERT_TRUE(param.check_register(mix.ra(), expected_value));
+	ASSERT_TRUE(param.check_register(mix.rx(), expected_value));
 
 	for (std::size_t index = 1; index <= 6; ++index)
 	{
 		const IndexRegister& ri = mix.ri(index);
-		if (well_defined_behaviour_for_index_registers)
-		{
-			ASSERT_EQ(expected_abs_value, std::abs(int(ri.value())));
-			ASSERT_EQ(expected_sign, ri.sign());
-		}
-		else
-		{
-			// Sign is the same as it should be
-			ASSERT_EQ(expected_sign, ri.sign());
-			// ... but 1, 2, 3 bytes are zero
-#if (MIX_LDI_UB_IMPLEMENTED)
-			ASSERT_EQ(ri.byte(1), Byte{0});
-			ASSERT_EQ(ri.byte(2), Byte{0});
-			ASSERT_EQ(ri.byte(3), Byte{0});
-#endif
-		}
+		EXPECT_TRUE(param.check_index_register(ri, expected_value, mix.ra()));
 	}
 }
 
