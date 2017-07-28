@@ -31,20 +31,24 @@ void Computer::set_memory(std::size_t address, const Word& value)
 	memory_[address] = value;
 }
 
-const Word& Computer::memory_with_index(int address, size_t index) const
+int Computer::fix_up_address(int address, std::size_t ri) const
 {
-	if (index != 0)
+	if (ri != 0)
 	{
-		address += index_register(index).value();
+		address += index_register(ri).value();
 	}
-
-	return memory_at(address);
+	return address;
 }
 
-Word& Computer::memory_with_index(int address, size_t index)
+const Word& Computer::memory_with_index(int address, std::size_t ri) const
+{
+	return memory_at(fix_up_address(address, ri));
+}
+
+Word& Computer::memory_with_index(int address, std::size_t ri)
 {
 	return const_cast<Word&>(
-		static_cast<const Computer&>(*this).memory_with_index(address, index));
+		static_cast<const Computer&>(*this).memory_with_index(address, ri));
 }
 
 const Word& Computer::memory_at(int address) const
@@ -57,7 +61,7 @@ const Word& Computer::memory_at(int address) const
 	return memory_[static_cast<std::size_t>(address)];
 }
 
-const IndexRegister& Computer::index_register(size_t index) const
+const IndexRegister& Computer::index_register(std::size_t index) const
 {
 	if ((index == 0) || (index > rindexes_.size()))
 	{
@@ -67,7 +71,7 @@ const IndexRegister& Computer::index_register(size_t index) const
 	return rindexes_[index - 1];
 }
 
-IndexRegister& Computer::index_register(size_t index)
+IndexRegister& Computer::index_register(std::size_t index)
 {
 	return const_cast<IndexRegister&>(
 		static_cast<const Computer&>(*this).index_register(index));

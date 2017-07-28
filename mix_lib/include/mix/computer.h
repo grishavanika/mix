@@ -33,8 +33,9 @@ public:
 	void set_overflow();
 
 private:
-	const Word& memory_with_index(int address, size_t index) const;
-	Word& memory_with_index(int address, size_t index);
+	int fix_up_address(int address, std::size_t ri) const;
+	const Word& memory_with_index(int address, std::size_t ri) const;
+	Word& memory_with_index(int address, std::size_t ri);
 	const Word& memory_at(int address) const;
 
 	const IndexRegister& index_register(size_t index) const;

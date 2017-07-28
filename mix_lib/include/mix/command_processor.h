@@ -18,10 +18,22 @@ public:
 
 	void process(const Command& command);
 
-	// #TODO: these concrete functions should validate
-	// command's ID passed via `command`.
-	// Otherwise, it's make sense to hide them and
-	// let the client uses general `process()` function
+private:
+	void load_register(Register& r, const Command& command);
+	void load_register_reverse_sign(Register& r, const Command& command);
+	void load_index_register(std::size_t index, const Command& command);
+	void load_index_register_reverse_sign(std::size_t index, const Command& command);
+
+	Word& memory(const Command& command);
+
+	void do_add(const WordValue& source);
+	void do_safe_add_without_overflow_check(int value, int prev_value);
+
+	void store_register(Register& r, const Command& command);
+
+	void enter_register(Register& r, const Command& command);
+
+private:
 	void nop(const Command& command);
 
 	void lda(const Command& command);
@@ -55,18 +67,6 @@ public:
 
 	void add(const Command& command);
 	void sub(const Command& command);
-
-private:
-	void load_register(Register& r, const Command& command);
-	void load_register_reverse_sign(Register& r, const Command& command);
-	void store_register(Register& r, const Command& command);
-	void load_index_register(std::size_t index, const Command& command);
-	void load_index_register_reverse_sign(std::size_t index, const Command& command);
-
-	Word& memory(const Command& command);
-
-	void do_add(const WordValue& source);
-	void do_safe_add_without_overflow_check(int value, int prev_value);
 
 private:
 	Computer& mix_;

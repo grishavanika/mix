@@ -10,6 +10,8 @@ class Command
 public:
 	explicit Command(const Word& word);
 	
+	// #TODO: `address` should be `WordValue` since it can be
+	// -0 or +0 and we need to distinguish between these values
 	explicit Command(
 		std::size_t id,
 		int address,

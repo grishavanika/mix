@@ -88,7 +88,7 @@ void CommandProcessor::process(const Command& command)
 		throw std::runtime_error{"Not implemented"};
 	}
 
-	(*this.*callback)(command);
+	(this->*callback)(command);
 }
 
 Word& CommandProcessor::memory(const Command& command)
@@ -108,6 +108,16 @@ void CommandProcessor::load_register(Register& r, const Command& command)
 
 	r.set_zero_abs_value();
 	r.set_value(word.value(source_field), dest_field);
+}
+
+void CommandProcessor::enter_register(Register& r, const Command& command)
+{
+	assert(command.word_field().to_byte().value() == 2);
+	const auto value = mix_.fix_up_address(command.address(), command.address_index());
+	
+	r.set_zero_abs_value();
+	// #TODO: distinguish zero address sign (e.g., -0 or +0)
+	r.set_value(WordValue{value});
 }
 
 void CommandProcessor::load_register_reverse_sign(Register& r, const Command& command)
