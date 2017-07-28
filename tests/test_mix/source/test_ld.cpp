@@ -21,107 +21,127 @@ struct LDParam
 	int address;
 	WordValue value;
 	WordField field;
-
-	void setup_data(Computer& mix) const
-	{
-		Word data;
-		data.set_value(value, field);
-		mix.set_memory(static_cast<std::size_t>(address), data);
-	}
-
-	Command make_lda() const
-	{
-		return Command{8, address, 0, field};
-	}
-
-	Command make_ldx() const
-	{
-		return Command{15, address, 0, field};
-	}
-
-	Command make_ldan() const
-	{
-		return Command{16, address, 0, field};
-	}
-
-	Command make_ldxn() const
-	{
-		return Command{23, address, 0, field};
-	}
-
-	Command make_ldi(std::size_t index) const
-	{
-		assert((index >= 1) && (index <= 8));
-		return Command{8 + index, address, 0, field};
-	}
-
-	Command make_ldin(std::size_t index) const
-	{
-		assert((index >= 1) && (index <= 8));
-		return Command{16 + index, address, 0, field};
-	}
-
-	std::tuple<int, Sign> expected_value(bool reverse_sign) const
-	{
-		const int expected_abs_value = std::abs(int(value));
-		const Sign expected_sign = field.includes_sign()
-			? value.sign()
-			: Sign::Positive;
-		const auto sign = reverse_sign ? ReverseSign(expected_sign) : expected_sign;
-		return {expected_abs_value, sign};
-	}
-
-	bool check_register(const Register& r, std::tuple<int, Sign> expected_value) const
-	{
-		bool result = true;
-		result &= (std::get<0>(expected_value) == std::abs(int(r.value())));
-		result &= (std::get<1>(expected_value) == r.value().sign());
-		return result;
-	}
-
-	bool check_index_register(
-		const IndexRegister& ri,
-		std::tuple<int, Sign> expected_value,
-		const Word& ideal_value) const
-	{
-		// Index registers has only 2 bytes.
-		// Setting value to 1, 2, 3 indexes is UB
-		const bool well_defined_behaviour_for_index_registers = (field.bytes_count() <= 2);
-
-		if (well_defined_behaviour_for_index_registers)
-		{
-			return check_register(ri, expected_value);
-		}
-		else
-		{
-			return validate_index_register_UB_state(ri, expected_value, ideal_value);
-		}
-	}
-
-	bool validate_index_register_UB_state(
-		const IndexRegister& ri,
-		std::tuple<int, Sign> expected_value,
-		const Word& ideal_value) const
-	{
-		bool result = true;
-		// Sign is the same as it should be
-		result &= (std::get<1>(expected_value) == ri.sign());
-		// ... but 1, 2, 3 bytes are zero
-		result &= (ri.byte(1) == Byte{0});
-		result &= (ri.byte(2) == Byte{0});
-		result &= (ri.byte(3) == Byte{0});
-
-		// ... and value is truncated value of Field(4, 5)
-		const int abs_ri_value = std::abs(int(ri.value()));
-		const int word_part_value = ideal_value.value(WordField{4, 5});
-		result &= (abs_ri_value == word_part_value);
-		return result;
-	}
 };
 
 class LDTest :
 	public ::testing::TestWithParam<LDParam>
 {
+protected:
+	void SetUp() override
+	{
+		const auto& param = GetParam();
+		Word data;
+		data.set_value(param.value, param.field);
+		mix.set_memory(static_cast<std::size_t>(param.address), data);
+	}
+
+	Command make_lda() const
+	{
+		const auto& param = GetParam();
+		return Command{8, param.address, 0, param.field};
+	}
+
+	Command make_ldx() const
+	{
+		const auto& param = GetParam();
+		return Command{15, param.address, 0, param.field};
+	}
+
+	Command make_ldan() const
+	{
+		const auto& param = GetParam();
+		return Command{16, param.address, 0, param.field};
+	}
+
+	Command make_ldxn() const
+	{
+		const auto& param = GetParam();
+		return Command{23, param.address, 0, param.field};
+	}
+
+	Command make_ldi(std::size_t index) const
+	{
+		const auto& param = GetParam();
+		assert((index >= 1) && (index <= 6));
+		return Command{8 + index, param.address, 0, param.field};
+	}
+
+	Command make_ldin(std::size_t index) const
+	{
+		const auto& param = GetParam();
+		assert((index >= 1) && (index <= 6));
+		return Command{16 + index, param.address, 0, param.field};
+	}
+
+	std::tuple<int, Sign> expected_value(bool reverse_sign) const
+	{
+		const auto& param = GetParam();
+		const int expected_abs_value = std::abs(int(param.value));
+		const Sign expected_sign = param.field.includes_sign()
+			? param.value.sign()
+			: Sign::Positive;
+		const auto sign = reverse_sign ? ReverseSign(expected_sign) : expected_sign;
+		return {expected_abs_value, sign};
+	}
+
+	void check_register(const Register& r, std::tuple<int, Sign> expected_value)
+	{
+		ASSERT_EQ(std::get<0>(expected_value), std::abs(int(r.value())));
+		ASSERT_EQ(std::get<1>(expected_value), r.value().sign());
+	}
+
+	void check_index_register(
+		const IndexRegister& ri,
+		std::tuple<int, Sign> expected_value,
+		const Word& ideal_value)
+	{
+		const auto& param = GetParam();
+
+		// Index registers has only 2 bytes.
+		// Setting value to 1, 2, 3 indexes is UB
+		const bool well_defined_behaviour_for_index_registers = (param.field.bytes_count() <= 2);
+
+		if (well_defined_behaviour_for_index_registers)
+		{
+			check_register(ri, expected_value);
+		}
+		else
+		{
+			validate_index_register_UB_state(ri, expected_value, ideal_value);
+		}
+	}
+
+	void validate_index_register_UB_state(
+		const IndexRegister& ri,
+		std::tuple<int, Sign> expected_value,
+		const Word& ideal_value) const
+	{
+		// Sign is the same as it should be
+		ASSERT_EQ(std::get<1>(expected_value), ri.sign());
+		// ... but 1, 2, 3 bytes are zero
+		ASSERT_EQ(ri.byte(1), Byte{0});
+		ASSERT_EQ(ri.byte(2), Byte{0});
+		ASSERT_EQ(ri.byte(3), Byte{0});
+
+		// ... and value is truncated value of Field(4, 5)
+		const int abs_ri_value = std::abs(int(ri.value()));
+		const int word_part_value = ideal_value.value(WordField{4, 5});
+		ASSERT_EQ(abs_ri_value, word_part_value);
+	}
+
+	void check_all_registers(std::tuple<int, Sign> expected_value)
+	{
+		check_register(mix.ra(), expected_value);
+		check_register(mix.rx(), expected_value);
+
+		const auto& index_register_ideal_value = mix.ra();
+		for (std::size_t index = 1; index <= 6; ++index)
+		{
+			const IndexRegister& ri = mix.ri(index);
+			check_index_register(ri, expected_value, index_register_ideal_value);
+		}
+	}
+
 protected:
 	Computer mix;
 };
@@ -130,54 +150,32 @@ protected:
 
 // #TODO: LD* commands with non-zero index register
 
-TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_Of_Registers)
+TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_Of_Registers_For_LD_Commnads)
 {
-	const auto& param = GetParam();
-	param.setup_data(mix);
-
-	mix.execute(param.make_lda());
-	mix.execute(param.make_ldx());
+	mix.execute(make_lda());
+	mix.execute(make_ldx());
 
 	for (std::size_t index = 1; index <= 6; ++index)
 	{
-		mix.execute(param.make_ldi(index));
+		mix.execute(make_ldi(index));
 	}
 
-	const auto expected_value = param.expected_value(false/*DO not reverse original sign*/);
-
-	ASSERT_TRUE(param.check_register(mix.ra(), expected_value));
-	ASSERT_TRUE(param.check_register(mix.rx(), expected_value));
-
-	for (std::size_t index = 1; index <= 6; ++index)
-	{
-		const IndexRegister& ri = mix.ri(index);
-		EXPECT_TRUE(param.check_index_register(ri, expected_value, mix.ra()));
-	}
+	check_all_registers(
+		expected_value(false/*DO not reverse original sign*/));
 }
 
-TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_Of_Registers_With_Reverse_Sign)
+TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_Of_Registers_With_Reverse_Sign_For_LD_N_Commnads)
 {
-	const auto& param = GetParam();
-	param.setup_data(mix);
-
-	mix.execute(param.make_ldan());
-	mix.execute(param.make_ldxn());
+	mix.execute(make_ldan());
+	mix.execute(make_ldxn());
 
 	for (std::size_t index = 1; index <= 6; ++index)
 	{
-		mix.execute(param.make_ldin(index));
+		mix.execute(make_ldin(index));
 	}
 
-	const auto expected_value = param.expected_value(true/*reverse original sign*/);
-
-	ASSERT_TRUE(param.check_register(mix.ra(), expected_value));
-	ASSERT_TRUE(param.check_register(mix.rx(), expected_value));
-
-	for (std::size_t index = 1; index <= 6; ++index)
-	{
-		const IndexRegister& ri = mix.ri(index);
-		EXPECT_TRUE(param.check_index_register(ri, expected_value, mix.ra()));
-	}
+	check_all_registers(
+		expected_value(true/*reverse original sign*/));
 }
 
 INSTANTIATE_TEST_CASE_P(Load_With_Default_Field,
