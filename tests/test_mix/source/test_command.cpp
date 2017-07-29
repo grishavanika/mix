@@ -38,3 +38,10 @@ TEST(Command, Parts_Constructor_Packs)
 	ASSERT_EQ(4u, command.address_index());
 	ASSERT_EQ(word, command.to_word());
 }
+
+TEST(Command, Command_With_Negative_Zero_Address_Can_Be_Constructed)
+{
+	const Command command{1, WordValue{Sign::Negative, 0}, 3, WordField{1, 3}};
+	ASSERT_EQ(0, command.address());
+	ASSERT_EQ(Sign::Negative, command.sign());
+}

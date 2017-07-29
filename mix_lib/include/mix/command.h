@@ -10,11 +10,15 @@ class Command
 public:
 	explicit Command(const Word& word);
 	
-	// #TODO: `address` should be `WordValue` since it can be
-	// -0 or +0 and we need to distinguish between these values
 	explicit Command(
 		std::size_t id,
 		int address,
+		std::size_t address_index,
+		const WordField& field);
+
+	explicit Command(
+		std::size_t id,
+		WordValue address,
 		std::size_t address_index,
 		const WordField& field);
 
@@ -22,6 +26,7 @@ public:
 	const WordField& word_field() const;
 	int address() const;
 	std::size_t address_index() const;
+	Sign sign() const;
 
 	const Word& to_word() const;
 
@@ -31,7 +36,7 @@ private:
 private:
 	Word word_;
 	WordField field_;
-	AddressRegister address_;
+	WordValue address_;
 };
 
 } // namespace mix

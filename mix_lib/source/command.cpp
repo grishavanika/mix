@@ -2,11 +2,10 @@
 
 using namespace mix;
 
-
 Command::Command(const Word& word)
 	: word_{word}
 	, field_{WordField::FromByte(field_byte())}
-	, address_{word.sign(), word.byte(1), word.byte(2)}
+	, address_{word.value(WordField{0, 2})}
 {
 }
 
@@ -15,13 +14,20 @@ Command::Command(
 	int address,
 	std::size_t address_index,
 	const WordField& field)
+		: Command{id, WordValue{address}, address_index, field}
+{
+}
+
+Command::Command(
+	std::size_t id,
+	WordValue address,
+	std::size_t address_index,
+	const WordField& field)
 		: word_{}
 		, field_{field}
 		, address_{address}
 {
-	word_.set_sign(address_.sign());
-	word_.set_byte(1, address_.byte(4));
-	word_.set_byte(2, address_.byte(5));
+	word_.set_value(address_, WordField{0, 2});
 	word_.set_byte(3, Byte{address_index});
 	word_.set_byte(4, field_.to_byte());
 	word_.set_byte(5, Byte{id});
@@ -57,3 +63,7 @@ int Command::address() const
 	return address_.value();
 }
 
+Sign Command::sign() const
+{
+	return word_.sign();
+}
