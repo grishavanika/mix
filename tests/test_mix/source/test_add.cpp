@@ -90,37 +90,37 @@ TEST_P(AddTest, Adds_Memory_Cell_To_RA)
 INSTANTIATE_TEST_CASE_P(Add_With_Overflow,
 	AddTest,
 	::testing::Values(
-		AddParam{0, true, MinRegister(), Word{-1}, Word::MaxField(), 1000},
-		AddParam{-1, true, MinRegister(), Word{-2}, Word::MaxField(), 1000},
-		AddParam{0, true, MaxRegister(), Word{1}, Word::MaxField(), 1000},
-		AddParam{1, true, MaxRegister(), Word{2}, Word::MaxField(), 1000},
-		AddParam{MaxWord().value() - 1, true, MaxRegister(), MaxWord(), Word::MaxField(), 1000},
-		AddParam{MinWord().value() + 1, true, MinRegister(), MinWord(), Word::MaxField(), 1000},
-		AddParam{0, true, MaxRegister(), Word{1, WordField{5, 5}}, WordField{5, 5}, 1000},
-		AddParam{1, true, MaxRegister(), Word{2, WordField{4, 4}}, WordField{4, 4}, 1000}
+		/*00*/AddParam{0, true, MinRegister(), Word{-1}, Word::MaxField(), 1000},
+		/*01*/AddParam{-1, true, MinRegister(), Word{-2}, Word::MaxField(), 1000},
+		/*02*/AddParam{0, true, MaxRegister(), Word{1}, Word::MaxField(), 1000},
+		/*03*/AddParam{1, true, MaxRegister(), Word{2}, Word::MaxField(), 1000},
+		/*04*/AddParam{MaxWord().value() - 1, true, MaxRegister(), MaxWord(), Word::MaxField(), 1000},
+		/*05*/AddParam{MinWord().value() + 1, true, MinRegister(), MinWord(), Word::MaxField(), 1000},
+		/*06*/AddParam{0, true, MaxRegister(), Word{1, WordField{5, 5}}, WordField{5, 5}, 1000},
+		/*07*/AddParam{1, true, MaxRegister(), Word{2, WordField{4, 4}}, WordField{4, 4}, 1000}
 	));
 
 INSTANTIATE_TEST_CASE_P(Add_Without_Overflow,
 	AddTest,
 	::testing::Values(
-		AddParam{0, false, Register{-1}, Word{1}, Word::MaxField(), 1000},
-		AddParam{2, false, Register{1}, Word{1},Word::MaxField(), 1000},
-		AddParam{4'096, false, Register{4'095}, Word{1}, Word::MaxField(), 1000},
-		AddParam{16'777'216, false, Register{1}, Word{16'777'215}, Word::MaxField(), 1000},
-		AddParam{1 + Byte::k_max_value, false, Register{1}, MaxWord(), WordField{1, 1}, 1000},
-		AddParam{1 + Byte::k_max_value, false, Register{1}, MaxWord(), WordField{2, 2}, 1000},
-		AddParam{1 + Byte::k_max_value, false, Register{1}, MaxWord(), WordField{3, 3}, 1000},
-		AddParam{1 + Byte::k_max_value, false, Register{1}, MaxWord(), WordField{4, 4}, 1000},
-		AddParam{1 + Byte::k_max_value, false, Register{1}, MaxWord(), WordField{5, 5}, 1000},
-		AddParam{4'096, false, Register{1}, MaxWord(), WordField{4, 5}, 1000},
-		AddParam{0, false, Register{-4'095}, MaxWord(), WordField{3, 4}, 1000},
-		AddParam{0, false, MinRegister(), MinWord(), WordField{1, 5}, 1000}
+		/*00*/AddParam{0, false, Register{-1}, Word{1}, Word::MaxField(), 1000},
+		/*01*/AddParam{2, false, Register{1}, Word{1},Word::MaxField(), 1000},
+		/*02*/AddParam{4'096, false, Register{4'095}, Word{1}, Word::MaxField(), 1000},
+		/*03*/AddParam{16'777'216, false, Register{1}, Word{16'777'215}, Word::MaxField(), 1000},
+		/*04*/AddParam{1 + Byte::k_max_value, false, Register{1}, MaxWord(), WordField{1, 1}, 1000},
+		/*05*/AddParam{1 + Byte::k_max_value, false, Register{1}, MaxWord(), WordField{2, 2}, 1000},
+		/*06*/AddParam{1 + Byte::k_max_value, false, Register{1}, MaxWord(), WordField{3, 3}, 1000},
+		/*07*/AddParam{1 + Byte::k_max_value, false, Register{1}, MaxWord(), WordField{4, 4}, 1000},
+		/*08*/AddParam{1 + Byte::k_max_value, false, Register{1}, MaxWord(), WordField{5, 5}, 1000},
+		/*09*/AddParam{4'096, false, Register{1}, MaxWord(), WordField{4, 5}, 1000},
+		/*10*/AddParam{0, false, Register{-4'095}, MaxWord(), WordField{3, 4}, 1000},
+		/*11*/AddParam{0, false, MinRegister(), MinWord(), WordField{1, 5}, 1000}
 	));
 
 INSTANTIATE_TEST_CASE_P(Add_Zero_Leads_To_No_Changes,
 	AddTest,
 	::testing::Values(
-		AddParam{-1, false, Register{-1}, Word{0}, Word::MaxField(), 1000},
-		AddParam{1, false, Register{0}, Word{1}, Word::MaxField(), 1000},
-		AddParam{2, false, Register{2}, Word{1}, WordField{0, 0}, 1000}
+		/*00*/AddParam{-1, false, Register{-1}, Word{0}, Word::MaxField(), 1000},
+		/*01*/AddParam{1, false, Register{0}, Word{1}, Word::MaxField(), 1000},
+		/*02*/AddParam{2, false, Register{2}, Word{1}, WordField{0, 0}, 1000}
 	));
