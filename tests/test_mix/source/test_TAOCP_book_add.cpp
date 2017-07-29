@@ -21,6 +21,13 @@ Command MakeADD(int address, const WordField& field = Word::MaxField(), std::siz
 {
 	return Command{1, address, index_register, field};
 }
+
+// #TODO: move these functions from all tests to some helper header
+Command MakeSUB(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
+{
+	return Command{2, address, index_register, field};
+}
+
 } // namespace
 
 TEST(ADD_TAOCP_Book_Test, Register_A_Bytes_Sum)
@@ -80,3 +87,33 @@ TEST(ADD_TAOCP_Book_Test, Simple_Addition)
 		ASSERT_EQ(200, mix.ra().value(WordField{4, 5}));
 	}
 }
+
+TEST(SUB_TAOCP_Book_Test, Simple_Substraction)
+{
+	Computer mix;
+
+	{
+		Register ra;
+		ra.set_value(WordValue{-1234}, WordField{0, 2});
+		ra.set_byte(3, Byte{0});
+		ra.set_byte(4, Byte{0});
+		ra.set_byte(5, Byte{9});
+		mix.set_ra(ra);
+	}
+
+	{
+		Word w;
+		w.set_value(WordValue{-2000}, WordField{0, 2});
+		w.set_value(WordValue{150}, WordField{3, 4}, false/*do not touch sign*/);
+		w.set_byte(5, Byte{0});
+		mix.set_memory(1000, w);
+	}
+
+	mix.execute(MakeSUB(1000));
+
+	{
+		ASSERT_EQ(766, mix.ra().value(WordField{0, 2}));
+		ASSERT_EQ(149, mix.ra().value(WordField{3, 4}));
+	}
+}
+
