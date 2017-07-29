@@ -96,7 +96,7 @@ INSTANTIATE_TEST_CASE_P(Sub_With_Overflow,
 		/*03*/SubParam{1, true, MaxRegister(), Word{-2}, Word::MaxField(), 1000},
 		/*04*/SubParam{MaxWord().value() - 1, true, MaxRegister(), MinWord(), Word::MaxField(), 1000},
 		/*05*/SubParam{MinWord().value() + 1, true, MinRegister(), MaxWord(), Word::MaxField(), 1000},
-		/*06*/SubParam{0, true, MinRegister(), Word{1, WordField{5, 5}}, WordField{2, 2}, 1000}
+		/*06*/SubParam{0, true, MinRegister(), Word{1, WordField{5, 5}}, WordField{5, 5}, 1000}
 	));
 
 INSTANTIATE_TEST_CASE_P(Sub_Without_Overflow,
