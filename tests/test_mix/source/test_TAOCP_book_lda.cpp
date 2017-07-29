@@ -29,7 +29,7 @@ private:
 	{
 		source_address = 2000;
 		source_cell = MakeTestWord(-80, 3, 5, 4);
-		mix.set_memory(static_cast<std::size_t>(source_address), source_cell);
+		mix.set_memory(source_address, source_cell);
 
 		Register ra;
 		ra.set_value(Word::k_max_abs_value);

@@ -1,13 +1,17 @@
 #include <mix/computer.h>
 #include <mix/command.h>
+#include <mix/computer_listener.h>
 
 #include <tuple>
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include <cassert>
 
 using namespace mix;
+using ::testing::_;
+using ::testing::StrictMock;
 
 namespace {
 
@@ -23,16 +27,42 @@ struct LDParam
 	WordField field;
 };
 
+struct ComputerListenerMock :
+	public IComputerListener
+{
+	MOCK_METHOD1(on_memory_set, void (int));
+	MOCK_METHOD0(on_ra_set, void ());
+	MOCK_METHOD0(on_rx_set, void ());
+	MOCK_METHOD1(on_ri_set, void (std::size_t));
+	MOCK_METHOD0(on_overflow_flag_set, void ());
+};
+
 class LDTest :
 	public ::testing::TestWithParam<LDParam>
 {
+public:
+	LDTest()
+		: listener{}
+		, mix{&listener}
+	{
+	}
+
 protected:
 	void SetUp() override
 	{
 		const auto& param = GetParam();
+
+		EXPECT_CALL(listener, on_memory_set(param.address)).Times(1);
+		EXPECT_CALL(listener, on_ra_set()).Times(1);
+		EXPECT_CALL(listener, on_rx_set()).Times(1);
+		for (std::size_t i = 1; i <= 6; ++i)
+		{
+			EXPECT_CALL(listener, on_ri_set(i)).Times(1);
+		}
+
 		Word data;
 		data.set_value(param.value, param.field);
-		mix.set_memory(static_cast<std::size_t>(param.address), data);
+		mix.set_memory(param.address, data);
 	}
 
 	Command make_lda() const
@@ -143,6 +173,7 @@ protected:
 	}
 
 protected:
+	StrictMock<ComputerListenerMock> listener;
 	Computer mix;
 };
 

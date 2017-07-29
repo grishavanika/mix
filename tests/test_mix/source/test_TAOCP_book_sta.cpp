@@ -25,7 +25,7 @@ private:
 		dest_cell.set_byte(4, Byte{4});
 		dest_cell.set_byte(5, Byte{5});
 
-		mix.set_memory(static_cast<std::size_t>(dest_address), dest_cell);
+		mix.set_memory(dest_address, dest_cell);
 
 		Register ra;
 		ra.set_sign(Sign::Positive);
