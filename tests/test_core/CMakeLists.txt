@@ -7,7 +7,7 @@ file(GLOB_RECURSE ${exe_name}_src "source" "*.cpp")
 add_executable(${exe_name} ${${exe_name}_src})
 
 target_link_libraries(${exe_name} PRIVATE core_lib)
-target_link_libraries(${exe_name} PRIVATE gtest gtest_main)
+target_link_libraries(${exe_name} PRIVATE gtest gmock gmock_main)
 
 install(TARGETS ${exe_name}
 	DESTINATION bin/tests/Debug

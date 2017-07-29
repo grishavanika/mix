@@ -51,9 +51,11 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 # third party libraries
 # GoogleTest uses static C++ runtime by default
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-add_subdirectory(third_party/googletest/googletest_1.7.0)
+add_subdirectory(third_party/googletest/googlemock)
 set_target_properties(gtest PROPERTIES FOLDER third_party)
+set_target_properties(gmock PROPERTIES FOLDER third_party)
 set_target_properties(gtest_main PROPERTIES FOLDER third_party)
+set_target_properties(gmock_main PROPERTIES FOLDER third_party)
 
 # libraries
 add_subdirectory(core_lib)
