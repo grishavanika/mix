@@ -97,3 +97,51 @@ TEST(MUL_TAOCP_Book_Test, Multiply_RA_With_Cell_Takes_Into_Account_Field)
 	ASSERT_EQ(WordValue(Sign::Negative, 0), mix.ra().value());
 	ASSERT_EQ(-224, mix.rx().value());
 }
+
+TEST(MUL_TAOCP_Book_Test, Multiply_RA_With_Cell_Stores_Most_Significant_Part_In_RA)
+{
+	Computer mix;
+
+	{
+		Register ra;
+		ra.set_sign(Sign::Negative);
+		ra.set_byte(1, Byte{50});
+		ra.set_byte(2, Byte{0});
+		ra.set_value(WordValue{112}, WordField{3, 4}, false/*do not touch sign*/);
+		ra.set_byte(5, Byte{4});
+		mix.set_ra(ra);
+	}
+
+	{
+		Word w;
+		w.set_sign(Sign::Negative);
+		w.set_byte(1, Byte{2});
+		w.set_byte(2, Byte{0});
+		w.set_byte(3, Byte{0});
+		w.set_byte(4, Byte{0});
+		w.set_byte(5, Byte{0});
+		mix.set_memory(1000, w);
+	}
+
+	mix.execute(MakeMULL(1000));
+
+	Register expected_ra;
+	{
+		expected_ra.set_value(WordValue{100}, WordField{0, 2});
+		expected_ra.set_byte(3, Byte{0});
+		expected_ra.set_value(WordValue{224}, WordField{4, 5});
+	}
+
+	Register expected_rx;
+	{
+		expected_rx.set_sign(Sign::Positive);
+		expected_rx.set_byte(1, Byte{8});
+		expected_rx.set_byte(2, Byte{0});
+		expected_rx.set_byte(3, Byte{0});
+		expected_rx.set_byte(4, Byte{0});
+		expected_rx.set_byte(5, Byte{0});
+	}
+
+	ASSERT_EQ(expected_ra, mix.ra());
+	ASSERT_EQ(expected_rx, mix.rx());
+}
