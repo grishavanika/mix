@@ -76,6 +76,8 @@ private:
 	void add(const Command& command);
 	void sub(const Command& command);
 
+	void mul(const Command& command);
+
 private:
 	Computer& mix_;
 

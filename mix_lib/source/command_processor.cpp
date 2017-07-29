@@ -3,6 +3,7 @@
 #include <mix/command.h>
 
 #include <cassert>
+#include <cstdint>
 
 using namespace mix;
 
@@ -13,7 +14,7 @@ CommandProcessor::k_command_actions = {{
 	/*00*/&CommandProcessor::nop,
 	/*01*/&CommandProcessor::add,
 	/*02*/&CommandProcessor::sub,
-	/*03*/nullptr,
+	/*03*/&CommandProcessor::mul,
 	/*04*/nullptr,
 	/*05*/nullptr,
 	/*06*/nullptr,
@@ -349,4 +350,23 @@ void CommandProcessor::sub(const Command& command)
 {
 	const auto value = memory(command).value(command.word_field());
 	mix_.set_ra(do_add(value.reverse_sign()));
+}
+
+void CommandProcessor::mul(const Command& command)
+{
+	static_assert((sizeof(std::uint64_t) * CHAR_BIT) >= (2 * Word::k_bits_count),
+		"Native `uint64_t` can't hold the result of MUL command");
+	const auto ra = mix_.ra().value();
+	const auto value = memory(command).value(command.word_field());
+	const Sign sign = ((ra.sign() == value.sign()) ? Sign::Positive : Sign::Negative);
+	const auto abs_result = static_cast<std::uint64_t>(
+		std::abs(std::int64_t{ra}) * std::abs(std::int64_t{value}));
+	
+	// Store less significant part to RX
+	const auto rx_part = (abs_result & Word::k_max_abs_value);
+	// ... and most significant part to RA
+	const auto ra_part = ((abs_result >> Word::k_bits_count) & Word::k_max_abs_value);
+
+	mix_.set_ra(Register{WordValue{sign, static_cast<int>(ra_part)}});
+	mix_.set_rx(Register{WordValue{sign, static_cast<int>(rx_part)}});
 }

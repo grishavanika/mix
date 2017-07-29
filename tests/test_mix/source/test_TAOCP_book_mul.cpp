@@ -63,3 +63,5 @@ TEST(MUL_TAOCP_Book_Test, Multiply_RA_With_Cell_Replaces_RA_And_RX_Content)
 	ASSERT_EQ(expected_ra, mix.ra());
 	ASSERT_EQ(expected_rx, mix.rx());
 }
+
+
