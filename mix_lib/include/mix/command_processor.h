@@ -31,13 +31,14 @@ private:
 		bool reverse_sorce_sign = false) const;
 
 	const Word& memory(const Command& command) const;
-	int address_with_ri(int address, std::size_t ri) const;
-	int address_with_ri(const Command& command) const;
+	int indexed_address(int address, std::size_t ri) const;
+	int indexed_address(const Command& command) const;
 
 	Register do_add(const WordValue& source) const;
 	Register do_safe_add_without_overflow_check(int value, int prev_value) const;
 
-	Register enter_register(Register r, const Command& command) const;
+	Register enter(const Command& command) const;
+	Register enter_negative(const Command& command) const;
 
 	void store_register(const Register& r, const Command& command);
 
@@ -78,6 +79,18 @@ private:
 
 	void mul(const Command& command);
 	void div(const Command& command);
+
+	void enta_or_enna(const Command& command);
+	void entx_or_ennx(const Command& command);
+	void enti_or_enni(std::size_t index, const Command& command);
+	
+	void ent1_or_enn1(const Command& command);
+	void ent2_or_enn2(const Command& command);
+	void ent3_or_enn3(const Command& command);
+	void ent4_or_enn4(const Command& command);
+	void ent5_or_enn5(const Command& command);
+	void ent6_or_enn6(const Command& command);
+
 
 private:
 	Computer& mix_;

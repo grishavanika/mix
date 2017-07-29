@@ -46,13 +46,47 @@ CommandProcessor::k_command_actions = {{
 	/*32*/&CommandProcessor::stj,
 	/*33*/&CommandProcessor::stz,
 	/*34*/nullptr,
-}};
+	/*35*/nullptr,
+	/*36*/nullptr,
+	/*37*/nullptr,
+	/*38*/nullptr,
+	/*39*/nullptr,
+	/*40*/nullptr,
+	/*41*/nullptr,
+	/*42*/nullptr,
+	/*43*/nullptr,
+	/*44*/nullptr,
+	/*45*/nullptr,
+	/*46*/nullptr,
+	/*47*/nullptr,
+	/*48*/&CommandProcessor::enta_or_enna,
+	/*49*/&CommandProcessor::ent1_or_enn1,
+	/*50*/&CommandProcessor::ent2_or_enn2,
+	/*51*/&CommandProcessor::ent3_or_enn3,
+	/*52*/&CommandProcessor::ent4_or_enn4,
+	/*53*/&CommandProcessor::ent5_or_enn5,
+	/*54*/&CommandProcessor::ent6_or_enn6,
+	/*55*/&CommandProcessor::entx_or_ennx,
+	/*56*/nullptr,
+	/*57*/nullptr,
+	/*58*/nullptr,
+	/*59*/nullptr,
+	/*60*/nullptr,
+	/*61*/nullptr,
+	/*62*/nullptr,
+	/*63*/nullptr
+	}};
 
 namespace {
 
 int SignValue(int v)
 {
 	return (v < 0) ? -1 : 1;
+}
+
+Sign ReverseSign(Sign sign)
+{
+	return ((sign == Sign::Negative) ? Sign::Positive : Sign::Negative);
 }
 
 bool CalculateWordAddOverflow(int lhs, int rhs, int& overflow_part)
@@ -94,7 +128,7 @@ void CommandProcessor::process(const Command& command)
 
 const Word& CommandProcessor::memory(const Command& command) const
 {
-	return mix_.memory(address_with_ri(command));
+	return mix_.memory(indexed_address(command));
 }
 
 void CommandProcessor::nop(const Command& /*command*/)
@@ -117,7 +151,7 @@ Register CommandProcessor::load_register(
 	return std::move(prev_value);
 }
 
-int CommandProcessor::address_with_ri(int address, std::size_t ri) const
+int CommandProcessor::indexed_address(int address, std::size_t ri) const
 {
 	if (ri != 0)
 	{
@@ -127,25 +161,40 @@ int CommandProcessor::address_with_ri(int address, std::size_t ri) const
 	return address;
 }
 
-int CommandProcessor::address_with_ri(const Command& command) const
+int CommandProcessor::indexed_address(const Command& command) const
 {
-	return address_with_ri(command.address(), command.address_index());
+	return indexed_address(command.address(), command.address_index());
 }
 
-Register CommandProcessor::enter_register(Register r, const Command& command) const
+Register CommandProcessor::enter(const Command& command) const
 {
-	assert(command.word_field().to_byte().value() == 2);
-	const auto value = address_with_ri(command);
+	const auto value = indexed_address(command);
 	
-	r.set_zero_abs_value();
-	// #TODO: distinguish zero address sign (e.g., -0 or +0)
+	Register r;
 	r.set_value(WordValue{value});
+	if (value == 0)
+	{
+		r.set_sign(command.sign());
+	}
+	return r;
+}
+
+Register CommandProcessor::enter_negative(const Command& command) const
+{
+	const auto value = indexed_address(command);
+
+	Register r;
+	r.set_value(WordValue{value}.reverse_sign());
+	if (value == 0)
+	{
+		r.set_sign(ReverseSign(command.sign()));
+	}
 	return r;
 }
 
 void CommandProcessor::store_register(const Register& r, const Command& command)
 {
-	auto address = address_with_ri(command);
+	auto address = indexed_address(command);
 	const auto& source_field = command.word_field();
 
 	auto word = mix_.memory(address);
@@ -289,7 +338,7 @@ void CommandProcessor::st6(const Command& command)
 
 void CommandProcessor::stz(const Command& command)
 {
-	auto address = address_with_ri(command);
+	auto address = indexed_address(command);
 	auto word = mix_.memory(address);
 	word.set_value(0, command.word_field());
 	mix_.set_memory(address, std::move(word));
@@ -395,4 +444,97 @@ void CommandProcessor::div(const Command& command)
 
 	mix_.set_ra(Register{WordValue{sign, static_cast<int>(new_a)}});
 	mix_.set_rx(Register{WordValue{prev_sign, static_cast<int>(new_x)}});
+}
+
+void CommandProcessor::enta_or_enna(const Command& command)
+{
+	switch (command.field())
+	{
+	case 0:
+		// INCA
+		break;
+	case 1:
+		// DECA
+		break;
+	case 2:
+		mix_.set_ra(enter(command));
+		return;
+	case 3:
+		mix_.set_ra(enter_negative(command));
+		return;
+	}
+
+	throw std::logic_error{"ENTA* command has unknown field"};
+}
+
+void CommandProcessor::entx_or_ennx(const Command& command)
+{
+	switch (command.field())
+	{
+	case 0:
+		// INCX
+		break;
+	case 1:
+		// DECX
+		break;
+	case 2:
+		mix_.set_rx(enter(command));
+		return;
+	case 3:
+		mix_.set_rx(enter_negative(command));
+		return;
+	}
+
+	throw std::logic_error{"ENTX* command has unknown field"};
+}
+
+void CommandProcessor::enti_or_enni(std::size_t index, const Command& command)
+{
+	switch (command.field())
+	{
+	case 0:
+		// INCI
+		break;
+	case 1:
+		// DECI
+		break;
+	case 2:
+		mix_.set_ri(index, IndexRegister{enter(command)});
+		return;
+	case 3:
+		mix_.set_ri(index, IndexRegister{enter_negative(command)});
+		return;
+	}
+
+	throw std::logic_error{"ENTI* command has unknown field"};
+}
+
+void CommandProcessor::ent1_or_enn1(const Command& command)
+{
+	enti_or_enni(1, command);
+}
+
+void CommandProcessor::ent2_or_enn2(const Command& command)
+{
+	enti_or_enni(2, command);
+}
+
+void CommandProcessor::ent3_or_enn3(const Command& command)
+{
+	enti_or_enni(3, command);
+}
+
+void CommandProcessor::ent4_or_enn4(const Command& command)
+{
+	enti_or_enni(4, command);
+}
+
+void CommandProcessor::ent5_or_enn5(const Command& command)
+{
+	enti_or_enni(5, command);
+}
+
+void CommandProcessor::ent6_or_enn6(const Command& command)
+{
+	enti_or_enni(6, command);
 }

@@ -67,3 +67,9 @@ Sign Command::sign() const
 {
 	return word_.sign();
 }
+
+std::size_t Command::field() const
+{
+	return field_.to_byte().cast_to<std::size_t>();
+}
+

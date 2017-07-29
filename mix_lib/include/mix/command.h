@@ -24,6 +24,7 @@ public:
 
 	std::size_t id() const;
 	const WordField& word_field() const;
+	std::size_t field() const;
 	int address() const;
 	std::size_t address_index() const;
 	Sign sign() const;
