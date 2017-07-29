@@ -40,6 +40,7 @@ public:
 
 	WordValue value(const WordField& field, bool take_sign = false) const;
 	WordValue value() const;
+	std::size_t abs_value() const;
 
 	static WordField MaxField();
 	static WordField MaxFieldWithoutSign();

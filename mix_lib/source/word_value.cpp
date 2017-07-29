@@ -1,5 +1,7 @@
 #include <mix/word_value.h>
 
+#include <cmath>
+
 using namespace mix;
 
 
@@ -22,6 +24,11 @@ WordValue::operator Type() const
 WordValue::Type WordValue::value() const
 {
 	return value_;
+}
+
+std::size_t WordValue::abs_value() const
+{
+	return static_cast<std::size_t>(std::abs(value_));
 }
 
 Sign WordValue::sign() const

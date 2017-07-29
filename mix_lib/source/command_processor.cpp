@@ -15,7 +15,7 @@ CommandProcessor::k_command_actions = {{
 	/*01*/&CommandProcessor::add,
 	/*02*/&CommandProcessor::sub,
 	/*03*/&CommandProcessor::mul,
-	/*04*/nullptr,
+	/*04*/&CommandProcessor::div,
 	/*05*/nullptr,
 	/*06*/nullptr,
 	/*07*/nullptr,
@@ -356,11 +356,11 @@ void CommandProcessor::mul(const Command& command)
 {
 	static_assert((sizeof(std::uint64_t) * CHAR_BIT) >= (2 * Word::k_bits_count),
 		"Native `uint64_t` can't hold the result of MUL command");
+
 	const auto ra = mix_.ra().value();
 	const auto value = memory(command).value(command.word_field());
 	const Sign sign = ((ra.sign() == value.sign()) ? Sign::Positive : Sign::Negative);
-	const auto abs_result = static_cast<std::uint64_t>(
-		std::abs(std::int64_t{ra}) * std::abs(std::int64_t{value}));
+	const auto abs_result = std::uint64_t{ra.abs_value()} * value.abs_value();
 	
 	// Store less significant part to RX
 	const auto rx_part = (abs_result & Word::k_max_abs_value);
@@ -369,4 +369,30 @@ void CommandProcessor::mul(const Command& command)
 
 	mix_.set_ra(Register{WordValue{sign, static_cast<int>(ra_part)}});
 	mix_.set_rx(Register{WordValue{sign, static_cast<int>(rx_part)}});
+}
+
+void CommandProcessor::div(const Command& command)
+{
+	const auto ra = mix_.ra().value();
+	const auto value = memory(command).value(command.word_field());
+
+	const auto abs_ra = ra.abs_value();
+	const auto abs_value = value.abs_value();
+	if ((abs_ra >= abs_value) || (abs_value == 0))
+	{
+		mix_.set_overflow();
+		return;
+	}
+
+	const auto rx = mix_.rx().value();
+	std::uint64_t rax = (std::uint64_t{abs_ra} << Word::k_bits_count);
+	rax |= rx.abs_value();
+
+	const auto new_a = rax / abs_value;
+	const auto new_x = rax % abs_value;
+	const Sign prev_sign = ra.sign();
+	const Sign sign = ((prev_sign == value.sign()) ? Sign::Positive : Sign::Negative);
+
+	mix_.set_ra(Register{WordValue{sign, static_cast<int>(new_a)}});
+	mix_.set_rx(Register{WordValue{prev_sign, static_cast<int>(new_x)}});
 }

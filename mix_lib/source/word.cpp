@@ -173,6 +173,11 @@ WordValue Word::value() const
 	return value(MaxField());
 }
 
+std::size_t Word::abs_value() const
+{
+	return static_cast<std::size_t>(value(MaxFieldWithoutSign()));
+}
+
 namespace mix {
 
 bool operator==(const Word& lhs, const Word& rhs)
