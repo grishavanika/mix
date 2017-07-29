@@ -18,6 +18,7 @@ public:
 	static constexpr std::size_t k_max_abs_value = (1 << k_bits_count) - 1;
 
 	explicit Word();
+	explicit Word(WordValue value, const WordField& field = MaxField(), bool owerwrite_sign = true);
 
 	Sign sign() const;
 	int sign_value() const;

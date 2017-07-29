@@ -5,6 +5,8 @@ namespace mix {
 
 class Register : public Word
 {
+public:
+	using Word::Word;
 };
 
 // #TODO: use composition over inheritance

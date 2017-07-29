@@ -1,11 +1,11 @@
 #include <mix/computer.h>
 #include <mix/command.h>
-#include <mix/computer_listener.h>
+
+#include "computer_listener_mock.h"
 
 #include <tuple>
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
 #include <cassert>
 
@@ -27,26 +27,9 @@ struct LDParam
 	WordField field;
 };
 
-struct ComputerListenerMock :
-	public IComputerListener
-{
-	MOCK_METHOD1(on_memory_set, void (int));
-	MOCK_METHOD0(on_ra_set, void ());
-	MOCK_METHOD0(on_rx_set, void ());
-	MOCK_METHOD1(on_ri_set, void (std::size_t));
-	MOCK_METHOD0(on_overflow_flag_set, void ());
-};
-
 class LDTest :
 	public ::testing::TestWithParam<LDParam>
 {
-public:
-	LDTest()
-		: listener{}
-		, mix{&listener}
-	{
-	}
-
 protected:
 	void SetUp() override
 	{
@@ -174,7 +157,7 @@ protected:
 
 protected:
 	StrictMock<ComputerListenerMock> listener;
-	Computer mix;
+	Computer mix{&listener};
 };
 
 } // namespace

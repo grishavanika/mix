@@ -37,6 +37,12 @@ Word::Word()
 {
 }
 
+Word::Word(WordValue value, const WordField& field /*= MaxField()*/, bool owerwrite_sign /*= true*/)
+	: Word{}
+{
+	set_value(value, field, owerwrite_sign);
+}
+
 Sign Word::sign() const
 {
 	return sign_;
