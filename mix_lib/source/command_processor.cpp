@@ -91,245 +91,262 @@ void CommandProcessor::process(const Command& command)
 	(this->*callback)(command);
 }
 
-Word& CommandProcessor::memory(const Command& command)
+const Word& CommandProcessor::memory(const Command& command) const
 {
-	return mix_.memory_with_index(command.address(), command.address_index());
+	return mix_.memory(address_with_ri(command));
 }
 
 void CommandProcessor::nop(const Command& /*command*/)
 {
 }
 
-void CommandProcessor::load_register(Register& r, const Command& command)
+Register CommandProcessor::load_register(
+	Register prev_value,
+	const Command& command,
+	bool reverse_sorce_sign /*= false*/) const
 {
 	const auto& word = memory(command);
 	const auto& source_field = command.word_field();
 	const auto dest_field = source_field.shift_bytes_right();
 
-	r.set_zero_abs_value();
-	r.set_value(word.value(source_field), dest_field);
+	auto value = word.value(source_field);
+	
+	prev_value.set_zero_abs_value();
+	prev_value.set_value(reverse_sorce_sign ? value.reverse_sign() : value, dest_field);
+	return std::move(prev_value);
 }
 
-void CommandProcessor::enter_register(Register& r, const Command& command)
+int CommandProcessor::address_with_ri(int address, std::size_t ri) const
+{
+	if (ri != 0)
+	{
+		return address + mix_.ri(ri).value();
+	}
+
+	return address;
+}
+
+int CommandProcessor::address_with_ri(const Command& command) const
+{
+	return address_with_ri(command.address(), command.address_index());
+}
+
+Register CommandProcessor::enter_register(Register r, const Command& command) const
 {
 	assert(command.word_field().to_byte().value() == 2);
-	const auto value = mix_.fix_up_address(command.address(), command.address_index());
+	const auto value = address_with_ri(command);
 	
 	r.set_zero_abs_value();
 	// #TODO: distinguish zero address sign (e.g., -0 or +0)
 	r.set_value(WordValue{value});
+	return r;
 }
 
-void CommandProcessor::load_register_reverse_sign(Register& r, const Command& command)
+void CommandProcessor::store_register(const Register& r, const Command& command)
 {
-	const auto& word = memory(command);
-	const auto& source_field = command.word_field();
-	const auto dest_field = source_field.shift_bytes_right();
-
-	r.set_zero_abs_value();
-	r.set_value(word.value(source_field).reverse_sign(), dest_field);	
-}
-
-void CommandProcessor::store_register(Register& r, const Command& command)
-{
-	auto& word = memory(command);
+	auto address = address_with_ri(command);
 	const auto& source_field = command.word_field();
 
+	auto word = mix_.memory(address);
 	word.set_value(
 		r.value(source_field.shift_bytes_right()),
 		source_field,
 		false/*do not overwrite sign*/);
+	
+	mix_.set_memory(address, std::move(word));
 }
 
-void CommandProcessor::load_index_register(std::size_t index, const Command& command)
+IndexRegister CommandProcessor::load_index_register(
+	std::size_t index,
+	const Command& command,
+	bool reverse_sorce_sign /*= false*/) const
 {
-	auto& ri = mix_.index_register(index);
-	load_register(ri, command);
+	IndexRegister ri{load_register(mix_.ri(index), command, reverse_sorce_sign)};
 	ri.zero_unspecified_bytes();
-}
-
-void CommandProcessor::load_index_register_reverse_sign(std::size_t index, const Command& command)
-{
-	auto& ri = mix_.index_register(index);
-	load_register_reverse_sign(ri, command);
-	ri.zero_unspecified_bytes();
+	return ri;
 }
 
 void CommandProcessor::lda(const Command& command)
 {
-	load_register(mix_.ra_, command);
+	mix_.set_ra(load_register(mix_.ra(), command));
 }
 
 void CommandProcessor::ldx(const Command& command)
 {
-	load_register(mix_.rx_, command);
+	mix_.set_rx(load_register(mix_.rx(), command));
 }
 
 void CommandProcessor::ld1(const Command& command)
 {
-	load_index_register(1, command);
+	mix_.set_ri(1, load_index_register(1, command));
 }
 
 void CommandProcessor::ld2(const Command& command)
 {
-	load_index_register(2, command);
+	mix_.set_ri(2, load_index_register(2, command));
 }
 
 void CommandProcessor::ld3(const Command& command)
 {
-	load_index_register(3, command);
+	mix_.set_ri(3, load_index_register(3, command));
 }
 
 void CommandProcessor::ld4(const Command& command)
 {
-	load_index_register(4, command);
+	mix_.set_ri(4, load_index_register(4, command));
 }
 
 void CommandProcessor::ld5(const Command& command)
 {
-	load_index_register(5, command);
+	mix_.set_ri(5, load_index_register(5, command));
 }
 
 void CommandProcessor::ld6(const Command& command)
 {
-	load_index_register(6, command);
+	mix_.set_ri(6, load_index_register(6, command));
 }
 
 void CommandProcessor::ldan(const Command& command)
 {
-	load_register_reverse_sign(mix_.ra_, command);
+	mix_.set_ra(load_register(mix_.ra(), command, true/*reverse*/));
 }
 
 void CommandProcessor::ldxn(const Command& command)
 {
-	load_register_reverse_sign(mix_.rx_, command);
+	mix_.set_rx(load_register(mix_.rx(), command, true/*reverse*/));
 }
 
 void CommandProcessor::ld1n(const Command& command)
 {
-	load_index_register_reverse_sign(1, command);
+	mix_.set_ri(1, load_index_register(1, command, true/*reverse*/));
 }
 
 void CommandProcessor::ld2n(const Command& command)
 {
-	load_index_register_reverse_sign(2, command);
+	mix_.set_ri(2, load_index_register(2, command, true/*reverse*/));
 }
 
 void CommandProcessor::ld3n(const Command& command)
 {
-	load_index_register_reverse_sign(3, command);
+	mix_.set_ri(3, load_index_register(3, command, true/*reverse*/));
 }
 
 void CommandProcessor::ld4n(const Command& command)
 {
-	load_index_register_reverse_sign(4, command);
+	mix_.set_ri(4, load_index_register(4, command, true/*reverse*/));
 }
 
 void CommandProcessor::ld5n(const Command& command)
 {
-	load_index_register_reverse_sign(5, command);
+	mix_.set_ri(5, load_index_register(5, command, true/*reverse*/));
 }
 
 void CommandProcessor::ld6n(const Command& command)
 {
-	load_index_register_reverse_sign(6, command);
+	mix_.set_ri(6, load_index_register(6, command, true/*reverse*/));
 }
 
 void CommandProcessor::sta(const Command& command)
 {
-	store_register(mix_.ra_, command);
+	store_register(mix_.ra(), command);
 }
 
 void CommandProcessor::stx(const Command& command)
 {
-	store_register(mix_.rx_, command);
+	store_register(mix_.rx(), command);
 }
 
 void CommandProcessor::st1(const Command& command)
 {
-	store_register(mix_.index_register(1), command);
+	store_register(mix_.ri(1), command);
 }
 
 void CommandProcessor::st2(const Command& command)
 {
-	store_register(mix_.index_register(2), command);
+	store_register(mix_.ri(2), command);
 }
 
 void CommandProcessor::st3(const Command& command)
 {
-	store_register(mix_.index_register(3), command);
+	store_register(mix_.ri(3), command);
 }
 
 void CommandProcessor::st4(const Command& command)
 {
-	store_register(mix_.index_register(4), command);
+	store_register(mix_.ri(4), command);
 }
 
 void CommandProcessor::st5(const Command& command)
 {
-	store_register(mix_.index_register(5), command);
+	store_register(mix_.ri(5), command);
 }
 
 void CommandProcessor::st6(const Command& command)
 {
-	store_register(mix_.index_register(6), command);
+	store_register(mix_.ri(6), command);
 }
 
 void CommandProcessor::stz(const Command& command)
 {
-	auto& word = memory(command);
+	auto address = address_with_ri(command);
+	auto word = mix_.memory(address);
 	word.set_value(0, command.word_field());
+	mix_.set_memory(address, std::move(word));
 }
 
 void CommandProcessor::stj(const Command& command)
 {
 	// #TODO: default WordField should be (0, 2) instead of (0, 5)
-	store_register(mix_.rj_, command);
+	store_register(mix_.rj(), command);
 }
 
-void CommandProcessor::do_safe_add_without_overflow_check(int value, int prev_value)
+Register CommandProcessor::do_safe_add_without_overflow_check(int value, int prev_value) const
 {
 	const int result = value + prev_value;
 
+	Register ra;
 	if (result == 0)
 	{
-		// We should not touch sign value when,
-		// hence setting only absolute part without changing sign
-		mix_.ra_.set_zero_abs_value();
+		// We should not touch sign value,
+		// hence result is 0 with unchanged sign
+		ra.set_sign(mix_.ra().sign());
 	}
 	else
 	{
-		mix_.ra_.set_value(result);
+		ra.set_value(result);
 	}
+
+	return ra;
 }
 
-void CommandProcessor::do_add(const WordValue& value)
+Register CommandProcessor::do_add(const WordValue& value) const
 {
-	const int prev_value = mix_.ra_.value();
-	const bool overflow_possible = (value.sign() == mix_.ra_.sign());
+	auto ra = mix_.ra();
+	const int prev_value = ra.value();
+	const bool overflow_possible = (value.sign() == ra.sign());
 	
 	if (overflow_possible)
 	{
 		int overflow_result = 0;
 		if (CalculateWordAddOverflow(value, prev_value, overflow_result))
 		{
-			mix_.ra_.set_value(overflow_result);
 			mix_.set_overflow();
-			return;
+			ra.set_value(overflow_result);
+			return ra;
 		}
 	}
 
-	do_safe_add_without_overflow_check(value, prev_value);
+	return do_safe_add_without_overflow_check(value, prev_value);
 }
 
 void CommandProcessor::add(const Command& command)
 {
 	const auto value = memory(command).value(command.word_field());
-	do_add(value);
+	mix_.set_ra(do_add(value));
 }
 
 void CommandProcessor::sub(const Command& command)
 {
 	const auto value = memory(command).value(command.word_field());
-	do_add(value.reverse_sign());
+	mix_.set_ra(do_add(value.reverse_sign()));
 }

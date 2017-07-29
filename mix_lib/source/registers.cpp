@@ -58,6 +58,11 @@ IndexRegister::IndexRegister(int two_bytes_with_sign)
 		true/*overwrite sign*/);
 }
 
+IndexRegister::IndexRegister(const Register& r)
+	: Register{r}
+{
+}
+
 WordValue IndexRegister::value() const
 {
 	return Register::value(

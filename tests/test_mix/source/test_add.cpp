@@ -12,7 +12,7 @@ Command MakeADD(int address, const WordField& field = Word::MaxField(), std::siz
 	return Command{1, address, index_register, field};
 }
 
-void SetTestValues(Computer& mix, WordValue ra_value, WordValue memory_value, std::size_t address)
+void SetTestValues(Computer& mix, WordValue ra_value, WordValue memory_value, int address)
 {
 	Register ra;
 	ra.set_value(ra_value);

@@ -7,6 +7,7 @@ class Register : public Word
 {
 };
 
+// #TODO: use composition over inheritance
 class IndexRegister : public Register
 {
 public:
@@ -14,6 +15,7 @@ public:
 	explicit IndexRegister(int two_bytes_with_sign);
 	explicit IndexRegister(const Byte& b4, const Byte& b5);
 	explicit IndexRegister(Sign sign, const Byte& b4, const Byte& b5);
+	explicit IndexRegister(const Register& r);
 
 	void set_byte(std::size_t index, const Byte& byte);
 	WordValue value() const;

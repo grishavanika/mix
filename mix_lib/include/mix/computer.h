@@ -3,7 +3,6 @@
 
 namespace mix {
 
-class CommandProcessor;
 class Command;
 
 class Computer
@@ -16,8 +15,8 @@ public:
 
 	void execute(const Command& command);
 
-	void set_memory(std::size_t address, const Word& value);
-	const Word& memory(std::size_t address) const;
+	void set_memory(int, const Word& value);
+	const Word& memory(int address) const;
 
 	const Register& ra() const;
 	void set_ra(const Register& ra);
@@ -28,23 +27,16 @@ public:
 	const IndexRegister& ri(std::size_t index) const;
 	void set_ri(std::size_t index, const IndexRegister& ri);
 
+	const AddressRegister& rj() const;
+
 	OverflowFlag overflow_flag() const;
 	bool has_overflow() const;
 	void set_overflow();
 
 private:
-	int fix_up_address(int address, std::size_t ri) const;
-	const Word& memory_with_index(int address, std::size_t ri) const;
-	Word& memory_with_index(int address, std::size_t ri);
-	const Word& memory_at(int address) const;
 
-	const IndexRegister& index_register(size_t index) const;
-	IndexRegister& index_register(size_t index);
 
 private:
-	// #TODO: make this relationship thru interface
-	friend class CommandProcessor;
-
 	Register ra_;
 	Register rx_;
 	std::array<IndexRegister, k_index_registers_count> rindexes_;

@@ -1,11 +1,12 @@
 #pragma once
+#include <mix/registers.h>
+
 #include <array>
 
 namespace mix {
 
 class Computer;
 class Command;
-class Register;
 class Word;
 class WordValue;
 
@@ -19,19 +20,26 @@ public:
 	void process(const Command& command);
 
 private:
-	void load_register(Register& r, const Command& command);
-	void load_register_reverse_sign(Register& r, const Command& command);
-	void load_index_register(std::size_t index, const Command& command);
-	void load_index_register_reverse_sign(std::size_t index, const Command& command);
+	Register load_register(
+		Register prev_value,
+		const Command& command,
+		bool reverse_sorce_sign = false) const;
 
-	Word& memory(const Command& command);
+	IndexRegister load_index_register(
+		std::size_t index,
+		const Command& command,
+		bool reverse_sorce_sign = false) const;
 
-	void do_add(const WordValue& source);
-	void do_safe_add_without_overflow_check(int value, int prev_value);
+	const Word& memory(const Command& command) const;
+	int address_with_ri(int address, std::size_t ri) const;
+	int address_with_ri(const Command& command) const;
 
-	void store_register(Register& r, const Command& command);
+	Register do_add(const WordValue& source) const;
+	Register do_safe_add_without_overflow_check(int value, int prev_value) const;
 
-	void enter_register(Register& r, const Command& command);
+	Register enter_register(Register r, const Command& command) const;
+
+	void store_register(const Register& r, const Command& command);
 
 private:
 	void nop(const Command& command);
