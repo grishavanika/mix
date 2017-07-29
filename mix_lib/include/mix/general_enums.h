@@ -10,8 +10,8 @@ enum class Sign
 
 enum class ComparisonIndicator
 {
-	Less,
 	Equal,
+	Less,
 	Greater
 };
 

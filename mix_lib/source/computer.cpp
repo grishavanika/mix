@@ -20,7 +20,14 @@ void InvokeListener(
 } // namespace
 
 Computer::Computer(IComputerListener* listener /*= nullptr*/)
-	: m_listener{listener}
+	: ra_{}
+	, rx_{}
+	, rindexes_{}
+	, rj_{}
+	, comparison_state_{ComparisonIndicator::Less}
+	, overflow_flag_{OverflowFlag::NoOverdlow}
+	, memory_{}
+	, m_listener{listener}
 {
 }
 
