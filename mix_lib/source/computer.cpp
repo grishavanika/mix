@@ -1,9 +1,26 @@
 #include <mix/computer.h>
 #include <mix/command_processor.h>
+#include <mix/computer_listener.h>
 
 using namespace mix;
 
-Computer::Computer()
+namespace {
+
+template<typename CallbackMember, typename... Args>
+void InvokeListener(
+	IComputerListener* listener,
+	CallbackMember callback,
+	Args&&... args)
+{
+	if (listener)
+	{
+		(listener->*callback)(std::forward<Args>(args)...);
+	}
+}
+} // namespace
+
+Computer::Computer(IComputerListener* listener /*= nullptr*/)
+	: m_listener{listener}
 {
 }
 
@@ -28,7 +45,9 @@ void Computer::set_memory(int address, const Word& value)
 	{
 		throw std::out_of_range{"Invalid memory address"};
 	}
+
 	memory_[static_cast<std::size_t>(address)] = value;
+	InvokeListener(m_listener, &IComputerListener::on_memory_set, address);
 }
 
 const Word& Computer::memory(int address) const
@@ -60,11 +79,13 @@ void Computer::execute(const Command& command)
 void Computer::set_ra(const Register& ra)
 {
 	ra_ = ra;
+	InvokeListener(m_listener, &IComputerListener::on_ra_set);
 }
 
 void Computer::set_rx(const Register& rx)
 {
 	rx_ = rx;
+	InvokeListener(m_listener, &IComputerListener::on_rx_set);
 }
 
 void Computer::set_ri(std::size_t index, const IndexRegister& ri)
@@ -75,6 +96,7 @@ void Computer::set_ri(std::size_t index, const IndexRegister& ri)
 	}
 
 	rindexes_[index - 1] = ri;
+	InvokeListener(m_listener, &IComputerListener::on_ri_set, index);
 }
 
 OverflowFlag Computer::overflow_flag() const
@@ -90,5 +112,11 @@ bool Computer::has_overflow() const
 void Computer::set_overflow()
 {
 	overflow_flag_ = OverflowFlag::Overflow;
+	InvokeListener(m_listener, &IComputerListener::on_overflow_flag_set);
+}
+
+void Computer::set_listener(IComputerListener* listener)
+{
+	m_listener = listener;
 }
 

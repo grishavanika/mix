@@ -4,6 +4,7 @@
 namespace mix {
 
 class Command;
+struct IComputerListener;
 
 class Computer
 {
@@ -11,7 +12,9 @@ public:
 	static constexpr std::size_t k_index_registers_count = 6;
 	static constexpr std::size_t k_memory_words_count = 4000;
 
-	explicit Computer();
+	explicit Computer(IComputerListener* listener = nullptr);
+
+	void set_listener(IComputerListener* listener);
 
 	void execute(const Command& command);
 
@@ -46,6 +49,8 @@ private:
 	OverflowFlag overflow_flag_;
 
 	std::array<Word, k_memory_words_count> memory_;
+
+	IComputerListener* m_listener;
 };
 
 
