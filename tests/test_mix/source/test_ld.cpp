@@ -10,7 +10,6 @@
 #include <cassert>
 
 using namespace mix;
-using ::testing::_;
 using ::testing::StrictMock;
 
 namespace {

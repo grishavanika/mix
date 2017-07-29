@@ -296,7 +296,7 @@ void CommandProcessor::stz(const Command& command)
 
 void CommandProcessor::stj(const Command& command)
 {
-	// #TODO: default WordField should be (0, 2) instead of (0, 5)
+	// #TODO(MIXAL): default WordField should be (0, 2) instead of (0, 5)
 	store_register(mix_.rj(), command);
 }
 
