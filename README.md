@@ -22,3 +22,6 @@
     ```
 
 that byte code can be saved to some intermediate result and executed later
+
+- port interpreter (when it will exist!) to JavaScript (with **[emscripten](http://kripken.github.io/emscripten-site/)**)
+to play with it in web-page
