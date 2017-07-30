@@ -34,13 +34,13 @@ private:
 	int indexed_address(int address, std::size_t ri) const;
 	int indexed_address(const Command& command) const;
 
-	Register do_add(const WordValue& source) const;
-	Register do_safe_add_without_overflow_check(int value, int prev_value) const;
+	Register do_add(Register r, const WordValue& value);
+	Register do_safe_add_without_overflow_check(Sign original_sign, int value, int prev_value) const;
 
-	Register enter(const Command& command) const;
-	Register enter_negative(const Command& command) const;
+	Register do_enter(WordValue value, const Command& command) const;
+	Register do_enter_negative(WordValue value, const Command& command) const;
 
-	void store_register(const Register& r, const Command& command);
+	void do_store(const Register& r, const Command& command);
 
 private:
 	void nop(const Command& command);

@@ -166,12 +166,10 @@ int CommandProcessor::indexed_address(const Command& command) const
 	return indexed_address(command.address(), command.address_index());
 }
 
-Register CommandProcessor::enter(const Command& command) const
+Register CommandProcessor::do_enter(WordValue value, const Command& command) const
 {
-	const auto value = indexed_address(command);
-	
 	Register r;
-	r.set_value(WordValue{value});
+	r.set_value(value);
 	if (value == 0)
 	{
 		r.set_sign(command.sign());
@@ -179,12 +177,10 @@ Register CommandProcessor::enter(const Command& command) const
 	return r;
 }
 
-Register CommandProcessor::enter_negative(const Command& command) const
+Register CommandProcessor::do_enter_negative(WordValue value, const Command& command) const
 {
-	const auto value = indexed_address(command);
-
 	Register r;
-	r.set_value(WordValue{value}.reverse_sign());
+	r.set_value(value.reverse_sign());
 	if (value == 0)
 	{
 		r.set_sign(ReverseSign(command.sign()));
@@ -192,7 +188,7 @@ Register CommandProcessor::enter_negative(const Command& command) const
 	return r;
 }
 
-void CommandProcessor::store_register(const Register& r, const Command& command)
+void CommandProcessor::do_store(const Register& r, const Command& command)
 {
 	auto address = indexed_address(command);
 	const auto& source_field = command.word_field();
@@ -298,42 +294,42 @@ void CommandProcessor::ld6n(const Command& command)
 
 void CommandProcessor::sta(const Command& command)
 {
-	store_register(mix_.ra(), command);
+	do_store(mix_.ra(), command);
 }
 
 void CommandProcessor::stx(const Command& command)
 {
-	store_register(mix_.rx(), command);
+	do_store(mix_.rx(), command);
 }
 
 void CommandProcessor::st1(const Command& command)
 {
-	store_register(mix_.ri(1), command);
+	do_store(mix_.ri(1), command);
 }
 
 void CommandProcessor::st2(const Command& command)
 {
-	store_register(mix_.ri(2), command);
+	do_store(mix_.ri(2), command);
 }
 
 void CommandProcessor::st3(const Command& command)
 {
-	store_register(mix_.ri(3), command);
+	do_store(mix_.ri(3), command);
 }
 
 void CommandProcessor::st4(const Command& command)
 {
-	store_register(mix_.ri(4), command);
+	do_store(mix_.ri(4), command);
 }
 
 void CommandProcessor::st5(const Command& command)
 {
-	store_register(mix_.ri(5), command);
+	do_store(mix_.ri(5), command);
 }
 
 void CommandProcessor::st6(const Command& command)
 {
-	store_register(mix_.ri(6), command);
+	do_store(mix_.ri(6), command);
 }
 
 void CommandProcessor::stz(const Command& command)
@@ -347,33 +343,32 @@ void CommandProcessor::stz(const Command& command)
 void CommandProcessor::stj(const Command& command)
 {
 	// #TODO(MIXAL): default WordField should be (0, 2) instead of (0, 5)
-	store_register(mix_.rj(), command);
+	do_store(mix_.rj(), command);
 }
 
-Register CommandProcessor::do_safe_add_without_overflow_check(int value, int prev_value) const
+Register CommandProcessor::do_safe_add_without_overflow_check(Sign original_sign, int value, int prev_value) const
 {
 	const int result = value + prev_value;
 
-	Register ra;
+	Register r;
 	if (result == 0)
 	{
 		// We should not touch sign value,
 		// hence result is 0 with unchanged sign
-		ra.set_sign(mix_.ra().sign());
+		r.set_sign(original_sign);
 	}
 	else
 	{
-		ra.set_value(result);
+		r.set_value(result);
 	}
 
-	return ra;
+	return r;
 }
 
-Register CommandProcessor::do_add(const WordValue& value) const
+Register CommandProcessor::do_add(Register r, const WordValue& value)
 {
-	auto ra = mix_.ra();
-	const int prev_value = ra.value();
-	const bool overflow_possible = (value.sign() == ra.sign());
+	const int prev_value = r.value();
+	const bool overflow_possible = (value.sign() == r.sign());
 	
 	if (overflow_possible)
 	{
@@ -381,24 +376,24 @@ Register CommandProcessor::do_add(const WordValue& value) const
 		if (CalculateWordAddOverflow(value, prev_value, overflow_result))
 		{
 			mix_.set_overflow();
-			ra.set_value(overflow_result);
-			return ra;
+			r.set_value(overflow_result);
+			return std::move(r);
 		}
 	}
 
-	return do_safe_add_without_overflow_check(value, prev_value);
+	return do_safe_add_without_overflow_check(r.sign(), value, prev_value);
 }
 
 void CommandProcessor::add(const Command& command)
 {
 	const auto value = memory(command).value(command.word_field());
-	mix_.set_ra(do_add(value));
+	mix_.set_ra(do_add(mix_.ra(), value));
 }
 
 void CommandProcessor::sub(const Command& command)
 {
 	const auto value = memory(command).value(command.word_field());
-	mix_.set_ra(do_add(value.reverse_sign()));
+	mix_.set_ra(do_add(mix_.ra(), value.reverse_sign()));
 }
 
 void CommandProcessor::mul(const Command& command)
@@ -448,65 +443,79 @@ void CommandProcessor::div(const Command& command)
 
 void CommandProcessor::enta_group(const Command& command)
 {
+	const WordValue value = indexed_address(command);
+	Register ra;
 	switch (command.field())
 	{
-	case 0:
-		// INCA
+	case 0: // INCA
+		ra = do_add(mix_.ra(), value);
 		break;
-	case 1:
-		// DECA
+	case 1: // DECA
+		ra = do_add(mix_.ra(), value.reverse_sign());
 		break;
-	case 2:
-		mix_.set_ra(enter(command));
-		return;
-	case 3:
-		mix_.set_ra(enter_negative(command));
-		return;
+	case 2: // ENTA
+		ra = do_enter(value, command);
+		break;
+	case 3: // ENNA
+		ra = do_enter_negative(value, command);
+		break;
+	default:
+		throw std::logic_error{"ENTA* command has unknown field"};
 	}
 
-	throw std::logic_error{"ENTA* command has unknown field"};
+	mix_.set_ra(std::move(ra));
 }
 
 void CommandProcessor::entx_group(const Command& command)
 {
+	const WordValue value = indexed_address(command);
+	Register rx;
 	switch (command.field())
 	{
-	case 0:
-		// INCX
+	case 0: // INCX
+		rx = do_add(mix_.rx(), value);
 		break;
-	case 1:
-		// DECX
+	case 1: // DECX
+		rx = do_add(mix_.rx(), value.reverse_sign());
 		break;
-	case 2:
-		mix_.set_rx(enter(command));
-		return;
-	case 3:
-		mix_.set_rx(enter_negative(command));
-		return;
+	case 2: // ENTX
+		rx = do_enter(value, command);
+		break;
+	case 3: // ENNX
+		rx = do_enter_negative(value, command);
+		break;
+	default:
+		throw std::logic_error{"ENTX* command has unknown field"};
 	}
 
-	throw std::logic_error{"ENTX* command has unknown field"};
+	mix_.set_rx(std::move(rx));
 }
 
 void CommandProcessor::enti_group(std::size_t index, const Command& command)
 {
+	const WordValue value = indexed_address(command);
+	Register result;
 	switch (command.field())
 	{
-	case 0:
-		// INCI
+	case 0: // INCI
+		// Note: overflow is not possible since `do_add()` works with 5 bytes overflow
+		// and `IndexRegister` contains only 2 bytes
+		result = do_add(mix_.ri(index), value);
 		break;
-	case 1:
-		// DECI
+	case 1: // DECI
+		result = do_add(mix_.ri(index), value.reverse_sign());
 		break;
-	case 2:
-		mix_.set_ri(index, IndexRegister{enter(command)});
-		return;
-	case 3:
-		mix_.set_ri(index, IndexRegister{enter_negative(command)});
-		return;
+	case 2: // ENTI
+		result = do_enter(value, command);
+		break;
+	case 3: // ENNI
+		result = do_enter_negative(value, command);
+		break;
+	default:
+		throw std::logic_error{"ENTI* command has unknown field"};
 	}
 
-	throw std::logic_error{"ENTI* command has unknown field"};
+	mix_.set_ri(index, IndexRegister{result});
 }
 
 void CommandProcessor::ent1_group(const Command& command)
