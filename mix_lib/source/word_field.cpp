@@ -7,15 +7,10 @@ WordField::WordField(std::size_t left, std::size_t right)
 	: left_{left}
 	, right_{right}
 {
-	if (left > right)
-	{
-		throw std::logic_error{"`Field` can be used only for adjacent indexes"};
-	}
-
-	if (right > Word::k_bytes_count)
-	{
-		throw std::logic_error{"Too big `Field` was specified for `Word`"};
-	}
+	// #TODO: review code and validate that there are no
+	// statements that expect:
+	// 1. `right` to be less then equal to `Word::k_bytes_count`
+	// 2. `left` to be less then equal to `right`
 }
 
 Byte WordField::to_byte() const
