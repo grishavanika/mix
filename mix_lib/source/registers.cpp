@@ -61,6 +61,7 @@ IndexRegister::IndexRegister(int two_bytes_with_sign)
 IndexRegister::IndexRegister(const Register& r)
 	: Register{r}
 {
+	zero_unspecified_bytes();
 }
 
 WordValue IndexRegister::value() const

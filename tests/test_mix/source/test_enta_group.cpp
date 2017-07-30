@@ -15,6 +15,11 @@ Command MakeENTA(WordValue address, std::size_t index_register = 0)
 	return Command{48, address, index_register, WordField::FromByte(Byte{2})};
 }
 
+Command MakeENTI(std::size_t index, WordValue address, std::size_t index_register = 0)
+{
+	return Command{48 + index, address, index_register, WordField::FromByte(Byte{2})};
+}
+
 Command MakeENNI(std::size_t index, WordValue address, std::size_t index_register = 0)
 {
 	return Command{48 + index, address, index_register, WordField::FromByte(Byte{3})};
@@ -110,4 +115,22 @@ TEST(ENNI, Enter_Negative_I_For_Itself_Leaves_Negative_Zero_Unchanged)
 	mix.execute(MakeENNI(3, 0, 3));
 
 	ASSERT_EQ(WordValue(Sign::Negative, 0), mix.ri(3).value());
+}
+
+TEST(ENTI, Enter_Too_Big_Index_Register_Value_Zeroes_Bytes_Except_Last_2)
+{
+	Computer mix{};
+
+	IndexRegister r1{-4'095};
+	mix.set_ri(1, r1);
+
+	mix.execute(MakeENTI(5, -4'095, 1));
+
+	const auto& r5 = mix.ri(5);
+	ASSERT_EQ(Sign::Negative, r5.sign());
+	ASSERT_EQ(Byte{0}, r5.byte(1));
+	ASSERT_EQ(Byte{0}, r5.byte(2));
+	ASSERT_EQ(Byte{0}, r5.byte(3));
+	ASSERT_NE(Byte{0}, r5.byte(4));
+	ASSERT_NE(Byte{0}, r5.byte(5));
 }
