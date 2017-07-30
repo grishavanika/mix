@@ -27,7 +27,7 @@ Computer::Computer(IComputerListener* listener /*= nullptr*/)
 	, comparison_state_{ComparisonIndicator::Less}
 	, overflow_flag_{OverflowFlag::NoOverdlow}
 	, memory_{}
-	, m_listener{listener}
+	, listener_{listener}
 {
 }
 
@@ -54,7 +54,7 @@ void Computer::set_memory(int address, const Word& value)
 	}
 
 	memory_[static_cast<std::size_t>(address)] = value;
-	InvokeListener(m_listener, &IComputerListener::on_memory_set, address);
+	InvokeListener(listener_, &IComputerListener::on_memory_set, address);
 }
 
 const Word& Computer::memory(int address) const
@@ -86,13 +86,13 @@ void Computer::execute(const Command& command)
 void Computer::set_ra(const Register& ra)
 {
 	ra_ = ra;
-	InvokeListener(m_listener, &IComputerListener::on_ra_set);
+	InvokeListener(listener_, &IComputerListener::on_ra_set);
 }
 
 void Computer::set_rx(const Register& rx)
 {
 	rx_ = rx;
-	InvokeListener(m_listener, &IComputerListener::on_rx_set);
+	InvokeListener(listener_, &IComputerListener::on_rx_set);
 }
 
 void Computer::set_ri(std::size_t index, const IndexRegister& ri)
@@ -103,7 +103,7 @@ void Computer::set_ri(std::size_t index, const IndexRegister& ri)
 	}
 
 	rindexes_[index - 1] = ri;
-	InvokeListener(m_listener, &IComputerListener::on_ri_set, index);
+	InvokeListener(listener_, &IComputerListener::on_ri_set, index);
 }
 
 OverflowFlag Computer::overflow_flag() const
@@ -119,11 +119,21 @@ bool Computer::has_overflow() const
 void Computer::set_overflow()
 {
 	overflow_flag_ = OverflowFlag::Overflow;
-	InvokeListener(m_listener, &IComputerListener::on_overflow_flag_set);
+	InvokeListener(listener_, &IComputerListener::on_overflow_flag_set);
 }
 
 void Computer::set_listener(IComputerListener* listener)
 {
-	m_listener = listener;
+	listener_ = listener;
 }
 
+ComparisonIndicator Computer::comparison_state() const
+{
+	return comparison_state_;
+}
+
+void Computer::set_comparison_state(ComparisonIndicator comparison)
+{
+	comparison_state_ = comparison;
+	InvokeListener(listener_, &IComputerListener::on_comparison_state_set);
+}

@@ -36,6 +36,9 @@ public:
 	bool has_overflow() const;
 	void set_overflow();
 
+	ComparisonIndicator comparison_state() const;
+	void set_comparison_state(ComparisonIndicator comparison);
+
 private:
 
 
@@ -50,7 +53,7 @@ private:
 
 	std::array<Word, k_memory_words_count> memory_;
 
-	IComputerListener* m_listener;
+	IComputerListener* listener_;
 };
 
 
