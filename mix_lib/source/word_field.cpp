@@ -1,6 +1,8 @@
 #include <mix/word_field.h>
 #include <mix/word.h>
 
+#include <cassert>
+
 using namespace mix;
 
 WordField::WordField(std::size_t left, std::size_t right)
@@ -48,6 +50,7 @@ std::size_t WordField::right_byte_index() const
 
 std::size_t WordField::bytes_count() const
 {
+	assert(right_ >= left_);
 	auto length = right_ - left_;
 	if (!includes_sign())
 	{
@@ -62,6 +65,9 @@ WordField WordField::shift_bytes_right() const
 	{
 		return *this;
 	}
+
+	assert(right_byte_index() <= Word::k_bytes_count);
+	assert(right_ >= left_);;
 
 	const auto shift_right = Word::k_bytes_count - right_byte_index();
 	return WordField{left_byte_index() + shift_right, Word::k_bytes_count};
