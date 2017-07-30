@@ -39,6 +39,8 @@ private:
 
 	ComparisonIndicator do_compare(const Register& r, const Command& command) const;
 
+	void do_jump(const Register& r, const Command& command);
+
 private:
 	void nop(const Command& command);
 
@@ -98,6 +100,14 @@ private:
 	void cmp6(const Command& command);
 
 	void jmp_flags_group(const Command& command);
+	void jmp_ra_group(const Command& command);
+	void jmp_rx_group(const Command& command);
+	void jmp_ri1_group(const Command& command);
+	void jmp_ri2_group(const Command& command);
+	void jmp_ri3_group(const Command& command);
+	void jmp_ri4_group(const Command& command);
+	void jmp_ri5_group(const Command& command);
+	void jmp_ri6_group(const Command& command);
 
 private:
 	Computer& mix_;

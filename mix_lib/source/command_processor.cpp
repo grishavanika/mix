@@ -51,14 +51,14 @@ CommandProcessor::k_command_actions = {{
 	/*37*/nullptr,
 	/*38*/nullptr,
 	/*39*/&CommandProcessor::jmp_flags_group,
-	/*40*/nullptr,
-	/*41*/nullptr,
-	/*42*/nullptr,
-	/*43*/nullptr,
-	/*44*/nullptr,
-	/*45*/nullptr,
-	/*46*/nullptr,
-	/*47*/nullptr,
+	/*40*/&CommandProcessor::jmp_ra_group,
+	/*41*/&CommandProcessor::jmp_ri1_group,
+	/*42*/&CommandProcessor::jmp_ri2_group,
+	/*43*/&CommandProcessor::jmp_ri3_group,
+	/*44*/&CommandProcessor::jmp_ri4_group,
+	/*45*/&CommandProcessor::jmp_ri5_group,
+	/*46*/&CommandProcessor::jmp_ri6_group,
+	/*47*/&CommandProcessor::jmp_rx_group,
 	/*48*/&CommandProcessor::enta_group,
 	/*49*/&CommandProcessor::ent1_group,
 	/*50*/&CommandProcessor::ent2_group,
@@ -642,7 +642,7 @@ void CommandProcessor::jmp_flags_group(const Command& command)
 			(comparison_flag == ComparisonIndicator::Equal));
 		break;
 	default:
-		throw std::logic_error{"JMP* command has unknown field"};
+		throw std::logic_error{"JMP* (flags) command has unknown field"};
 	};
 
 	if (do_jump)
@@ -650,3 +650,79 @@ void CommandProcessor::jmp_flags_group(const Command& command)
 		mix_.jump(next_address);
 	}
 }
+
+void CommandProcessor::do_jump(const Register& r, const Command& command)
+{
+	const int value = r.value();
+	bool do_jump = false;
+	switch (command.field())
+	{
+	case 0:
+		do_jump = (value < 0);
+		break;
+	case 1:
+		do_jump = (value == 0);
+		break;
+	case 2:
+		do_jump = (value > 0);
+		break;
+	case 3:
+		do_jump = (value >= 0);
+		break;
+	case 4:
+		do_jump = (value != 0);
+		break;
+	case 5:
+		do_jump = (value <= 0);
+		break;
+	default:
+		throw std::logic_error{"JMP* (values) command has unknown field"};
+	}
+
+	if (do_jump)
+	{
+		const int next_address = indexed_address(command);
+		mix_.jump(next_address);
+	}
+}
+
+void CommandProcessor::jmp_ra_group(const Command& command)
+{
+	do_jump(mix_.ra(), command);
+}
+
+void CommandProcessor::jmp_rx_group(const Command& command)
+{
+	do_jump(mix_.rx(), command);
+}
+
+void CommandProcessor::jmp_ri1_group(const Command& command)
+{
+	do_jump(mix_.ri(1), command);
+}
+
+void CommandProcessor::jmp_ri2_group(const Command& command)
+{
+	do_jump(mix_.ri(2), command);
+}
+
+void CommandProcessor::jmp_ri3_group(const Command& command)
+{
+	do_jump(mix_.ri(3), command);
+}
+
+void CommandProcessor::jmp_ri4_group(const Command& command)
+{
+	do_jump(mix_.ri(4), command);
+}
+
+void CommandProcessor::jmp_ri5_group(const Command& command)
+{
+	do_jump(mix_.ri(5), command);
+}
+
+void CommandProcessor::jmp_ri6_group(const Command& command)
+{
+	do_jump(mix_.ri(6), command);
+}
+
