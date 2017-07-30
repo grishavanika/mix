@@ -37,6 +37,8 @@ private:
 	Register do_enter(WordValue value, const Command& command) const;
 	Register do_enter_negative(WordValue value, const Command& command) const;
 
+	ComparisonIndicator do_compare(const Register& r, const Command& command) const;
+
 private:
 	void nop(const Command& command);
 
@@ -86,6 +88,14 @@ private:
 	void ent5_group(const Command& command);
 	void ent6_group(const Command& command);
 
+	void cmpa(const Command& command);
+	void cmpx(const Command& command);
+	void cmp1(const Command& command);
+	void cmp2(const Command& command);
+	void cmp3(const Command& command);
+	void cmp4(const Command& command);
+	void cmp5(const Command& command);
+	void cmp6(const Command& command);
 
 private:
 	Computer& mix_;

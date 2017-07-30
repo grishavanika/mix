@@ -28,7 +28,10 @@ Command MakeCMPI(std::size_t index, int address, WordField field = Word::MaxFiel
 
 TEST(CMPA, Comparing_RA_With_Same_Field_Of_Memory_Cell)
 {
-	Computer mix;
+	NiceMock<ComputerListenerMock> listener;
+	EXPECT_CALL(listener, on_comparison_state_set()).Times(6);
+
+	Computer mix{&listener};
 	Register ra{-int{Word::k_max_abs_value}};
 	mix.set_ra(ra);
 	Word memory{4'095, WordField{0, 2}};

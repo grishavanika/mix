@@ -67,14 +67,14 @@ CommandProcessor::k_command_actions = {{
 	/*53*/&CommandProcessor::ent5_group,
 	/*54*/&CommandProcessor::ent6_group,
 	/*55*/&CommandProcessor::entx_group,
-	/*56*/nullptr,
-	/*57*/nullptr,
-	/*58*/nullptr,
-	/*59*/nullptr,
-	/*60*/nullptr,
-	/*61*/nullptr,
-	/*62*/nullptr,
-	/*63*/nullptr
+	/*56*/&CommandProcessor::cmpa,
+	/*57*/&CommandProcessor::cmp1,
+	/*58*/&CommandProcessor::cmp2,
+	/*59*/&CommandProcessor::cmp3,
+	/*60*/&CommandProcessor::cmp4,
+	/*61*/&CommandProcessor::cmp5,
+	/*62*/&CommandProcessor::cmp6,
+	/*63*/&CommandProcessor::cmpx
 	}};
 
 namespace {
@@ -536,4 +536,62 @@ void CommandProcessor::ent5_group(const Command& command)
 void CommandProcessor::ent6_group(const Command& command)
 {
 	enti_group(6, command);
+}
+
+ComparisonIndicator CommandProcessor::do_compare(const Register& r, const Command& command) const
+{
+	const auto field = command.word_field();
+	const int rhs = memory(command).value(field);
+	const int lhs = r.value(field);
+
+	if (lhs > rhs)
+	{
+		return ComparisonIndicator::Greater;
+	}
+	else if (lhs < rhs)
+	{
+		return ComparisonIndicator::Less;
+	}
+
+	return ComparisonIndicator::Equal;	
+}
+
+void CommandProcessor::cmpa(const Command& command)
+{
+	mix_.set_comparison_state(do_compare(mix_.ra(), command));
+}
+
+void CommandProcessor::cmpx(const Command& command)
+{
+	mix_.set_comparison_state(do_compare(mix_.rx(), command));
+}
+
+void CommandProcessor::cmp1(const Command& command)
+{
+	mix_.set_comparison_state(do_compare(mix_.ri(1), command));
+}
+
+void CommandProcessor::cmp2(const Command& command)
+{
+	mix_.set_comparison_state(do_compare(mix_.ri(2), command));
+}
+
+void CommandProcessor::cmp3(const Command& command)
+{
+	mix_.set_comparison_state(do_compare(mix_.ri(3), command));
+}
+
+void CommandProcessor::cmp4(const Command& command)
+{
+	mix_.set_comparison_state(do_compare(mix_.ri(4), command));
+}
+
+void CommandProcessor::cmp5(const Command& command)
+{
+	mix_.set_comparison_state(do_compare(mix_.ri(5), command));
+}
+
+void CommandProcessor::cmp6(const Command& command)
+{
+	mix_.set_comparison_state(do_compare(mix_.ri(6), command));
 }
