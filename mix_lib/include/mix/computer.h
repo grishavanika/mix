@@ -18,6 +18,12 @@ public:
 
 	void execute(const Command& command);
 
+	int current_command() const;
+	int next_command() const;
+	void set_next_command(int address);
+
+	void jump(int address);
+
 	void set_memory(int, const Word& value);
 	const Word& memory(int address) const;
 
@@ -35,6 +41,7 @@ public:
 	OverflowFlag overflow_flag() const;
 	bool has_overflow() const;
 	void set_overflow();
+	void clear_overflow();
 
 	ComparisonIndicator comparison_state() const;
 	void set_comparison_state(ComparisonIndicator comparison);
@@ -47,6 +54,7 @@ private:
 	Register rx_;
 	std::array<IndexRegister, k_index_registers_count> rindexes_;
 	AddressRegister rj_;
+	AddressRegister rip_;
 
 	ComparisonIndicator comparison_state_;
 	OverflowFlag overflow_flag_;

@@ -50,7 +50,7 @@ CommandProcessor::k_command_actions = {{
 	/*36*/nullptr,
 	/*37*/nullptr,
 	/*38*/nullptr,
-	/*39*/nullptr,
+	/*39*/&CommandProcessor::jmp_flags_group,
 	/*40*/nullptr,
 	/*41*/nullptr,
 	/*42*/nullptr,
@@ -594,4 +594,59 @@ void CommandProcessor::cmp5(const Command& command)
 void CommandProcessor::cmp6(const Command& command)
 {
 	mix_.set_comparison_state(do_compare(mix_.ri(6), command));
+}
+
+void CommandProcessor::jmp_flags_group(const Command& command)
+{
+	const int next_address = indexed_address(command);
+	const ComparisonIndicator comparison_flag = mix_.comparison_state();
+	const bool has_overflow = mix_.has_overflow();
+
+	bool do_jump = false;
+	switch (command.field())
+	{
+	case 0: // JMP
+		do_jump = true;
+		break;
+	case 1: // JSJ
+		mix_.set_next_command(next_address);
+		break;
+	case 2: // JOV
+		if (has_overflow)
+		{
+			mix_.clear_overflow();
+			do_jump = true;
+		}
+		break;
+	case 3: // JNOV
+		do_jump = !has_overflow;
+		break;
+	case 4: // JL
+		do_jump = (comparison_flag == ComparisonIndicator::Less);
+		break;
+	case 5: // JE
+		do_jump = (comparison_flag == ComparisonIndicator::Equal);
+		break;
+	case 6: // JG
+		do_jump = (comparison_flag == ComparisonIndicator::Greater);
+		break;
+	case 7: // JGE
+		do_jump = ((comparison_flag == ComparisonIndicator::Greater) ||
+			(comparison_flag == ComparisonIndicator::Equal));
+		break;
+	case 8: // JNE
+		do_jump = (comparison_flag != ComparisonIndicator::Equal);
+		break;
+	case 9: // JLE
+		do_jump = ((comparison_flag == ComparisonIndicator::Less) ||
+			(comparison_flag == ComparisonIndicator::Equal));
+		break;
+	default:
+		throw std::logic_error{"JMP* command has unknown field"};
+	};
+
+	if (do_jump)
+	{
+		mix_.jump(next_address);
+	}
 }

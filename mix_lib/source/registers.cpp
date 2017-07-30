@@ -52,7 +52,12 @@ IndexRegister::IndexRegister(Sign sign, const Byte& b4, const Byte& b5)
 
 IndexRegister::IndexRegister(int two_bytes_with_sign)
 {
-	set_value(
+	set_value(two_bytes_with_sign);
+}
+
+void IndexRegister::set_value(int two_bytes_with_sign)
+{
+	Register::set_value(
 		two_bytes_with_sign,
 		WordField{4, 5},
 		true/*overwrite sign*/);

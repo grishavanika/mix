@@ -97,6 +97,8 @@ private:
 	void cmp5(const Command& command);
 	void cmp6(const Command& command);
 
+	void jmp_flags_group(const Command& command);
+
 private:
 	Computer& mix_;
 

@@ -20,6 +20,8 @@ public:
 	explicit IndexRegister(const Register& r);
 
 	void set_byte(std::size_t index, const Byte& byte);
+	
+	void set_value(int two_bytes_with_sign);
 	WordValue value() const;
 
 	void zero_unspecified_bytes();

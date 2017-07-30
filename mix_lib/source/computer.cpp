@@ -24,6 +24,7 @@ Computer::Computer(IComputerListener* listener /*= nullptr*/)
 	, rx_{}
 	, rindexes_{}
 	, rj_{}
+	, rip_{}
 	, comparison_state_{ComparisonIndicator::Less}
 	, overflow_flag_{OverflowFlag::NoOverdlow}
 	, memory_{}
@@ -44,6 +45,31 @@ const Register& Computer::rx() const
 const AddressRegister& Computer::rj() const
 {
 	return rj_;
+}
+
+void Computer::jump(int address)
+{
+	const auto next = next_command();
+	set_next_command(address);
+	rj_.set_value(next);
+	InvokeListener(listener_, &IComputerListener::on_jump, next);
+}
+
+void Computer::set_next_command(int address)
+{
+	// #TODO: validate `address` (in range [0; 4000))
+	rip_.set_value(address);
+	InvokeListener(listener_, &IComputerListener::on_current_command_changed, address);
+}
+
+int Computer::current_command() const
+{
+	return rip_.value();
+}
+
+int Computer::next_command() const
+{
+	return current_command() + 1;
 }
 
 void Computer::set_memory(int address, const Word& value)
@@ -119,6 +145,12 @@ bool Computer::has_overflow() const
 void Computer::set_overflow()
 {
 	overflow_flag_ = OverflowFlag::Overflow;
+	InvokeListener(listener_, &IComputerListener::on_overflow_flag_set);
+}
+
+void Computer::clear_overflow()
+{
+	overflow_flag_ = OverflowFlag::NoOverdlow;
 	InvokeListener(listener_, &IComputerListener::on_overflow_flag_set);
 }
 

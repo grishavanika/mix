@@ -4,21 +4,21 @@ namespace mix {
 
 enum class Sign
 {
-	Positive,
-	Negative
+	Positive	= 1,
+	Negative	= -1
 };
 
 enum class ComparisonIndicator
 {
-	Equal,
-	Less,
-	Greater
+	Equal		= 0,
+	Less		= -1,
+	Greater		= 1
 };
 
 enum class OverflowFlag
 {
-	NoOverdlow,
-	Overflow
+	NoOverdlow	= 0,
+	Overflow	= 1
 };
 
 } // namespace mix
