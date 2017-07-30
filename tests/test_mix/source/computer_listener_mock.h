@@ -12,5 +12,7 @@ struct ComputerListenerMock :
 	MOCK_METHOD1(on_ri_set, void (std::size_t));
 	MOCK_METHOD0(on_overflow_flag_set, void ());
 	MOCK_METHOD0(on_comparison_state_set, void ());
+	MOCK_METHOD1(on_current_command_changed, void (int));
+	MOCK_METHOD1(on_jump, void (int));
 };
 
