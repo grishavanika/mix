@@ -10,5 +10,15 @@
 - remove googletest third_party files and use git submodule instead
 - add Travis CI build support
 
+- MIXAL should process text input to byte-code. For example:
+    ```
+    LDA 2000
+    LDA -2000,4
+    ```
+will generate next commands:
+    ```
+    +2000 2 3 8
+    -2000 4 5 8
+    ```
 
-
+that byte code can be saved to some intermediate result and executed later
