@@ -135,7 +135,7 @@ void CommandProcessor::nop(const Command& /*command*/)
 {
 }
 
-Register CommandProcessor::load_register(
+Register CommandProcessor::do_load(
 	Register prev_value,
 	const Command& command,
 	bool reverse_sorce_sign /*= false*/) const
@@ -151,11 +151,11 @@ Register CommandProcessor::load_register(
 	return std::move(prev_value);
 }
 
-int CommandProcessor::indexed_address(int address, std::size_t ri) const
+int CommandProcessor::indexed_address(int address, std::size_t index) const
 {
-	if (ri != 0)
+	if (index != 0)
 	{
-		return address + mix_.ri(ri).value();
+		return address + mix_.ri(index).value();
 	}
 
 	return address;
@@ -202,94 +202,84 @@ void CommandProcessor::do_store(const Register& r, const Command& command)
 	mix_.set_memory(address, std::move(word));
 }
 
-IndexRegister CommandProcessor::load_index_register(
-	std::size_t index,
-	const Command& command,
-	bool reverse_sorce_sign /*= false*/) const
-{
-	IndexRegister ri{load_register(mix_.ri(index), command, reverse_sorce_sign)};
-	ri.zero_unspecified_bytes();
-	return ri;
-}
-
 void CommandProcessor::lda(const Command& command)
 {
-	mix_.set_ra(load_register(mix_.ra(), command));
+	mix_.set_ra(do_load(mix_.ra(), command));
 }
 
 void CommandProcessor::ldx(const Command& command)
 {
-	mix_.set_rx(load_register(mix_.rx(), command));
+	mix_.set_rx(do_load(mix_.rx(), command));
 }
 
 void CommandProcessor::ld1(const Command& command)
 {
-	mix_.set_ri(1, load_index_register(1, command));
+	mix_.set_ri(1, IndexRegister{do_load(mix_.ri(1), command)});
 }
 
 void CommandProcessor::ld2(const Command& command)
 {
-	mix_.set_ri(2, load_index_register(2, command));
+	mix_.set_ri(2, IndexRegister{do_load(mix_.ri(2), command)});
 }
 
 void CommandProcessor::ld3(const Command& command)
 {
-	mix_.set_ri(3, load_index_register(3, command));
+	mix_.set_ri(3, IndexRegister{do_load(mix_.ri(3), command)});
 }
 
 void CommandProcessor::ld4(const Command& command)
 {
-	mix_.set_ri(4, load_index_register(4, command));
+	mix_.set_ri(4, IndexRegister{do_load(mix_.ri(4), command)});
 }
 
 void CommandProcessor::ld5(const Command& command)
 {
-	mix_.set_ri(5, load_index_register(5, command));
+	mix_.set_ri(5, IndexRegister{do_load(mix_.ri(5), command)});
 }
 
 void CommandProcessor::ld6(const Command& command)
 {
-	mix_.set_ri(6, load_index_register(6, command));
+	mix_.set_ri(6, IndexRegister{do_load(mix_.ri(6), command)});
 }
 
 void CommandProcessor::ldan(const Command& command)
 {
-	mix_.set_ra(load_register(mix_.ra(), command, true/*reverse*/));
+	mix_.set_ra(do_load(mix_.ra(), command, true/*reverse*/));
 }
 
 void CommandProcessor::ldxn(const Command& command)
 {
-	mix_.set_rx(load_register(mix_.rx(), command, true/*reverse*/));
+	mix_.set_rx(do_load(mix_.rx(), command, true/*reverse*/));
 }
 
 void CommandProcessor::ld1n(const Command& command)
 {
-	mix_.set_ri(1, load_index_register(1, command, true/*reverse*/));
+	mix_.set_ri(1, IndexRegister{do_load(mix_.ri(1), command, true/*reverse*/)});
 }
 
 void CommandProcessor::ld2n(const Command& command)
 {
-	mix_.set_ri(2, load_index_register(2, command, true/*reverse*/));
+	mix_.set_ri(2, IndexRegister{do_load(mix_.ri(2), command, true/*reverse*/)});
 }
 
 void CommandProcessor::ld3n(const Command& command)
 {
-	mix_.set_ri(3, load_index_register(3, command, true/*reverse*/));
+	mix_.set_ri(3, IndexRegister{do_load(mix_.ri(3), command, true/*reverse*/)});
 }
 
 void CommandProcessor::ld4n(const Command& command)
 {
-	mix_.set_ri(4, load_index_register(4, command, true/*reverse*/));
+	mix_.set_ri(4, IndexRegister{do_load(mix_.ri(4), command, true/*reverse*/)});
 }
 
 void CommandProcessor::ld5n(const Command& command)
 {
-	mix_.set_ri(5, load_index_register(5, command, true/*reverse*/));
+	mix_.set_ri(5, IndexRegister{do_load(mix_.ri(5), command, true/*reverse*/)});
 }
 
 void CommandProcessor::ld6n(const Command& command)
 {
-	mix_.set_ri(6, load_index_register(6, command, true/*reverse*/));
+	mix_.set_ri(6, IndexRegister{do_load(mix_.ri(6), command, true/*reverse*/)});
 }
 
 void CommandProcessor::sta(const Command& command)

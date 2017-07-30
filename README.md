@@ -15,7 +15,7 @@
     LDA 2000
     LDA -2000,4
     ```
-will generate next commands:
+	will generate next commands:
     ```
     +2000 2 3 8
     -2000 4 5 8

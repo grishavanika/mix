@@ -20,27 +20,22 @@ public:
 	void process(const Command& command);
 
 private:
-	Register load_register(
+	const Word& memory(const Command& command) const;
+	int indexed_address(int address, std::size_t index) const;
+	int indexed_address(const Command& command) const;
+
+	Register do_load(
 		Register prev_value,
 		const Command& command,
 		bool reverse_sorce_sign = false) const;
 
-	IndexRegister load_index_register(
-		std::size_t index,
-		const Command& command,
-		bool reverse_sorce_sign = false) const;
-
-	const Word& memory(const Command& command) const;
-	int indexed_address(int address, std::size_t ri) const;
-	int indexed_address(const Command& command) const;
+	void do_store(const Register& r, const Command& command);
 
 	Register do_add(Register r, const WordValue& value);
 	Register do_safe_add_without_overflow_check(Sign original_sign, int value, int prev_value) const;
 
 	Register do_enter(WordValue value, const Command& command) const;
 	Register do_enter_negative(WordValue value, const Command& command) const;
-
-	void do_store(const Register& r, const Command& command);
 
 private:
 	void nop(const Command& command);
