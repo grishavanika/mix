@@ -80,16 +80,16 @@ private:
 	void mul(const Command& command);
 	void div(const Command& command);
 
-	void enta_or_enna(const Command& command);
-	void entx_or_ennx(const Command& command);
-	void enti_or_enni(std::size_t index, const Command& command);
+	void enta_group(const Command& command);
+	void entx_group(const Command& command);
+	void enti_group(std::size_t index, const Command& command);
 	
-	void ent1_or_enn1(const Command& command);
-	void ent2_or_enn2(const Command& command);
-	void ent3_or_enn3(const Command& command);
-	void ent4_or_enn4(const Command& command);
-	void ent5_or_enn5(const Command& command);
-	void ent6_or_enn6(const Command& command);
+	void ent1_group(const Command& command);
+	void ent2_group(const Command& command);
+	void ent3_group(const Command& command);
+	void ent4_group(const Command& command);
+	void ent5_group(const Command& command);
+	void ent6_group(const Command& command);
 
 
 private:

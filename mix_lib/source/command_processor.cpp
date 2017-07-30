@@ -59,14 +59,14 @@ CommandProcessor::k_command_actions = {{
 	/*45*/nullptr,
 	/*46*/nullptr,
 	/*47*/nullptr,
-	/*48*/&CommandProcessor::enta_or_enna,
-	/*49*/&CommandProcessor::ent1_or_enn1,
-	/*50*/&CommandProcessor::ent2_or_enn2,
-	/*51*/&CommandProcessor::ent3_or_enn3,
-	/*52*/&CommandProcessor::ent4_or_enn4,
-	/*53*/&CommandProcessor::ent5_or_enn5,
-	/*54*/&CommandProcessor::ent6_or_enn6,
-	/*55*/&CommandProcessor::entx_or_ennx,
+	/*48*/&CommandProcessor::enta_group,
+	/*49*/&CommandProcessor::ent1_group,
+	/*50*/&CommandProcessor::ent2_group,
+	/*51*/&CommandProcessor::ent3_group,
+	/*52*/&CommandProcessor::ent4_group,
+	/*53*/&CommandProcessor::ent5_group,
+	/*54*/&CommandProcessor::ent6_group,
+	/*55*/&CommandProcessor::entx_group,
 	/*56*/nullptr,
 	/*57*/nullptr,
 	/*58*/nullptr,
@@ -446,7 +446,7 @@ void CommandProcessor::div(const Command& command)
 	mix_.set_rx(Register{WordValue{prev_sign, static_cast<int>(new_x)}});
 }
 
-void CommandProcessor::enta_or_enna(const Command& command)
+void CommandProcessor::enta_group(const Command& command)
 {
 	switch (command.field())
 	{
@@ -467,7 +467,7 @@ void CommandProcessor::enta_or_enna(const Command& command)
 	throw std::logic_error{"ENTA* command has unknown field"};
 }
 
-void CommandProcessor::entx_or_ennx(const Command& command)
+void CommandProcessor::entx_group(const Command& command)
 {
 	switch (command.field())
 	{
@@ -488,7 +488,7 @@ void CommandProcessor::entx_or_ennx(const Command& command)
 	throw std::logic_error{"ENTX* command has unknown field"};
 }
 
-void CommandProcessor::enti_or_enni(std::size_t index, const Command& command)
+void CommandProcessor::enti_group(std::size_t index, const Command& command)
 {
 	switch (command.field())
 	{
@@ -509,32 +509,32 @@ void CommandProcessor::enti_or_enni(std::size_t index, const Command& command)
 	throw std::logic_error{"ENTI* command has unknown field"};
 }
 
-void CommandProcessor::ent1_or_enn1(const Command& command)
+void CommandProcessor::ent1_group(const Command& command)
 {
-	enti_or_enni(1, command);
+	enti_group(1, command);
 }
 
-void CommandProcessor::ent2_or_enn2(const Command& command)
+void CommandProcessor::ent2_group(const Command& command)
 {
-	enti_or_enni(2, command);
+	enti_group(2, command);
 }
 
-void CommandProcessor::ent3_or_enn3(const Command& command)
+void CommandProcessor::ent3_group(const Command& command)
 {
-	enti_or_enni(3, command);
+	enti_group(3, command);
 }
 
-void CommandProcessor::ent4_or_enn4(const Command& command)
+void CommandProcessor::ent4_group(const Command& command)
 {
-	enti_or_enni(4, command);
+	enti_group(4, command);
 }
 
-void CommandProcessor::ent5_or_enn5(const Command& command)
+void CommandProcessor::ent5_group(const Command& command)
 {
-	enti_or_enni(5, command);
+	enti_group(5, command);
 }
 
-void CommandProcessor::ent6_or_enn6(const Command& command)
+void CommandProcessor::ent6_group(const Command& command)
 {
-	enti_or_enni(6, command);
+	enti_group(6, command);
 }
