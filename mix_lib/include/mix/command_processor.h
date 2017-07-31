@@ -113,6 +113,8 @@ private:
 	void ra_shift(int shift);
 	void rax_shift(int shift, bool cyclic);
 
+	void move(const Command& command);
+
 private:
 	Computer& mix_;
 

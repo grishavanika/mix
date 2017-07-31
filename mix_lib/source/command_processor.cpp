@@ -20,7 +20,7 @@ CommandProcessor::k_command_actions = {{
 	/*04*/&CommandProcessor::div,
 	/*05*/nullptr,
 	/*06*/&CommandProcessor::shift_group,
-	/*07*/nullptr,
+	/*07*/&CommandProcessor::move,
 	/*08*/&CommandProcessor::lda,
 	/*09*/&CommandProcessor::ld1,
 	/*10*/&CommandProcessor::ld2,
@@ -777,4 +777,19 @@ void CommandProcessor::rax_shift(int shift, bool cyclic)
 
 	mix_.set_ra(rax.first);
 	mix_.set_rx(rax.second);
+}
+
+void CommandProcessor::move(const Command& command)
+{
+	const int source_address = indexed_address(command);
+	assert(source_address >= 0);
+	const auto r1 = mix_.ri(1);
+	const int dest_address = r1.value();
+	assert(dest_address >= 0);
+	const int count = static_cast<int>(command.field());
+	for (int i = 0; i < count; ++i)
+	{
+		mix_.set_memory(dest_address + i, mix_.memory(source_address + i));
+	}
+	mix_.set_ri(1, IndexRegister{do_add(r1, count)});
 }
