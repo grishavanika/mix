@@ -18,7 +18,7 @@ CommandProcessor::k_command_actions = {{
 	/*02*/&CommandProcessor::sub,
 	/*03*/&CommandProcessor::mul,
 	/*04*/&CommandProcessor::div,
-	/*05*/nullptr,
+	/*05*/&CommandProcessor::convert_or_halt_group,
 	/*06*/&CommandProcessor::shift_group,
 	/*07*/&CommandProcessor::move,
 	/*08*/&CommandProcessor::lda,
@@ -116,7 +116,7 @@ CommandProcessor::CommandProcessor(Computer& mix)
 
 void CommandProcessor::process(const Command& command)
 {
-	static_assert(k_commands_count == (Byte::k_max_value + 1),
+	static_assert(k_commands_count == (Byte::k_values_count),
 		"Command actions array should have all possible variations of command IDs");
 
 	auto callback = k_command_actions[command.id()];
@@ -792,4 +792,19 @@ void CommandProcessor::move(const Command& command)
 		mix_.set_memory(dest_address + i, mix_.memory(source_address + i));
 	}
 	mix_.set_ri(1, IndexRegister{do_add(r1, count)});
+}
+
+void CommandProcessor::convert_or_halt_group(const Command& command)
+{
+	switch (command.field())
+	{
+	case 0: // NUM
+		break;
+	case 1: // CHAR
+		break;
+	case 2: // HLT
+		break;
+	default:
+		throw std::logic_error{"NUM/CHAR/HLT commands has unknown field"};
+	}
 }

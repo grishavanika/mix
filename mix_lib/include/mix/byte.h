@@ -19,6 +19,7 @@ public:
 		"hold number with given bits count");
 
 	static constexpr NarrowType k_min_value = 0;
+	static constexpr NarrowType k_values_count = (1 << k_bits_count);
 	static constexpr NarrowType k_max_value = (1 << k_bits_count) - 1;
 
 private:

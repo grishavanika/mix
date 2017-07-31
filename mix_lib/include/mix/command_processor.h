@@ -115,6 +115,8 @@ private:
 
 	void move(const Command& command);
 
+	void convert_or_halt_group(const Command& command);
+
 private:
 	Computer& mix_;
 
