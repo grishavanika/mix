@@ -110,8 +110,8 @@ private:
 	void jmp_ri6_group(const Command& command);
 
 	void shift_group(const Command& command);
-	Register sla(const Command& command) const;
-	Register sra(const Command& command) const;
+	void ra_shift(int shift);
+	void rax_shift(int shift, bool cyclic);
 
 private:
 	Computer& mix_;

@@ -730,45 +730,51 @@ void CommandProcessor::jmp_ri6_group(const Command& command)
 
 void CommandProcessor::shift_group(const Command& command)
 {
+	const int shift = indexed_address(command);
+	assert(shift >= 0);
+
 	switch (command.field())
 	{
 	case 0: // SLA
-		mix_.set_ra(sla(command));
+		ra_shift(+shift);
 		break;
 	case 1: // SRA
-		mix_.set_ra(sra(command));
+		ra_shift(-shift);
 		break;
 	case 2: // SLAX
+		rax_shift(+shift, false/*non-cyclic*/);
 		break;
 	case 3: // SRAX
+		rax_shift(-shift, false/*non-cyclic*/);
 		break;
 	case 4: // SLC
+		rax_shift(+shift, true/*cyclic*/);
 		break;
 	case 5: // SRC
+		rax_shift(-shift, true/*cyclic*/);
 		break;
 	default:
 		throw std::logic_error{"SHIFT commands has unknown field"};
 	}
 }
 
-Register CommandProcessor::sla(const Command& command) const
+void CommandProcessor::ra_shift(int shift)
 {
 	using namespace internal;
 
-	const int shift = indexed_address(command);
-	assert(shift >= 0);
-	// Non-cyclic shift left
-	const auto result = ToBytes(mix_.ra()).shift(+shift);
-	return ToRegister(mix_.ra().sign(), result);
+	const auto result = ToBytes(mix_.ra()).shift(shift);
+	mix_.set_ra(ToRegister(mix_.ra().sign(), result));
 }
 
-Register CommandProcessor::sra(const Command& command) const
+void CommandProcessor::rax_shift(int shift, bool cyclic)
 {
 	using namespace internal;
 
-	const int shift = indexed_address(command);
-	assert(shift >= 0);
-	// Non-cyclic shift right
-	const auto result = ToBytes(mix_.ra()).shift(-shift);
-	return ToRegister(mix_.ra().sign(), result);
+	std::valarray<Byte> bytes = ToBytes(mix_.ra(), mix_.rx());
+
+	const auto rax = ToRegisters(mix_.ra().sign(), mix_.rx().sign(),
+		cyclic ? bytes.cshift(shift) : bytes.shift(shift));
+
+	mix_.set_ra(rax.first);
+	mix_.set_rx(rax.second);
 }
