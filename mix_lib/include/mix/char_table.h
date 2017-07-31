@@ -3,9 +3,7 @@
 
 namespace mix {
 
-using Char = unsigned char;
-
-Char ByteToChar(Byte b);
-Byte CharToByte(Char ch);
+char ByteToChar(Byte b);
+Byte CharToByte(char ch);
 
 } // namespace mix
