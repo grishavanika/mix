@@ -43,6 +43,12 @@ Word::Word(WordValue value, const WordField& field /*= MaxField()*/, bool owerwr
 	set_value(value, field, owerwrite_sign);
 }
 
+Word::Word(BytesArray&& bytes, Sign sign /*= Sign::Positive*/)
+	: bytes_(std::move(bytes))
+	, sign_{sign}
+{
+}
+
 Sign Word::sign() const
 {
 	return sign_;
@@ -176,6 +182,11 @@ WordValue Word::value() const
 std::size_t Word::abs_value() const
 {
 	return static_cast<std::size_t>(value(MaxFieldWithoutSign()));
+}
+
+const Word::BytesArray& Word::bytes() const
+{
+	return bytes_;
 }
 
 namespace mix {

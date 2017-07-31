@@ -109,6 +109,10 @@ private:
 	void jmp_ri5_group(const Command& command);
 	void jmp_ri6_group(const Command& command);
 
+	void shift_group(const Command& command);
+	Register sla(const Command& command) const;
+	Register sra(const Command& command) const;
+
 private:
 	Computer& mix_;
 

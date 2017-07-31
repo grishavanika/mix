@@ -17,8 +17,15 @@ public:
 	static constexpr std::size_t k_bits_count = (k_bytes_count * Byte::k_bits_count);
 	static constexpr std::size_t k_max_abs_value = (1 << k_bits_count) - 1;
 
+	static_assert(std::size_t{INT_MAX} >= k_max_abs_value,
+		"Selected bytes count is too big to implement value()/set_value() functions. "
+		"Either decrease bytes count or change int to more capable signed type");
+
+	using BytesArray = std::array<Byte, k_bytes_count>;
+
 	explicit Word();
 	explicit Word(WordValue value, const WordField& field = MaxField(), bool owerwrite_sign = true);
+	explicit Word(BytesArray&& bytes, Sign sign = Sign::Positive);
 
 	Sign sign() const;
 	int sign_value() const;
@@ -29,10 +36,6 @@ public:
 	const Byte& byte(std::size_t index) const;
 	void set_byte(std::size_t index, const Byte& byte);
 
-	static_assert(static_cast<std::size_t>(INT_MAX) >= k_max_abs_value,
-		"Selected bytes count is too big to implement value()/set_value() functions. "
-		"Either decrease bytes count or change int to more capable signed type");
-
 	void set_value(WordValue value, const WordField& field, bool owerwrite_sign = true);
 	void set_value(WordValue value);
 
@@ -41,6 +44,8 @@ public:
 	WordValue value(const WordField& field, bool take_sign = false) const;
 	WordValue value() const;
 	std::size_t abs_value() const;
+
+	const BytesArray& bytes() const;
 
 	static WordField MaxField();
 	static WordField MaxFieldWithoutSign();
@@ -51,7 +56,7 @@ private:
 	friend bool operator==(const Word& lhs, const Word& rhs);
 
 private:
-	std::array<Byte, k_bytes_count> bytes_;
+	BytesArray bytes_;
 	Sign sign_;
 };
 

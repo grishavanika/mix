@@ -2,6 +2,8 @@
 #include <mix/computer.h>
 #include <mix/command.h>
 
+#include "internal/valarray_register_helpers.h"
+
 #include <cassert>
 #include <cstdint>
 
@@ -17,7 +19,7 @@ CommandProcessor::k_command_actions = {{
 	/*03*/&CommandProcessor::mul,
 	/*04*/&CommandProcessor::div,
 	/*05*/nullptr,
-	/*06*/nullptr,
+	/*06*/&CommandProcessor::shift_group,
 	/*07*/nullptr,
 	/*08*/&CommandProcessor::lda,
 	/*09*/&CommandProcessor::ld1,
@@ -726,3 +728,47 @@ void CommandProcessor::jmp_ri6_group(const Command& command)
 	do_jump(mix_.ri(6), command);
 }
 
+void CommandProcessor::shift_group(const Command& command)
+{
+	switch (command.field())
+	{
+	case 0: // SLA
+		mix_.set_ra(sla(command));
+		break;
+	case 1: // SRA
+		mix_.set_ra(sra(command));
+		break;
+	case 2: // SLAX
+		break;
+	case 3: // SRAX
+		break;
+	case 4: // SLC
+		break;
+	case 5: // SRC
+		break;
+	default:
+		throw std::logic_error{"SHIFT commands has unknown field"};
+	}
+}
+
+Register CommandProcessor::sla(const Command& command) const
+{
+	using namespace internal;
+
+	const int shift = indexed_address(command);
+	assert(shift >= 0);
+	// Non-cyclic shift left
+	const auto result = ToBytes(mix_.ra()).shift(+shift);
+	return ToRegister(mix_.ra().sign(), result);
+}
+
+Register CommandProcessor::sra(const Command& command) const
+{
+	using namespace internal;
+
+	const int shift = indexed_address(command);
+	assert(shift >= 0);
+	// Non-cyclic shift right
+	const auto result = ToBytes(mix_.ra()).shift(-shift);
+	return ToRegister(mix_.ra().sign(), result);
+}
