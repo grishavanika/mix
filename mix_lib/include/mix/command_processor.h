@@ -117,6 +117,8 @@ private:
 
 	void convert_or_halt_group(const Command& command);
 
+	Register num() const;
+
 private:
 	Computer& mix_;
 

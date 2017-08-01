@@ -107,6 +107,36 @@ bool CalculateWordAddOverflow(int lhs, int rhs, int& overflow_part)
 
 	return overflow;
 }
+
+// Returns number in range [0; 9]
+std::size_t ByteToNUMDigit(const Byte& byte)
+{
+	return (byte.cast_to<std::size_t>() % 10);
+}
+
+std::uint64_t TwoRegistersToNumber(const Register& r1, const Register& r2)
+{
+	// We have two 5-bytes words that are combined into
+	// 10-bytes "word" in decimal system
+	std::size_t pow = 2 * Word::k_bytes_count;
+	std::uint64_t result = 0;
+
+	auto result_from_byte = [&](const Register& r)
+	{
+		for (const auto byte : r.bytes())
+		{
+			--pow;
+			result += ByteToNUMDigit(byte) * static_cast<std::size_t>(std::pow(10u, pow));
+		}
+	};
+
+	result_from_byte(r1);
+	result_from_byte(r2);
+	assert(pow == 0);
+
+	return result;
+}
+
 } // namespace
 
 CommandProcessor::CommandProcessor(Computer& mix)
@@ -799,6 +829,7 @@ void CommandProcessor::convert_or_halt_group(const Command& command)
 	switch (command.field())
 	{
 	case 0: // NUM
+		mix_.set_ra(num());
 		break;
 	case 1: // CHAR
 		break;
@@ -807,4 +838,16 @@ void CommandProcessor::convert_or_halt_group(const Command& command)
 	default:
 		throw std::logic_error{"NUM/CHAR/HLT commands has unknown field"};
 	}
+}
+
+Register CommandProcessor::num() const
+{
+	auto result = TwoRegistersToNumber(mix_.ra(), mix_.rx());
+	if (result > Word::k_max_abs_value)
+	{
+		// .. reminder of b^5 where b is byte's size
+		result %= static_cast<std::uint64_t>(std::pow(Byte::k_bits_count, 5));
+	}
+
+	return Register{WordValue{mix_.ra().sign(), static_cast<int>(result)}};
 }
