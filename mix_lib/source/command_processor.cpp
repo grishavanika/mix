@@ -109,7 +109,7 @@ bool CalculateWordAddOverflow(int lhs, int rhs, int& overflow_part)
 }
 
 // Returns number in range [0; 9]
-std::size_t ByteToNUMDigit(const Byte& byte)
+std::size_t ByteToDigit(const Byte& byte)
 {
 	return (byte.cast_to<std::size_t>() % 10);
 }
@@ -126,7 +126,7 @@ std::uint64_t TwoRegistersToNumber(const Register& r1, const Register& r2)
 		for (const auto byte : r.bytes())
 		{
 			--pow;
-			result += ByteToNUMDigit(byte) * static_cast<std::size_t>(std::pow(10u, pow));
+			result += ByteToDigit(byte) * static_cast<std::size_t>(std::pow(10u, pow));
 		}
 	};
 
@@ -845,6 +845,8 @@ Register CommandProcessor::num() const
 	auto result = TwoRegistersToNumber(mix_.ra(), mix_.rx());
 	if (result > Word::k_max_abs_value)
 	{
+		// #TODO: should be overflow flag set ?
+		// #TODO: maybe this should be a reminder of Word's max value ?
 		// .. reminder of b^5 where b is byte's size
 		result %= static_cast<std::uint64_t>(std::pow(Byte::k_bits_count, 5));
 	}
