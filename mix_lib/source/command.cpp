@@ -28,9 +28,9 @@ Command::Command(
 		, address_{address}
 {
 	word_.set_value(address_, WordField{0, 2});
-	word_.set_byte(3, Byte{address_index});
+	word_.set_byte(3, address_index);
 	word_.set_byte(4, field_.to_byte());
-	word_.set_byte(5, Byte{id});
+	word_.set_byte(5, id);
 }
 
 std::size_t Command::id() const

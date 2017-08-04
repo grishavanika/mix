@@ -18,7 +18,7 @@ WordField::WordField(std::size_t left, std::size_t right)
 Byte WordField::to_byte() const
 {
 	const auto value = 8 * left_ + right_;
-	return Byte{value};
+	return value;
 }
 
 WordField WordField::FromByte(const Byte& byte)

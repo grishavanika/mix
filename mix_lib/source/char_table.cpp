@@ -41,7 +41,7 @@ Byte CharToByte(char ch)
 	const auto it = std::find(begin, end, ch);
 	if (it != end)
 	{
-		return Byte{std::distance(begin, it)};
+		return std::distance(begin, it);
 	}
 	
 	return Byte::Max();
@@ -57,7 +57,7 @@ std::size_t ByteToDecimalDigit(const Byte& byte)
 Byte DecimalDigitToByte(std::size_t digit)
 {
 	assert((digit >= 0) && (digit <= 9));
-	return Byte{CharToByte('0').cast_to<std::size_t>() + digit};
+	return CharToByte('0').cast_to<std::size_t>() + digit;
 }
 
 

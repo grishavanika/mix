@@ -11,9 +11,9 @@ Word MakeTestWord(int address, int b3, int b4, int b5)
 {
 	Word data;
 	data.set_value(address, WordField{0, 2});
-	data.set_byte(3, Byte{b3});
-	data.set_byte(4, Byte{b4});
-	data.set_byte(5, Byte{b5});
+	data.set_byte(3, b3);
+	data.set_byte(4, b4);
+	data.set_byte(5, b5);
 	return data;
 }
 
@@ -72,8 +72,8 @@ TEST_F(LDA_TAOCP_Book_Test, LDA_With_CustomFild_MapsToTheSameField_If_CantBe_Shi
 
 	ASSERT_EQ(Sign::Positive, mix.ra().sign());
 
-	ASSERT_EQ(mix.ra().byte(1), Byte{0});
-	ASSERT_EQ(mix.ra().byte(2), Byte{0});
+	ASSERT_EQ(mix.ra().byte(1), 0);
+	ASSERT_EQ(mix.ra().byte(2), 0);
 	ASSERT_EQ(mix.ra().byte(3), source_cell.byte(3));
 	ASSERT_EQ(mix.ra().byte(4), source_cell.byte(4));
 	ASSERT_EQ(mix.ra().byte(5), source_cell.byte(5));
@@ -86,8 +86,8 @@ TEST_F(LDA_TAOCP_Book_Test, LDA_With_CustomFild_WithSign_ShiftedRight)
 
 	ASSERT_EQ(Sign::Negative, mix.ra().sign());
 
-	ASSERT_EQ(mix.ra().byte(1), Byte{0});
-	ASSERT_EQ(mix.ra().byte(2), Byte{0});
+	ASSERT_EQ(mix.ra().byte(1), 0);
+	ASSERT_EQ(mix.ra().byte(2), 0);
 	ASSERT_EQ(mix.ra().byte(3), source_cell.byte(1));
 	ASSERT_EQ(mix.ra().byte(4), source_cell.byte(2));
 	ASSERT_EQ(mix.ra().byte(5), source_cell.byte(3));
@@ -100,10 +100,10 @@ TEST_F(LDA_TAOCP_Book_Test, LDA_With_CustomFild_ShiftedRight)
 
 	ASSERT_EQ(Sign::Positive, mix.ra().sign());
 
-	ASSERT_EQ(mix.ra().byte(1), Byte{0});
-	ASSERT_EQ(mix.ra().byte(2), Byte{0});
-	ASSERT_EQ(mix.ra().byte(3), Byte{0});
-	ASSERT_EQ(mix.ra().byte(4), Byte{0});
+	ASSERT_EQ(mix.ra().byte(1), 0);
+	ASSERT_EQ(mix.ra().byte(2), 0);
+	ASSERT_EQ(mix.ra().byte(3), 0);
+	ASSERT_EQ(mix.ra().byte(4), 0);
 	ASSERT_EQ(mix.ra().byte(5), source_cell.byte(4));
 }
 
@@ -114,11 +114,11 @@ TEST_F(LDA_TAOCP_Book_Test, LDA_With_OnlySign_Gets_Only_Sign)
 
 	ASSERT_EQ(Sign::Negative, mix.ra().sign());
 
-	ASSERT_EQ(mix.ra().byte(1), Byte{0});
-	ASSERT_EQ(mix.ra().byte(2), Byte{0});
-	ASSERT_EQ(mix.ra().byte(3), Byte{0});
-	ASSERT_EQ(mix.ra().byte(4), Byte{0});
-	ASSERT_EQ(mix.ra().byte(5), Byte{0});
+	ASSERT_EQ(mix.ra().byte(1), 0);
+	ASSERT_EQ(mix.ra().byte(2), 0);
+	ASSERT_EQ(mix.ra().byte(3), 0);
+	ASSERT_EQ(mix.ra().byte(4), 0);
+	ASSERT_EQ(mix.ra().byte(5), 0);
 }
 
 // LDA 2000(1:1)
@@ -128,9 +128,9 @@ TEST_F(LDA_TAOCP_Book_Test, LDA_With_FirstByte_Is_ShiftedRight)
 
 	ASSERT_EQ(Sign::Positive, mix.ra().sign());
 
-	ASSERT_EQ(mix.ra().byte(1), Byte{0});
-	ASSERT_EQ(mix.ra().byte(2), Byte{0});
-	ASSERT_EQ(mix.ra().byte(3), Byte{0});
-	ASSERT_EQ(mix.ra().byte(4), Byte{0});
+	ASSERT_EQ(mix.ra().byte(1), 0);
+	ASSERT_EQ(mix.ra().byte(2), 0);
+	ASSERT_EQ(mix.ra().byte(3), 0);
+	ASSERT_EQ(mix.ra().byte(4), 0);
 	ASSERT_EQ(mix.ra().byte(5), source_cell.byte(1));
 }

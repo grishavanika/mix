@@ -14,52 +14,52 @@ namespace {
 
 Command MakeJMP(WordValue address, std::size_t index_register = 0)
 {
-	return Command{39, address, index_register, WordField::FromByte(Byte{0})};
+	return Command{39, address, index_register, WordField::FromByte(0)};
 }
 
 Command MakeJSJ(WordValue address, std::size_t index_register = 0)
 {
-	return Command{39, address, index_register, WordField::FromByte(Byte{1})};
+	return Command{39, address, index_register, WordField::FromByte(1)};
 }
 
 Command MakeJOV(WordValue address, std::size_t index_register = 0)
 {
-	return Command{39, address, index_register, WordField::FromByte(Byte{2})};
+	return Command{39, address, index_register, WordField::FromByte(2)};
 }
 
 Command MakeJNOV(WordValue address, std::size_t index_register = 0)
 {
-	return Command{39, address, index_register, WordField::FromByte(Byte{3})};
+	return Command{39, address, index_register, WordField::FromByte(3)};
 }
 
 Command MakeJL(WordValue address, std::size_t index_register = 0)
 {
-	return Command{39, address, index_register, WordField::FromByte(Byte{4})};
+	return Command{39, address, index_register, WordField::FromByte(4)};
 }
 
 Command MakeJE(WordValue address, std::size_t index_register = 0)
 {
-	return Command{39, address, index_register, WordField::FromByte(Byte{5})};
+	return Command{39, address, index_register, WordField::FromByte(5)};
 }
 
 Command MakeJG(WordValue address, std::size_t index_register = 0)
 {
-	return Command{39, address, index_register, WordField::FromByte(Byte{6})};
+	return Command{39, address, index_register, WordField::FromByte(6)};
 }
 
 Command MakeJGE(WordValue address, std::size_t index_register = 0)
 {
-	return Command{39, address, index_register, WordField::FromByte(Byte{7})};
+	return Command{39, address, index_register, WordField::FromByte(7)};
 }
 
 Command MakeJNE(WordValue address, std::size_t index_register = 0)
 {
-	return Command{39, address, index_register, WordField::FromByte(Byte{8})};
+	return Command{39, address, index_register, WordField::FromByte(8)};
 }
 
 Command MakeJLE(WordValue address, std::size_t index_register = 0)
 {
-	return Command{39, address, index_register, WordField::FromByte(Byte{9})};
+	return Command{39, address, index_register, WordField::FromByte(9)};
 }
 
 } // namespace

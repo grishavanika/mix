@@ -131,7 +131,7 @@ void Word::set_value(std::size_t value, Sign sign, const WordField& field, bool 
 	{
 		// #TODO: maybe provide Byte::set_with_overdlow() function ?
 		const auto byte_value = value & Byte::k_max_value;
-		set_byte(end, Byte{byte_value});
+		set_byte(end, byte_value);
 		
 		value >>= Byte::k_bits_count;
 	}

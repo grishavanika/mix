@@ -8,9 +8,9 @@ namespace {
 Word PackToCommandWord(std::size_t id, int address, std::size_t index_register, const WordField& field)
 {
 	Word w;
-	w.set_byte(5, Byte{id});
+	w.set_byte(5, id);
 	w.set_byte(4, field.to_byte());
-	w.set_byte(3, Byte{index_register});
+	w.set_byte(3, index_register);
 	w.set_value(address, WordField{0, 2});
 	return w;
 }

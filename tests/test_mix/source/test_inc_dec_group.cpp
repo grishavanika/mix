@@ -13,17 +13,17 @@ namespace {
 
 Command MakeINCA(WordValue address, std::size_t index_register = 0)
 {
-	return Command{48, address, index_register, WordField::FromByte(Byte{0})};
+	return Command{48, address, index_register, WordField::FromByte(0)};
 }
 
 Command MakeINCX(WordValue address, std::size_t index_register = 0)
 {
-	return Command{55, address, index_register, WordField::FromByte(Byte{0})};
+	return Command{55, address, index_register, WordField::FromByte(0)};
 }
 
 Command MakeINCI(std::size_t index, WordValue address, std::size_t index_register = 0)
 {
-	return Command{48 + index, address, index_register, WordField::FromByte(Byte{0})};
+	return Command{48 + index, address, index_register, WordField::FromByte(0)};
 }
 
 } // namespace

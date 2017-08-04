@@ -63,16 +63,16 @@ TEST(DIV_TAOCP_Book_Test, XXXXX)
 	{
 		Register rx;
 		rx.set_value(1235, WordField{0, 2});
-		rx.set_byte(3, Byte{0});
-		rx.set_byte(4, Byte{3});
-		rx.set_byte(5, Byte{1});
+		rx.set_byte(3, 0);
+		rx.set_byte(4, 3);
+		rx.set_byte(5, 1);
 		mix.set_rx(rx);
 	}
 
 	{
 		Word w;
 		w.set_sign(Sign::Negative);
-		w.set_byte(4, Byte{2});
+		w.set_byte(4, 2);
 		mix.set_memory(1000, w);
 	}
 

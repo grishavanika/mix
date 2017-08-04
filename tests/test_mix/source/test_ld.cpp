@@ -132,9 +132,9 @@ protected:
 		// Sign is the same as it should be
 		ASSERT_EQ(std::get<1>(expected_value), ri.sign());
 		// ... but 1, 2, 3 bytes are zero
-		ASSERT_EQ(ri.byte(1), Byte{0});
-		ASSERT_EQ(ri.byte(2), Byte{0});
-		ASSERT_EQ(ri.byte(3), Byte{0});
+		ASSERT_EQ(ri.byte(1), 0);
+		ASSERT_EQ(ri.byte(2), 0);
+		ASSERT_EQ(ri.byte(3), 0);
 
 		// ... and value is truncated value of Field(4, 5)
 		const int abs_ri_value = std::abs(int(ri.value()));

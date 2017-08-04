@@ -25,11 +25,11 @@ Register MakeRegister(Sign sign, int b1, int b2, int b3, int b4, int b5)
 {
 	Register r;
 	r.set_sign(sign);
-	r.set_byte(1, Byte{b1});
-	r.set_byte(2, Byte{b2});
-	r.set_byte(3, Byte{b3});
-	r.set_byte(4, Byte{b4});
-	r.set_byte(5, Byte{b5});
+	r.set_byte(1, b1);
+	r.set_byte(2, b2);
+	r.set_byte(3, b3);
+	r.set_byte(4, b4);
+	r.set_byte(5, b5);
 	return r;
 }
 
@@ -37,8 +37,8 @@ IndexRegister MakeIndexRegister(Sign sign, int b4, int b5)
 {
 	IndexRegister ri;
 	ri.set_sign(sign);
-	ri.set_byte(4, Byte{b4});
-	ri.set_byte(5, Byte{b5});
+	ri.set_byte(4, b4);
+	ri.set_byte(5, b5);
 	return ri;
 }
 

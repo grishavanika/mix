@@ -17,7 +17,7 @@ void IndexRegister::zero_unspecified_bytes()
 {
 	for (std::size_t i = 1; i <= 3; ++i)
 	{
-		Register::set_byte(i, Byte{0});
+		Register::set_byte(i, 0);
 	}
 }
 

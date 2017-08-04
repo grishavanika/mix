@@ -12,17 +12,17 @@ using ::testing::NiceMock;
 namespace {
 Command MakeENTA(WordValue address, std::size_t index_register = 0)
 {
-	return Command{48, address, index_register, WordField::FromByte(Byte{2})};
+	return Command{48, address, index_register, WordField::FromByte(2)};
 }
 
 Command MakeENTI(std::size_t index, WordValue address, std::size_t index_register = 0)
 {
-	return Command{48 + index, address, index_register, WordField::FromByte(Byte{2})};
+	return Command{48 + index, address, index_register, WordField::FromByte(2)};
 }
 
 Command MakeENNI(std::size_t index, WordValue address, std::size_t index_register = 0)
 {
-	return Command{48 + index, address, index_register, WordField::FromByte(Byte{3})};
+	return Command{48 + index, address, index_register, WordField::FromByte(3)};
 }
 
 } // namespace
@@ -64,7 +64,7 @@ TEST(ENTA, Enta_With_Zero_Address_With_Index_Register_Takes_Zero_Negative_Index_
 
 	Computer mix{&listener};
 	Register ra{-int{Word::k_max_abs_value}};
-	IndexRegister r1{Sign::Negative, Byte{0}, Byte{0}};
+	IndexRegister r1{Sign::Negative, 0, 0};
 	mix.set_ra(ra);
 	mix.set_ri(1, r1);
 
@@ -80,7 +80,7 @@ TEST(ENTA, Enta_With_Negative_Zero_Address_With_Index_Register_Takes_Zero_Index_
 
 	Computer mix{&listener};
 	Register ra{-int{Word::k_max_abs_value}};
-	IndexRegister r1{Sign::Positive, Byte{0}, Byte{0}};
+	IndexRegister r1{Sign::Positive, 0, 0};
 	mix.set_ra(ra);
 	mix.set_ri(1, r1);
 
@@ -109,7 +109,7 @@ TEST(ENNI, Enter_Negative_I_For_Itself_Leaves_Negative_Zero_Unchanged)
 	EXPECT_CALL(listener, on_ri_set(3)).Times(2);
 
 	Computer mix{&listener};
-	IndexRegister r3{Sign::Negative, Byte{0}, Byte{0}};
+	IndexRegister r3{Sign::Negative, 0, 0};
 	mix.set_ri(3, r3);
 
 	mix.execute(MakeENNI(3, 0, 3));
@@ -128,9 +128,9 @@ TEST(ENTI, Enter_Too_Big_Index_Register_Value_Zeroes_Bytes_Except_Last_2)
 
 	const auto& r5 = mix.ri(5);
 	ASSERT_EQ(Sign::Negative, r5.sign());
-	ASSERT_EQ(Byte{0}, r5.byte(1));
-	ASSERT_EQ(Byte{0}, r5.byte(2));
-	ASSERT_EQ(Byte{0}, r5.byte(3));
-	ASSERT_NE(Byte{0}, r5.byte(4));
-	ASSERT_NE(Byte{0}, r5.byte(5));
+	ASSERT_EQ(0, r5.byte(1));
+	ASSERT_EQ(0, r5.byte(2));
+	ASSERT_EQ(0, r5.byte(3));
+	ASSERT_NE(0, r5.byte(4));
+	ASSERT_NE(0, r5.byte(5));
 }

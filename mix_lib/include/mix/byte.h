@@ -33,14 +33,14 @@ private:
 		CanBeNarrowedToByte<Number>;
 
 public:
-	explicit Byte()
+	Byte()
 		: Byte{0}
 	{
 	}
 
 	template<typename Number,
 		typename = std::enable_if_t<CanBeNarrowedToByte<Number>>>
-	explicit Byte(Number value)
+	Byte(Number value)
 		: value_{}
 	{
 		set(value);
@@ -79,12 +79,12 @@ public:
 
 	static Byte Min()
 	{
-		return Byte{k_min_value};
+		return k_min_value;
 	}
 
 	static Byte Max()
 	{
-		return Byte{k_max_value};
+		return k_max_value;
 	}
 
 private:

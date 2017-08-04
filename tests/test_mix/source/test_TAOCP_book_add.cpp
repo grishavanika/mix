@@ -66,7 +66,7 @@ TEST(ADD_TAOCP_Book_Test, Simple_Addition)
 	{
 		Register ra;
 		ra.set_value(1234, WordField{0, 2});
-		ra.set_byte(3, Byte{1});
+		ra.set_byte(3, 1);
 		ra.set_value(150, WordField{4, 5});
 		mix.set_ra(ra);
 	}
@@ -74,7 +74,7 @@ TEST(ADD_TAOCP_Book_Test, Simple_Addition)
 	{
 		Word w;
 		w.set_value(100, WordField{0, 2});
-		w.set_byte(3, Byte{5});
+		w.set_byte(3, 5);
 		w.set_value(50, WordField{4, 5});
 		mix.set_memory(1000, w);
 	}
@@ -95,9 +95,9 @@ TEST(SUB_TAOCP_Book_Test, Simple_Substraction)
 	{
 		Register ra;
 		ra.set_value(WordValue{-1234}, WordField{0, 2});
-		ra.set_byte(3, Byte{0});
-		ra.set_byte(4, Byte{0});
-		ra.set_byte(5, Byte{9});
+		ra.set_byte(3, 0);
+		ra.set_byte(4, 0);
+		ra.set_byte(5, 9);
 		mix.set_ra(ra);
 	}
 
@@ -105,7 +105,7 @@ TEST(SUB_TAOCP_Book_Test, Simple_Substraction)
 		Word w;
 		w.set_value(WordValue{-2000}, WordField{0, 2});
 		w.set_value(WordValue{150}, WordField{3, 4}, false/*do not touch sign*/);
-		w.set_byte(5, Byte{0});
+		w.set_byte(5, 0);
 		mix.set_memory(1000, w);
 	}
 

@@ -9,10 +9,9 @@ TEST(Word, Default_Word_Is_Positive_With_AllBytesZero)
 {
 	const Word w;
 	ASSERT_EQ(w.sign(), Sign::Positive);
-	const Byte zero{0};
 	for (std::size_t i = 1; i <= Word::k_bytes_count; ++i)
 	{
-		ASSERT_EQ(w.byte(i), zero) << "Index: " << i;
+		ASSERT_EQ(w.byte(i), 0) << "Index: " << i;
 	}
 }
 
@@ -161,7 +160,7 @@ TEST(Word, SetValue_Uses_Big_Endian)
 	Word w;
 	w.set_value(1);
 	ASSERT_EQ(1, w.value());
-	ASSERT_EQ(Byte{1}, w.byte(Word::k_bytes_count));
+	ASSERT_EQ(1, w.byte(Word::k_bytes_count));
 }
 
 TEST(Word, Set_Zero_Absolute_Value_Does_Not_Change_Sign)
