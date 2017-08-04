@@ -105,8 +105,13 @@ const IndexRegister& Computer::ri(std::size_t index) const
 
 void Computer::execute(const Command& command)
 {
+	// #TODO: make exception-safe on_before_command/on_after_command() calls ?
+	InvokeListener(listener_, &IComputerListener::on_before_command, command);
+
 	CommandProcessor processor{*this};
 	processor.process(command);
+
+	InvokeListener(listener_, &IComputerListener::on_after_command, command);
 }
 
 void Computer::set_ra(const Register& ra)
@@ -169,3 +174,9 @@ void Computer::set_comparison_state(ComparisonIndicator comparison)
 	comparison_state_ = comparison;
 	InvokeListener(listener_, &IComputerListener::on_comparison_state_set);
 }
+
+void Computer::halt()
+{
+
+}
+

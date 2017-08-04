@@ -1,6 +1,7 @@
 #include <mix/command_processor.h>
 #include <mix/computer.h>
 #include <mix/command.h>
+#include <mix/char_table.h>
 
 #include "internal/valarray_register_helpers.h"
 
@@ -108,12 +109,6 @@ bool CalculateWordAddOverflow(int lhs, int rhs, int& overflow_part)
 	return overflow;
 }
 
-// Returns number in range [0; 9]
-std::size_t ByteToDigit(const Byte& byte)
-{
-	return (byte.cast_to<std::size_t>() % 10);
-}
-
 std::uint64_t TwoRegistersToNumber(const Register& r1, const Register& r2)
 {
 	// We have two 5-bytes words that are combined into
@@ -126,7 +121,7 @@ std::uint64_t TwoRegistersToNumber(const Register& r1, const Register& r2)
 		for (const auto byte : r.bytes())
 		{
 			--pow;
-			result += ByteToDigit(byte) * static_cast<std::size_t>(std::pow(10u, pow));
+			result += ByteToDecimalDigit(byte) * static_cast<std::size_t>(std::pow(10u, pow));
 		}
 	};
 
@@ -832,8 +827,10 @@ void CommandProcessor::convert_or_halt_group(const Command& command)
 		mix_.set_ra(num());
 		break;
 	case 1: // CHAR
+		char_impl();
 		break;
 	case 2: // HLT
+		mix_.halt();
 		break;
 	default:
 		throw std::logic_error{"NUM/CHAR/HLT commands has unknown field"};
@@ -852,4 +849,24 @@ Register CommandProcessor::num() const
 	}
 
 	return Register{WordValue{mix_.ra().sign(), static_cast<int>(result)}};
+}
+
+void CommandProcessor::char_impl()
+{
+	auto value = mix_.ra().abs_value();
+
+	auto make_register = [&](Sign sign)
+	{
+		Register r;
+		r.set_sign(sign);
+		for (std::size_t i = Word::k_bytes_count; i >= 1; --i)
+		{
+			r.set_byte(i, DecimalDigitToByte(value % 10));
+			value /= 10;
+		}
+		return r;
+	};
+
+	mix_.set_rx(make_register(mix_.rx().sign()));
+	mix_.set_ra(make_register(mix_.ra().sign()));
 }

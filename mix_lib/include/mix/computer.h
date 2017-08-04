@@ -18,6 +18,8 @@ public:
 
 	void execute(const Command& command);
 
+	void halt();
+
 	int current_command() const;
 	int next_command() const;
 	void set_next_command(int address);

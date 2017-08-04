@@ -41,6 +41,9 @@ private:
 
 	void do_jump(const Register& r, const Command& command);
 
+	// #TODO: make statefull functions to return created value
+	// if this is possible/make sense (hint: almost all functions that return `void`)
+
 private:
 	void nop(const Command& command);
 
@@ -118,6 +121,7 @@ private:
 	void convert_or_halt_group(const Command& command);
 
 	Register num() const;
+	void char_impl();
 
 private:
 	Computer& mix_;

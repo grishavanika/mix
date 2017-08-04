@@ -10,7 +10,7 @@
 #include <cassert>
 
 using namespace mix;
-using ::testing::StrictMock;
+using ::testing::NiceMock;
 
 namespace {
 
@@ -37,6 +37,7 @@ protected:
 		EXPECT_CALL(listener, on_memory_set(param.address)).Times(1);
 		EXPECT_CALL(listener, on_ra_set()).Times(1);
 		EXPECT_CALL(listener, on_rx_set()).Times(1);
+
 		for (std::size_t i = 1; i <= 6; ++i)
 		{
 			EXPECT_CALL(listener, on_ri_set(i)).Times(1);
@@ -155,7 +156,7 @@ protected:
 	}
 
 protected:
-	StrictMock<ComputerListenerMock> listener;
+	NiceMock<ComputerListenerMock> listener;
 	Computer mix{&listener};
 };
 

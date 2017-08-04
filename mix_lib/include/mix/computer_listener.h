@@ -3,6 +3,8 @@
 
 namespace mix {
 
+class Command;
+
 struct IComputerListener
 {
 	virtual void on_memory_set(int /*address*/) {}
@@ -14,6 +16,9 @@ struct IComputerListener
 
 	virtual void on_current_command_changed(int /*address*/) {};
 	virtual void on_jump(int /*rj*/) {};
+
+	virtual void on_before_command(const Command&) {};
+	virtual void on_after_command(const Command&) {};
 
 protected:
 	~IComputerListener() = default;

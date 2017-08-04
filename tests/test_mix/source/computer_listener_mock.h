@@ -1,5 +1,6 @@
 #pragma once
 #include <mix/computer_listener.h>
+#include <mix/command.h>
 
 #include <gmock/gmock.h>
 
@@ -14,5 +15,7 @@ struct ComputerListenerMock :
 	MOCK_METHOD0(on_comparison_state_set, void ());
 	MOCK_METHOD1(on_current_command_changed, void (int));
 	MOCK_METHOD1(on_jump, void (int));
+	MOCK_METHOD1(on_before_command, void (const mix::Command&));
+	MOCK_METHOD1(on_after_command, void (const mix::Command&));
 };
 
