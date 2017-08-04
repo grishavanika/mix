@@ -48,11 +48,11 @@ CommandProcessor::k_command_actions = {{
 	/*31*/&CommandProcessor::stx,
 	/*32*/&CommandProcessor::stj,
 	/*33*/&CommandProcessor::stz,
-	/*34*/nullptr,
-	/*35*/nullptr,
-	/*36*/nullptr,
-	/*37*/nullptr,
-	/*38*/nullptr,
+	/*34*/&CommandProcessor::jbus,
+	/*35*/&CommandProcessor::ioc,
+	/*36*/&CommandProcessor::in,
+	/*37*/&CommandProcessor::out,
+	/*38*/&CommandProcessor::jred,
 	/*39*/&CommandProcessor::jmp_flags_group,
 	/*40*/&CommandProcessor::jmp_ra_group,
 	/*41*/&CommandProcessor::jmp_ri1_group,
@@ -145,10 +145,7 @@ void CommandProcessor::process(const Command& command)
 		"Command actions array should have all possible variations of command IDs");
 
 	auto callback = k_command_actions[command.id()];
-	if (!callback)
-	{
-		throw std::runtime_error{"Not implemented"};
-	}
+	assert(callback && "Invalid callback for command");
 
 	(this->*callback)(command);
 }
@@ -870,3 +867,34 @@ void CommandProcessor::char_impl()
 	mix_.set_rx(make_register(mix_.rx().sign()));
 	mix_.set_ra(make_register(mix_.ra().sign()));
 }
+
+void CommandProcessor::in(const Command& command)
+{
+	const auto device_number = command.field();
+	(void)device_number;
+}
+
+void CommandProcessor::out(const Command& command)
+{
+	const auto device_number = command.field();
+	(void)device_number;
+}
+
+void CommandProcessor::ioc(const Command& command)
+{
+	const auto device_number = command.field();
+	(void)device_number;
+}
+
+void CommandProcessor::jred(const Command& command)
+{
+	const auto device_number = command.field();
+	(void)device_number;
+}
+
+void CommandProcessor::jbus(const Command& command)
+{
+	const auto device_number = command.field();
+	(void)device_number;
+}
+

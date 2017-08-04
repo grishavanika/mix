@@ -123,6 +123,12 @@ private:
 	Register num() const;
 	void char_impl();
 
+	void in(const Command& command);
+	void out(const Command& command);
+	void ioc(const Command& command);
+	void jred(const Command& command);
+	void jbus(const Command& command);
+
 private:
 	Computer& mix_;
 
