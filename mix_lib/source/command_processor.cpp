@@ -1,6 +1,7 @@
 #include <mix/command_processor.h>
 #include <mix/computer.h>
 #include <mix/command.h>
+#include <mix/io_device.h>
 #include <mix/char_table.h>
 
 #include "internal/valarray_register_helpers.h"
@@ -873,14 +874,16 @@ void CommandProcessor::char_impl()
 
 void CommandProcessor::in(const Command& command)
 {
-	const auto device_number = command.field();
-	(void)device_number;
+	const auto device_id = static_cast<DeviceId>(command.field());
+	auto& device = mix_.device(device_id);
+	(void)device;
 }
 
 void CommandProcessor::out(const Command& command)
 {
-	const auto device_number = command.field();
-	(void)device_number;
+	const auto device_id = static_cast<DeviceId>(command.field());
+	auto& device = mix_.device(device_id);
+	(void)device;
 }
 
 void CommandProcessor::ioc(const Command& command)
@@ -891,13 +894,23 @@ void CommandProcessor::ioc(const Command& command)
 
 void CommandProcessor::jred(const Command& command)
 {
-	const auto device_number = command.field();
-	(void)device_number;
+	const auto device_id = static_cast<DeviceId>(command.field());
+	const bool ready = mix_.device(device_id).ready();
+	if (ready)
+	{
+		const int next_address = indexed_address(command);
+		mix_.jump(next_address);
+	}
 }
 
 void CommandProcessor::jbus(const Command& command)
 {
-	const auto device_number = command.field();
-	(void)device_number;
+	const auto device_id = static_cast<DeviceId>(command.field());
+	const bool busy = !mix_.device(device_id).ready();
+	if (busy)
+	{
+		const int next_address = indexed_address(command);
+		mix_.jump(next_address);
+	}
 }
 

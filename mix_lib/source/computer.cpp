@@ -18,6 +18,7 @@ Computer::Computer(IComputerListener* listener /*= nullptr*/)
 	, devices_{listener}
 	, listener_{listener}
 {
+	setup_default_devices();
 }
 
 const Register& Computer::ra() const
@@ -169,3 +170,17 @@ void Computer::halt()
 
 }
 
+IIODevice& Computer::device(DeviceId id)
+{
+	return devices_.device(id);
+}
+
+void Computer::change_device(DeviceId id, std::unique_ptr<IIODevice> device)
+{
+	devices_.inject_device(id, std::move(device));
+}
+
+void Computer::setup_default_devices()
+{
+	// #TODO: add default devices to `devices_`
+}

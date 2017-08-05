@@ -49,8 +49,11 @@ public:
 	ComparisonIndicator comparison_state() const;
 	void set_comparison_state(ComparisonIndicator comparison);
 
-private:
+	IIODevice& device(DeviceId id);
+	void change_device(DeviceId id, std::unique_ptr<IIODevice> device);
 
+private:
+	void setup_default_devices();
 
 private:
 	Register ra_;
