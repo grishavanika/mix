@@ -1,5 +1,5 @@
 #pragma once
-#include <mix/general_enums.h>
+#include <mix/general_types.h>
 
 #include <cstddef>
 

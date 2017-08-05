@@ -21,4 +21,6 @@ enum class OverflowFlag
 	Overflow	= 1
 };
 
+using DeviceId = unsigned char;
+
 } // namespace mix

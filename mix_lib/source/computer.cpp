@@ -2,22 +2,9 @@
 #include <mix/command_processor.h>
 #include <mix/computer_listener.h>
 
+#include "internal/helpers.hpp"
+
 using namespace mix;
-
-namespace {
-
-template<typename CallbackMember, typename... Args>
-void InvokeListener(
-	IComputerListener* listener,
-	CallbackMember callback,
-	Args&&... args)
-{
-	if (listener)
-	{
-		(listener->*callback)(std::forward<Args>(args)...);
-	}
-}
-} // namespace
 
 Computer::Computer(IComputerListener* listener /*= nullptr*/)
 	: ra_{}
@@ -29,6 +16,7 @@ Computer::Computer(IComputerListener* listener /*= nullptr*/)
 	, overflow_flag_{OverflowFlag::NoOverdlow}
 	, memory_{}
 	, listener_{listener}
+	, devices_{listener}
 {
 }
 
@@ -52,14 +40,14 @@ void Computer::jump(int address)
 	const auto next = next_command();
 	set_next_command(address);
 	rj_.set_value(next);
-	InvokeListener(listener_, &IComputerListener::on_jump, next);
+	internal::InvokeListener(listener_, &IComputerListener::on_jump, next);
 }
 
 void Computer::set_next_command(int address)
 {
 	// #TODO: validate `address` (in range [0; 4000))
 	rip_.set_value(address);
-	InvokeListener(listener_, &IComputerListener::on_current_command_changed, address);
+	internal::InvokeListener(listener_, &IComputerListener::on_current_command_changed, address);
 }
 
 int Computer::current_command() const
@@ -80,7 +68,7 @@ void Computer::set_memory(int address, const Word& value)
 	}
 
 	memory_[static_cast<std::size_t>(address)] = value;
-	InvokeListener(listener_, &IComputerListener::on_memory_set, address);
+	internal::InvokeListener(listener_, &IComputerListener::on_memory_set, address);
 }
 
 const Word& Computer::memory(int address) const
@@ -106,24 +94,24 @@ const IndexRegister& Computer::ri(std::size_t index) const
 void Computer::execute(const Command& command)
 {
 	// #TODO: make exception-safe on_before_command/on_after_command() calls ?
-	InvokeListener(listener_, &IComputerListener::on_before_command, command);
+	internal::InvokeListener(listener_, &IComputerListener::on_before_command, command);
 
 	CommandProcessor processor{*this};
 	processor.process(command);
 
-	InvokeListener(listener_, &IComputerListener::on_after_command, command);
+	internal::InvokeListener(listener_, &IComputerListener::on_after_command, command);
 }
 
 void Computer::set_ra(const Register& ra)
 {
 	ra_ = ra;
-	InvokeListener(listener_, &IComputerListener::on_ra_set);
+	internal::InvokeListener(listener_, &IComputerListener::on_ra_set);
 }
 
 void Computer::set_rx(const Register& rx)
 {
 	rx_ = rx;
-	InvokeListener(listener_, &IComputerListener::on_rx_set);
+	internal::InvokeListener(listener_, &IComputerListener::on_rx_set);
 }
 
 void Computer::set_ri(std::size_t index, const IndexRegister& ri)
@@ -134,7 +122,7 @@ void Computer::set_ri(std::size_t index, const IndexRegister& ri)
 	}
 
 	rindexes_[index - 1] = ri;
-	InvokeListener(listener_, &IComputerListener::on_ri_set, index);
+	internal::InvokeListener(listener_, &IComputerListener::on_ri_set, index);
 }
 
 OverflowFlag Computer::overflow_flag() const
@@ -150,18 +138,19 @@ bool Computer::has_overflow() const
 void Computer::set_overflow()
 {
 	overflow_flag_ = OverflowFlag::Overflow;
-	InvokeListener(listener_, &IComputerListener::on_overflow_flag_set);
+	internal::InvokeListener(listener_, &IComputerListener::on_overflow_flag_set);
 }
 
 void Computer::clear_overflow()
 {
 	overflow_flag_ = OverflowFlag::NoOverdlow;
-	InvokeListener(listener_, &IComputerListener::on_overflow_flag_set);
+	internal::InvokeListener(listener_, &IComputerListener::on_overflow_flag_set);
 }
 
 void Computer::set_listener(IComputerListener* listener)
 {
 	listener_ = listener;
+	devices_.set_listener(listener);
 }
 
 ComparisonIndicator Computer::comparison_state() const
@@ -172,7 +161,7 @@ ComparisonIndicator Computer::comparison_state() const
 void Computer::set_comparison_state(ComparisonIndicator comparison)
 {
 	comparison_state_ = comparison;
-	InvokeListener(listener_, &IComputerListener::on_comparison_state_set);
+	internal::InvokeListener(listener_, &IComputerListener::on_comparison_state_set);
 }
 
 void Computer::halt()

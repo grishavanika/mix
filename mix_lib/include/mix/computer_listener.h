@@ -1,12 +1,16 @@
 #pragma once
+#include <mix/io_device.h>
+
 #include <cstddef>
 
 namespace mix {
 
 class Command;
 
-struct IComputerListener
+class IComputerListener :
+	public IIODeviceListener
 {
+public:
 	virtual void on_memory_set(int /*address*/) {}
 	virtual void on_ra_set() {}
 	virtual void on_rx_set() {}

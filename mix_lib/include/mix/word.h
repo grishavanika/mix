@@ -1,6 +1,6 @@
 #pragma once
 #include <mix/byte.h>
-#include <mix/general_enums.h>
+#include <mix/general_types.h>
 #include <mix/word_field.h>
 #include <mix/word_value.h>
 

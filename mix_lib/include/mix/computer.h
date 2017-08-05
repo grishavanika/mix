@@ -1,10 +1,11 @@
 #include <mix/registers.h>
-#include <mix/general_enums.h>
+#include <mix/general_types.h>
+#include <mix/device_controller.h>
 
 namespace mix {
 
 class Command;
-struct IComputerListener;
+class IComputerListener;
 
 class Computer
 {
@@ -62,6 +63,8 @@ private:
 	OverflowFlag overflow_flag_;
 
 	std::array<Word, k_memory_words_count> memory_;
+
+	DeviceController devices_;
 
 	IComputerListener* listener_;
 };
