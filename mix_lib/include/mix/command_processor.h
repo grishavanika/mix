@@ -9,7 +9,6 @@ class Computer;
 class Command;
 class Word;
 class WordValue;
-class IIODevice;
 
 class CommandProcessor
 {
@@ -45,7 +44,7 @@ private:
 	// #TODO: make statefull functions to return created value
 	// if this is possible/make sense (hint: almost all functions that return `void`)
 
-	DeviceBlockId device_block_id(const IIODevice& device) const;
+	DeviceBlockId device_block_id(DeviceId device_id) const;
 
 private:
 	void nop(const Command& command);

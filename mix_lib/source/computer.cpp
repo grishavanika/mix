@@ -175,9 +175,9 @@ IIODevice& Computer::device(DeviceId id)
 	return devices_.device(id);
 }
 
-void Computer::replace_device(std::unique_ptr<IIODevice> device)
+void Computer::replace_device(DeviceId id, std::unique_ptr<IIODevice> device)
 {
-	devices_.inject_device(std::move(device));
+	devices_.inject_device(id, std::move(device));
 }
 
 IIODevice& Computer::wait_device_ready(DeviceId id)

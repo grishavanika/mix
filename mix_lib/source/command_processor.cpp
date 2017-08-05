@@ -877,7 +877,7 @@ void CommandProcessor::in(const Command& command)
 	const auto device_id = static_cast<DeviceId>(command.field());
 	auto& device = mix_.wait_device_ready(device_id);
 
-	const auto block_id = device_block_id(device);
+	const auto block_id = device_block_id(device_id);
 	const int dest_address = indexed_address(command);
 	const int cells_count = device.block_size();
 
@@ -893,7 +893,7 @@ void CommandProcessor::out(const Command& command)
 	const auto device_id = static_cast<DeviceId>(command.field());
 	auto& device = mix_.wait_device_ready(device_id);
 
-	const auto block_id = device_block_id(device);
+	const auto block_id = device_block_id(device_id);
 	const int source_address = indexed_address(command);
 	const int cells_count = device.block_size();
 
@@ -907,7 +907,9 @@ void CommandProcessor::ioc(const Command& command)
 {
 	const auto device_id = static_cast<DeviceId>(command.field());
 	auto& device = mix_.wait_device_ready(device_id);
-	const auto block_id = device_block_id(device);
+	const auto block_id = device_block_id(device_id);
+	(void)device;
+	(void)block_id;
 }
 
 void CommandProcessor::jred(const Command& command)
@@ -932,9 +934,9 @@ void CommandProcessor::jbus(const Command& command)
 	}
 }
 
-DeviceBlockId CommandProcessor::device_block_id(const IIODevice& device) const
+DeviceBlockId CommandProcessor::device_block_id(DeviceId device_id) const
 {
-	if (device.type() == IODeviceType::Drum)
+	if (DeviceController::DeviceTypeFromId(device_id) == IODeviceType::Drum)
 	{
 		return static_cast<DeviceBlockId>(mix_.rx().value());
 	}

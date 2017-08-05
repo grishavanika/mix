@@ -21,6 +21,22 @@ enum class OverflowFlag
 	Overflow	= 1
 };
 
+enum class IODeviceType
+{
+	Unknown = -1,
+	// https://en.wikipedia.org/wiki/Magnetic_tape
+	MagneticTape = 7,
+	// https://en.wikipedia.org/wiki/Drum_memory
+	Drum = 15,
+	// https://en.wikipedia.org/wiki/Punched_card
+	PunchCard = 16,
+	Perforator = 17,
+	Printer = 18,
+	Terminal = 19,
+	// https://en.wikipedia.org/wiki/Punched_tape
+	PunchedTape = 20,
+};
+
 using DeviceId = unsigned char;
 using DeviceBlockId = unsigned char;
 

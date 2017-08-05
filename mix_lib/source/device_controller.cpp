@@ -23,19 +23,6 @@ struct DeviceProxy final :
 	{
 	}
 
-	virtual DeviceId id() const override
-	{
-		// Note: we are not calling `device_->id()` since
-		// it's not make sense if Device will chnage its ID
-		return id_;
-	}
-
-	virtual IODeviceType type() const
-	{
-		// #TODO: cache type also as with `id()`
-		return device_->type();
-	}
-
 	virtual bool ready() const override
 	{
 		return device_->ready();
@@ -83,9 +70,8 @@ struct DeviceController::Impl final :
 		return devices_.at(id);
 	}
 
-	void inject_device(std::unique_ptr<IIODevice> device)
+	void inject_device(DeviceId id, std::unique_ptr<IIODevice> device)
 	{
-		const auto id = device->id();
 		devices_.erase(id);
 		(void)devices_.emplace(std::piecewise_construct,
 			std::make_tuple(id),
@@ -122,8 +108,42 @@ IIODevice& DeviceController::device(DeviceId id)
 	return impl_->device(id);
 }
 
-void DeviceController::inject_device(std::unique_ptr<IIODevice> device)
+void DeviceController::inject_device(DeviceId id, std::unique_ptr<IIODevice> device)
 {
 	assert(device);
-	impl_->inject_device(std::move(device));
+	impl_->inject_device(id, std::move(device));
+}
+
+/*static*/ IODeviceType DeviceController::DeviceTypeFromId(DeviceId id)
+{
+	const auto type_to_int = [](IODeviceType type)
+	{
+		return static_cast<int>(type);
+	};
+	const auto raw_id = static_cast<int>(id);
+	if (raw_id <= type_to_int(IODeviceType::MagneticTape))
+	{
+		return IODeviceType::MagneticTape;
+	}
+	else if (raw_id <= type_to_int(IODeviceType::Drum))
+	{
+		return IODeviceType::Drum;
+	}
+	else if (raw_id <= type_to_int(IODeviceType::PunchCard))
+	{
+		return IODeviceType::PunchCard;
+	}
+	else if (raw_id <= type_to_int(IODeviceType::Perforator))
+	{
+		return IODeviceType::Perforator;
+	}
+	else if (raw_id <= type_to_int(IODeviceType::Printer))
+	{
+		return IODeviceType::Terminal;
+	}
+	else if (raw_id <= type_to_int(IODeviceType::PunchedTape))
+	{
+		return IODeviceType::PunchedTape;
+	}
+	return IODeviceType::Unknown;
 }

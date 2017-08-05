@@ -51,7 +51,7 @@ public:
 
 	IIODevice& device(DeviceId id);
 	IIODevice& wait_device_ready(DeviceId id);
-	void replace_device(std::unique_ptr<IIODevice> device);
+	void replace_device(DeviceId id, std::unique_ptr<IIODevice> device);
 
 private:
 	void setup_default_devices();
