@@ -17,7 +17,7 @@ struct ComputerListenerMock :
 	MOCK_METHOD1(on_jump, void (int));
 	MOCK_METHOD1(on_before_command, void (const mix::Command&));
 	MOCK_METHOD1(on_after_command, void (const mix::Command&));
-	MOCK_METHOD1(on_device_read, void (mix::DeviceId));
-	MOCK_METHOD1(on_device_write, void (mix::DeviceId));
+	MOCK_METHOD2(on_device_read, void (mix::DeviceId, mix::DeviceBlockId));
+	MOCK_METHOD2(on_device_write, void (mix::DeviceId, mix::DeviceBlockId));
 };
 

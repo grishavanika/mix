@@ -28,16 +28,21 @@ struct DeviceProxy :
 		return device_->ready();
 	}
 
-	virtual Word read()
+	virtual std::size_t block_size() const override
 	{
-		listener_.on_device_read(id_);
-		return device_->read();
+		return device_->block_size();
 	}
 
-	virtual void write(const Word& word) override
+	virtual Word read_next(DeviceBlockId block_id) override
 	{
-		listener_.on_device_write(id_);
-		device_->write(word);
+		listener_.on_device_read(id_, block_id);
+		return device_->read_next(block_id);
+	}
+
+	virtual void write_next(DeviceBlockId block_id, const Word& word) override
+	{
+		listener_.on_device_write(id_, block_id);
+		device_->write_next(block_id, word);
 	}
 
 private:
@@ -73,14 +78,16 @@ struct DeviceController::Impl :
 			std::forward_as_tuple(*this, id, std::move(device)));
 	}
 
-	virtual void on_device_read(DeviceId id) override
+	virtual void on_device_read(DeviceId id, DeviceBlockId block_id) override
 	{
-		internal::InvokeListener(listener_, &IIODeviceListener::on_device_read, id);
+		internal::InvokeListener(listener_, &IIODeviceListener::on_device_read,
+			id, block_id);
 	}
 
-	virtual void on_device_write(DeviceId id) override
+	virtual void on_device_write(DeviceId id, DeviceBlockId block_id) override
 	{
-		internal::InvokeListener(listener_, &IIODeviceListener::on_device_write, id);
+		internal::InvokeListener(listener_, &IIODeviceListener::on_device_write,
+			id, block_id);
 	}
 };
 
