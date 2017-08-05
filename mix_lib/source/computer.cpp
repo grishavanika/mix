@@ -15,8 +15,8 @@ Computer::Computer(IComputerListener* listener /*= nullptr*/)
 	, comparison_state_{ComparisonIndicator::Less}
 	, overflow_flag_{OverflowFlag::NoOverdlow}
 	, memory_{}
-	, listener_{listener}
 	, devices_{listener}
+	, listener_{listener}
 {
 }
 
