@@ -794,6 +794,9 @@ void CommandProcessor::rax_shift(int shift, bool cyclic)
 
 	std::valarray<Byte> bytes = ToBytes(mix_.ra(), mix_.rx());
 
+	// #TODO: introduce "Extended Accumulator (rA)" thing
+	// that combines rA and rX together to avoid these ugly
+	// functions that work with 2 registers (rA and rX)
 	const auto rax = ToRegisters(mix_.ra().sign(), mix_.rx().sign(),
 		cyclic ? bytes.cshift(shift) : bytes.shift(shift));
 
