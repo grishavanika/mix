@@ -1,9 +1,4 @@
-#include <mix/computer.h>
-#include <mix/command_processor.h>
-#include <mix/registers.h>
-#include <mix/command.h>
-
-#include <gtest/gtest.h>
+#include "precompiled.h"
 
 using namespace mix;
 

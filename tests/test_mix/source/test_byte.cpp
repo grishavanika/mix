@@ -1,6 +1,4 @@
-#include <mix/byte.h>
-
-#include <gtest/gtest.h>
+#include "precompiled.h"
 
 using namespace mix;
 

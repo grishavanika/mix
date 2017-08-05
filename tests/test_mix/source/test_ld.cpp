@@ -1,13 +1,4 @@
-#include <mix/computer.h>
-#include <mix/command.h>
-
-#include "computer_listener_mock.h"
-
-#include <tuple>
-
-#include <gtest/gtest.h>
-
-#include <cassert>
+#include "precompiled.h"
 
 using namespace mix;
 using ::testing::NiceMock;

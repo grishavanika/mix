@@ -1,10 +1,4 @@
-#include <mix/computer.h>
-#include <mix/command_processor.h>
-#include <mix/command.h>
-
-#include "computer_listener_mock.h"
-
-#include <gtest/gtest.h>
+#include "precompiled.h"
 
 using namespace mix;
 using ::testing::_;

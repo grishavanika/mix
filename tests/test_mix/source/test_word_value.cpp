@@ -1,6 +1,4 @@
-#include <mix/word_value.h>
-
-#include <gtest/gtest.h>
+#include "precompiled.h"
 
 using namespace mix;
 

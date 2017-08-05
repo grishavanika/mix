@@ -117,32 +117,34 @@ void DeviceController::inject_device(DeviceId id, std::unique_ptr<IIODevice> dev
 
 /*static*/ IODeviceType DeviceController::DeviceTypeFromId(DeviceId id)
 {
-	const auto type_to_int = [](IODeviceType type)
+	const auto to_int = [](IODeviceType type)
 	{
 		return static_cast<int>(type);
 	};
+
+
 	const auto raw_id = static_cast<int>(id);
-	if (raw_id <= type_to_int(IODeviceType::MagneticTape))
+	if (raw_id <= to_int(IODeviceType::MagneticTape))
 	{
 		return IODeviceType::MagneticTape;
 	}
-	else if (raw_id <= type_to_int(IODeviceType::Drum))
+	else if (raw_id <= to_int(IODeviceType::Drum))
 	{
 		return IODeviceType::Drum;
 	}
-	else if (raw_id <= type_to_int(IODeviceType::PunchCard))
+	else if (raw_id <= to_int(IODeviceType::PunchCard))
 	{
 		return IODeviceType::PunchCard;
 	}
-	else if (raw_id <= type_to_int(IODeviceType::Perforator))
+	else if (raw_id <= to_int(IODeviceType::Perforator))
 	{
 		return IODeviceType::Perforator;
 	}
-	else if (raw_id <= type_to_int(IODeviceType::Printer))
+	else if (raw_id <= to_int(IODeviceType::Printer))
 	{
 		return IODeviceType::Terminal;
 	}
-	else if (raw_id <= type_to_int(IODeviceType::PunchedTape))
+	else if (raw_id <= to_int(IODeviceType::PunchedTape))
 	{
 		return IODeviceType::PunchedTape;
 	}
