@@ -17,7 +17,7 @@ public:
 	void set_listener(IIODeviceListener* listener);
 
 	IIODevice& device(DeviceId id);
-	void inject_device(DeviceId id, std::unique_ptr<IIODevice> device);
+	void inject_device(std::unique_ptr<IIODevice> device);
 
 private:
 	struct Impl;

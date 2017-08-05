@@ -875,21 +875,39 @@ void CommandProcessor::char_impl()
 void CommandProcessor::in(const Command& command)
 {
 	const auto device_id = static_cast<DeviceId>(command.field());
-	auto& device = mix_.device(device_id);
-	(void)device;
+	auto& device = mix_.wait_device_ready(device_id);
+
+	const auto block_id = device_block_id(device);
+	const int dest_address = indexed_address(command);
+	const int cells_count = device.block_size();
+
+	for (int i = 0; i < cells_count; ++i)
+	{
+		// #TODO: should we wait after each word read ?
+		mix_.set_memory(dest_address + i, device.read_next(block_id));
+	}
 }
 
 void CommandProcessor::out(const Command& command)
 {
 	const auto device_id = static_cast<DeviceId>(command.field());
-	auto& device = mix_.device(device_id);
-	(void)device;
+	auto& device = mix_.wait_device_ready(device_id);
+
+	const auto block_id = device_block_id(device);
+	const int source_address = indexed_address(command);
+	const int cells_count = device.block_size();
+
+	for (int i = 0; i < cells_count; ++i)
+	{
+		device.write_next(block_id, mix_.memory(source_address + i));
+	}
 }
 
 void CommandProcessor::ioc(const Command& command)
 {
-	const auto device_number = command.field();
-	(void)device_number;
+	const auto device_id = static_cast<DeviceId>(command.field());
+	auto& device = mix_.wait_device_ready(device_id);
+	const auto block_id = device_block_id(device);
 }
 
 void CommandProcessor::jred(const Command& command)
@@ -914,3 +932,12 @@ void CommandProcessor::jbus(const Command& command)
 	}
 }
 
+DeviceBlockId CommandProcessor::device_block_id(const IIODevice& device) const
+{
+	if (device.type() == IODeviceType::Drum)
+	{
+		return static_cast<DeviceBlockId>(mix_.rx().value());
+	}
+
+	return 0;
+}

@@ -50,7 +50,8 @@ public:
 	void set_comparison_state(ComparisonIndicator comparison);
 
 	IIODevice& device(DeviceId id);
-	void change_device(DeviceId id, std::unique_ptr<IIODevice> device);
+	IIODevice& wait_device_ready(DeviceId id);
+	void replace_device(std::unique_ptr<IIODevice> device);
 
 private:
 	void setup_default_devices();

@@ -24,6 +24,8 @@ public:
 	virtual void on_before_command(const Command&) {};
 	virtual void on_after_command(const Command&) {};
 
+	virtual void on_wait_on_device(DeviceId) {}
+
 protected:
 	~IComputerListener() = default;
 };
