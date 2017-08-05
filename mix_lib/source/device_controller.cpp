@@ -28,7 +28,7 @@ struct DeviceProxy :
 		return device_->ready();
 	}
 
-	virtual std::size_t block_size() const override
+	virtual int block_size() const override
 	{
 		return device_->block_size();
 	}

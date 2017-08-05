@@ -20,7 +20,7 @@ public:
 	virtual ~IIODevice() = default;
 
 	virtual bool ready() const = 0;
-	virtual std::size_t block_size() const = 0;
+	virtual int block_size() const = 0;
 
 	virtual Word read_next(DeviceBlockId block_id) = 0;
 	virtual void write_next(DeviceBlockId block_id, const Word&) = 0;
