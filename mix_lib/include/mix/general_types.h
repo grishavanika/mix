@@ -38,6 +38,6 @@ enum class IODeviceType
 };
 
 using DeviceId = unsigned char;
-using DeviceBlockId = unsigned char;
+using DeviceBlockId = int;
 
 } // namespace mix

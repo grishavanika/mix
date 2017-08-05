@@ -11,7 +11,7 @@ class IIODeviceListener;
 class DeviceController
 {
 public:
-	static constexpr std::size_t k_max_devices_count = 20;
+	static constexpr std::size_t k_max_devices_count = 21;
 
 public:
 	DeviceController(IIODeviceListener* listener = nullptr);

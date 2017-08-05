@@ -3,7 +3,7 @@
 
 #include "internal/helpers.hpp"
 
-#include <map>
+#include <array>
 
 #include <cassert>
 
@@ -14,12 +14,17 @@ namespace {
 struct DeviceProxy final :
 	public IIODevice
 {
-	DeviceProxy(IIODeviceListener& listener,
-		DeviceId id,
-		std::unique_ptr<IIODevice> device)
-			: listener_{listener}
-			, device_{std::move(device)}
-			, id_{id}
+	DeviceProxy()
+		: listener_{nullptr}
+		, device_{}
+		, id_{}
+	{
+	}
+
+	DeviceProxy(IIODeviceListener& listener, DeviceId id, std::unique_ptr<IIODevice> device)
+		: listener_{&listener}
+		, device_{std::move(device)}
+		, id_{id}
 	{
 	}
 
@@ -35,18 +40,18 @@ struct DeviceProxy final :
 
 	virtual Word read_next(DeviceBlockId block_id) override
 	{
-		listener_.on_device_read(id_, block_id);
+		listener_->on_device_read(id_, block_id);
 		return device_->read_next(block_id);
 	}
 
 	virtual void write_next(DeviceBlockId block_id, const Word& word) override
 	{
-		listener_.on_device_write(id_, block_id);
+		listener_->on_device_write(id_, block_id);
 		device_->write_next(block_id, word);
 	}
 
 private:
-	IIODeviceListener& listener_;
+	IIODeviceListener* listener_;
 	std::unique_ptr<IIODevice> device_;
 	DeviceId id_;
 };
@@ -57,11 +62,10 @@ struct DeviceController::Impl final :
 	public IIODeviceListener
 {
 	IIODeviceListener* listener_;
-	std::map<DeviceId, DeviceProxy> devices_;
+	std::array<DeviceProxy, DeviceController::k_max_devices_count> devices_;
 
 	Impl(IIODeviceListener* listener)
 		: listener_{listener}
-		, devices_{}
 	{
 	}
 
@@ -72,10 +76,7 @@ struct DeviceController::Impl final :
 
 	void inject_device(DeviceId id, std::unique_ptr<IIODevice> device)
 	{
-		devices_.erase(id);
-		(void)devices_.emplace(std::piecewise_construct,
-			std::make_tuple(id),
-			std::forward_as_tuple(*this, id, std::move(device)));
+		devices_.at(id) = DeviceProxy{*this, id, std::move(device)};
 	}
 
 	virtual void on_device_read(DeviceId id, DeviceBlockId block_id) override
