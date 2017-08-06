@@ -36,8 +36,8 @@ TEST(DIV_TAOCP_Book_Test, Div_RAX_With_Cell_Sets_Sign_Of_Result_To_RA)
 
 	mix.execute(MakeDIV(1000));
 
-	ASSERT_EQ(17 / 3, mix.ra().abs_value());
-	ASSERT_EQ(17 % 3, mix.rx().abs_value());
+	ASSERT_EQ(std::size_t{17 / 3}, mix.ra().abs_value());
+	ASSERT_EQ(std::size_t{17 % 3}, mix.rx().abs_value());
 
 	ASSERT_EQ(ra_sign_before_div, mix.rx().sign());
 	ASSERT_EQ(IntSign(17 / 3), mix.ra().sign());

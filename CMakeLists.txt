@@ -26,7 +26,9 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 endif()
 
 if (gcc)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z")	
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z")
+else()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
 endif()
 
 if (only_msvc)

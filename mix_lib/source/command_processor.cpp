@@ -173,7 +173,12 @@ Register CommandProcessor::do_load(
 	
 	prev_value.set_zero_abs_value();
 	prev_value.set_value(reverse_sorce_sign ? value.reverse_sign() : value, dest_field);
+	
+#if (0) // #TODO (Clang): why "redundant move in return statement" ?
 	return std::move(prev_value);
+#else
+	return prev_value;
+#endif
 }
 
 int CommandProcessor::indexed_address(int address, std::size_t index) const
@@ -392,7 +397,11 @@ Register CommandProcessor::do_add(Register r, const WordValue& value)
 		{
 			mix_.set_overflow();
 			r.set_value(overflow_result);
+#if (0) // #TODO (Clang): why "redundant move in return statement" ?
 			return std::move(r);
+#else
+			return r;
+#endif
 		}
 	}
 
