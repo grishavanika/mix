@@ -34,6 +34,31 @@ TEST(IOInput, Reads_Device_Block_Size_Cells_To_Memory_From_Device)
 	ASSERT_EQ(Word{42}, mix.memory(1001));
 }
 
+TEST(IOInput, Waits_While_Device_Is_Busy)
+{
+	const DeviceId k_device_id = 16;
+
+	auto device_mock = std::make_unique<DeviceMock>();
+	EXPECT_CALL(*device_mock, ready())
+		.WillOnce(Return(false))
+		.WillOnce(Return(false))
+		.WillOnce(Return(true));
+
+	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(1));
+	EXPECT_CALL(*device_mock, read_next(0)).WillOnce(Return(Word{42}));
+	EXPECT_CALL(*device_mock, write_next(_, _)).Times(0);
+
+	NiceMock<ComputerListenerMock> listener;
+	EXPECT_CALL(listener, on_device_read(k_device_id, 0)).Times(1);
+	EXPECT_CALL(listener, on_wait_on_device(k_device_id)).Times(2);
+
+	Computer mix{&listener};
+	mix.replace_device(k_device_id, std::move(device_mock));
+	mix.set_rx(Register{1}); // Should be ignored
+
+	mix.execute(MakeIN(1000, k_device_id));
+}
+
 TEST(IOInput, Takes_Into_Account_Device_Block_ID_From_RX_For_Drum_Devices)
 {
 	const DeviceId k_device_id = 15;
@@ -180,3 +205,33 @@ TEST(IOOutput, Takes_Into_Account_Device_Block_ID_From_RX_For_Drum_Devices)
 
 	mix.execute(MakeOUT(1000, k_device_id));
 }
+
+TEST(IOOutput, Waits_While_Device_Is_Busy)
+{
+	const DeviceId k_device_id = 12;
+	const DeviceBlockId k_drum_block_id = 5;
+
+	auto device_mock = std::make_unique<DeviceMock>();
+	EXPECT_CALL(*device_mock, ready())
+		.WillOnce(Return(false))
+		.WillOnce(Return(false))
+		.WillOnce(Return(false))
+		.WillOnce(Return(false))
+		.WillOnce(Return(true));
+	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(1));
+	EXPECT_CALL(*device_mock, read_next(_)).Times(0);
+	EXPECT_CALL(*device_mock, write_next(k_drum_block_id, Word{42})).Times(1);
+
+	NiceMock<ComputerListenerMock> listener;
+	EXPECT_CALL(listener, on_device_read(_, _)).Times(0);
+	EXPECT_CALL(listener, on_device_write(k_device_id, k_drum_block_id)).Times(1);
+	EXPECT_CALL(listener, on_wait_on_device(k_device_id)).Times(4);
+
+	Computer mix{&listener};
+	mix.replace_device(k_device_id, std::move(device_mock));
+	mix.set_rx(Register{k_drum_block_id});
+	mix.set_memory(1000, Word{42});
+
+	mix.execute(MakeOUT(1000, k_device_id));
+}
+
