@@ -9,12 +9,12 @@ using namespace mix;
 Computer::Computer(IComputerListener* listener /*= nullptr*/)
 	: ra_{}
 	, rx_{}
-	, rindexes_{}
+	, rindexes_()
 	, rj_{}
 	, rip_{}
 	, comparison_state_{ComparisonIndicator::Less}
 	, overflow_flag_{OverflowFlag::NoOverdlow}
-	, memory_{}
+	, memory_()
 	, devices_{listener}
 	, listener_{listener}
 {

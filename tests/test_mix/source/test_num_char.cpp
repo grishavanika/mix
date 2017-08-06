@@ -6,9 +6,9 @@ TEST(Num, Gets_Decimal_Number_From_RAX_Registers_And_Changes_Absolute_Value_Of_R
 {
 	Computer mix;
 
-	const Register ra{{0, 0, 31, 32, 39}, Sign::Negative};
+	const Register ra{{{0, 0, 31, 32, 39}}, Sign::Negative};
 	mix.set_ra(ra);
-	const Register rx{{37, 57, 47, 30, 30}, Sign::Positive};
+	const Register rx{{{37, 57, 47, 30, 30}}, Sign::Positive};
 	mix.set_rx(rx);
 
 	mix.execute(MakeNUM());
@@ -25,14 +25,14 @@ TEST(Char, Converts_RAX_Decimal_Digits_To_Digit_Char_Value_And_Puts_To_RA_RX)
 	{
 		Register ra{-12977699};
 		mix.set_ra(ra);
-		const Register rx{{37, 57, 47, 30, 30}, Sign::Positive};
+		const Register rx{{{37, 57, 47, 30, 30}}, Sign::Positive};
 		mix.set_rx(rx);
 	}
 
 	mix.execute(MakeCHAR());
 
-	const Register expected_ra{{30, 30, 31, 32, 39}, Sign::Negative};
-	const Register expected_rx{{37, 37, 36, 39, 39}, Sign::Positive};
+	const Register expected_ra{{{30, 30, 31, 32, 39}}, Sign::Negative};
+	const Register expected_rx{{{37, 37, 36, 39, 39}}, Sign::Positive};
 
 	ASSERT_EQ(expected_ra, mix.ra());
 	ASSERT_EQ(expected_rx, mix.rx());
