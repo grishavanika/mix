@@ -60,22 +60,27 @@ set_target_properties(gmock_main PROPERTIES FOLDER third_party)
 # libraries
 add_subdirectory(core_lib)
 add_subdirectory(mix_lib)
+add_subdirectory(mixal_parser_lib)
 set_target_properties(core_lib PROPERTIES FOLDER libs)
 set_target_properties(mix_lib PROPERTIES FOLDER libs)
+set_target_properties(mixal_parser_lib PROPERTIES FOLDER libs)
 
 # exe
 add_subdirectory(mix_exe)
 set_target_properties(mix_exe PROPERTIES FOLDER app)
 
 # tests
-add_subdirectory(tests/test_mix)
 add_subdirectory(tests/test_core)
-set_target_properties(test_mix PROPERTIES FOLDER tests)
+add_subdirectory(tests/test_mix)
+add_subdirectory(tests/test_mixal_parser)
 set_target_properties(test_core PROPERTIES FOLDER tests)
+set_target_properties(test_mix PROPERTIES FOLDER tests)
+set_target_properties(test_mixal_parser PROPERTIES FOLDER tests)
 
 enable_testing()
-add_test(NAME mix COMMAND test_mix)
 add_test(NAME core COMMAND test_core)
+add_test(NAME mix COMMAND test_mix)
+add_test(NAME mixal_parser COMMAND test_mixal_parser)
 
 # Note: to use it with clang you need to install latest one
 # from http://llvm.org/builds/ (5.0.0 for the moment)
