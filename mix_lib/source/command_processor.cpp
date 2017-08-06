@@ -936,7 +936,7 @@ void CommandProcessor::jbus(const Command& command)
 
 DeviceBlockId CommandProcessor::device_block_id(DeviceId device_id) const
 {
-	if (DeviceController::DeviceTypeFromId(device_id) == IODeviceType::Drum)
+	if (DeviceController::DeviceTypeFromId(device_id) == DeviceType::Drum)
 	{
 		return static_cast<DeviceBlockId>(mix_.rx().value());
 	}

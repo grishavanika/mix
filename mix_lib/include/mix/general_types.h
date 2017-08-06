@@ -21,7 +21,7 @@ enum class OverflowFlag
 	Overflow	= 1
 };
 
-enum class IODeviceType
+enum class DeviceType
 {
 	Unknown = -1,
 	// https://en.wikipedia.org/wiki/Magnetic_tape

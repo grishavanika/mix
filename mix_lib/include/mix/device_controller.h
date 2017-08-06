@@ -22,7 +22,7 @@ public:
 	IIODevice& device(DeviceId id);
 	void inject_device(DeviceId id, std::unique_ptr<IIODevice> device);
 
-	static IODeviceType DeviceTypeFromId(DeviceId id);
+	static DeviceType DeviceTypeFromId(DeviceId id);
 
 private:
 	struct Impl;
