@@ -3,8 +3,8 @@
 #include <mix/command.h>
 #include <mix/registers.h>
 
-#include "mocks.h"
-#include "commands_factory.h"
+#include "source/mocks.h"
+#include "source/commands_factory.h"
 
 #include <gtest/gtest.h>
 
