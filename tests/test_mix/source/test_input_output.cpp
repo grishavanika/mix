@@ -6,7 +6,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::NiceMock;
 
-TEST(IOInput, Reads_Device_Block_Size_Cells_To_Memory)
+TEST(IOInput, Reads_Device_Block_Size_Cells_To_Memory_From_Device)
 {
 	const DeviceId k_device_id = 16;
 
@@ -34,7 +34,7 @@ TEST(IOInput, Reads_Device_Block_Size_Cells_To_Memory)
 	ASSERT_EQ(Word{42}, mix.memory(1001));
 }
 
-TEST(IOInput, Gets_Device_Block_ID_From_RX_For_Drum_Devices)
+TEST(IOInput, Takes_Into_Account_Device_Block_ID_From_RX_For_Drum_Devices)
 {
 	const DeviceId k_device_id = 15;
 	const DeviceBlockId k_drum_block_id = 4;
@@ -131,7 +131,7 @@ TEST(IOJBUS, Does_Jump_If_Device_Is_Busy)
 	ASSERT_EQ(1001, mix.next_command());
 }
 
-TEST(IOOutput, Reads_Device_Block_Size_Cells_To_Memory)
+TEST(IOOutput, Writes_Device_Block_Size_Cells_From_Memory_To_Device)
 {
 	const DeviceId k_device_id = 16;
 
@@ -157,3 +157,26 @@ TEST(IOOutput, Reads_Device_Block_Size_Cells_To_Memory)
 	mix.execute(MakeOUT(1000, k_device_id));
 }
 
+TEST(IOOutput, Takes_Into_Account_Device_Block_ID_From_RX_For_Drum_Devices)
+{
+	const DeviceId k_device_id = 12;
+	const DeviceBlockId k_drum_block_id = 5;
+
+	auto device_mock = std::make_unique<DeviceMock>();
+	EXPECT_CALL(*device_mock, ready()).WillOnce(Return(true));
+	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(1));
+	EXPECT_CALL(*device_mock, read_next(_)).Times(0);
+	EXPECT_CALL(*device_mock, write_next(k_drum_block_id, Word{42})).Times(1);
+
+	NiceMock<ComputerListenerMock> listener;
+	EXPECT_CALL(listener, on_device_read(_, _)).Times(0);
+	EXPECT_CALL(listener, on_device_write(k_device_id, k_drum_block_id)).Times(1);
+	EXPECT_CALL(listener, on_wait_on_device(_)).Times(0);
+
+	Computer mix{&listener};
+	mix.replace_device(k_device_id, std::move(device_mock));
+	mix.set_rx(Register{k_drum_block_id});
+	mix.set_memory(1000, Word{42});
+
+	mix.execute(MakeOUT(1000, k_device_id));
+}
