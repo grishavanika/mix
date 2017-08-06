@@ -43,9 +43,19 @@ inline Command MakeSTA(int address, const WordField& field = Word::MaxField(), s
 	return Command{24, address, index_register, field};
 }
 
+inline Command MakeJBUS(WordValue address, DeviceId device_id, std::size_t index_register = 0)
+{
+	return Command{34, address, index_register, WordField::FromByte(device_id)};
+}
+
 inline Command MakeIN(WordValue address, DeviceId device_id, std::size_t index_register = 0)
 {
 	return Command{36, address, index_register, WordField::FromByte(device_id)};
+}
+
+inline Command MakeJRED(WordValue address, DeviceId device_id, std::size_t index_register = 0)
+{
+	return Command{38, address, index_register, WordField::FromByte(device_id)};
 }
 
 inline Command MakeJMP(WordValue address, std::size_t index_register = 0)
