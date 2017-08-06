@@ -5,11 +5,6 @@ using ::testing::NiceMock;
 
 namespace {
 
-Command MakeSUB(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
-{
-	return Command{2, address, index_register, field};
-}
-
 Word MaxWord()
 {
 	return Word{int{Word::k_max_abs_value}};

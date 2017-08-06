@@ -4,11 +4,6 @@ using namespace mix;
 
 namespace {
 
-Command MakeSTA(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
-{
-	return Command{24, address, index_register, field};
-}
-
 class STA_TAOCP_Book_Test : public ::testing::Test
 {
 private:

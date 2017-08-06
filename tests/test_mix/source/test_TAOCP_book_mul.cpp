@@ -3,10 +3,6 @@
 using namespace mix;
 
 namespace {
-Command MakeMULL(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
-{
-	return Command{3, address, index_register, field};
-}
 
 Word MakeRandomWord(std::random_device& rd)
 {
@@ -48,7 +44,7 @@ TEST(MUL_TAOCP_Book_Test, Multiply_RA_With_Cell_Replaces_RA_And_RX_Content)
 		mix.set_memory(1000, w);
 	}
 
-	mix.execute(MakeMULL(1000));
+	mix.execute(MakeMUL(1000));
 
 	Register expected_ra;
 	{
@@ -87,7 +83,7 @@ TEST(MUL_TAOCP_Book_Test, Multiply_RA_With_Cell_Takes_Into_Account_Field)
 	mix.set_ra(ra);
 	mix.set_memory(1000, w);
 
-	mix.execute(MakeMULL(1000, WordField{1, 1}));
+	mix.execute(MakeMUL(1000, WordField{1, 1}));
 
 	ASSERT_EQ(WordValue(Sign::Negative, 0), mix.ra().value());
 	ASSERT_EQ(-224, mix.rx().value());
@@ -118,7 +114,7 @@ TEST(MUL_TAOCP_Book_Test, Multiply_RA_With_Cell_Stores_Most_Significant_Part_In_
 		mix.set_memory(1000, w);
 	}
 
-	mix.execute(MakeMULL(1000));
+	mix.execute(MakeMUL(1000));
 
 	Register expected_ra;
 	{

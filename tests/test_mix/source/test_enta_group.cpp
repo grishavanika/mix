@@ -3,24 +3,6 @@
 using namespace mix;
 using ::testing::NiceMock;
 
-namespace {
-Command MakeENTA(WordValue address, std::size_t index_register = 0)
-{
-	return Command{48, address, index_register, WordField::FromByte(2)};
-}
-
-Command MakeENTI(std::size_t index, WordValue address, std::size_t index_register = 0)
-{
-	return Command{48 + index, address, index_register, WordField::FromByte(2)};
-}
-
-Command MakeENNI(std::size_t index, WordValue address, std::size_t index_register = 0)
-{
-	return Command{48 + index, address, index_register, WordField::FromByte(3)};
-}
-
-} // namespace
-
 TEST(ENTA, Enta_With_Zero_Address_Zeroes_RA)
 {
 	NiceMock<ComputerListenerMock> listener;

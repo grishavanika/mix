@@ -3,7 +3,8 @@
 #include <mix/command.h>
 #include <mix/registers.h>
 
-#include "computer_listener_mock.h"
+#include "mocks.h"
+#include "commands_factory.h"
 
 #include <gtest/gtest.h>
 

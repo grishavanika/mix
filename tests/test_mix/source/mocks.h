@@ -1,6 +1,8 @@
 #pragma once
 #include <mix/computer_listener.h>
+#include <mix/io_device.h>
 #include <mix/command.h>
+#include <mix/word.h>
 
 #include <gmock/gmock.h>
 
@@ -21,4 +23,15 @@ struct ComputerListenerMock :
 	MOCK_METHOD2(on_device_write, void (mix::DeviceId, mix::DeviceBlockId));
 	MOCK_METHOD1(on_wait_on_device, void (mix::DeviceId));
 };
+
+struct DeviceMock :
+	public mix::IIODevice
+{
+	MOCK_CONST_METHOD0(ready, bool());
+	MOCK_CONST_METHOD0(block_size, int());
+	MOCK_METHOD1(read_next, mix::Word (mix::DeviceBlockId));
+	MOCK_METHOD2(write_next, void (mix::DeviceBlockId, const mix::Word&));
+};
+
+
 

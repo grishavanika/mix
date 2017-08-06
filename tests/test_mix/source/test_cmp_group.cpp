@@ -3,23 +3,6 @@
 using namespace mix;
 using ::testing::NiceMock;
 
-namespace {
-Command MakeCMPA(int address, WordField field = Word::MaxField(), std::size_t index_register = 0)
-{
-	return Command{56, address, index_register, field};
-}
-
-Command MakeCMPX(int address, WordField field = Word::MaxField(), std::size_t index_register = 0)
-{
-	return Command{63, address, index_register, field};
-}
-
-Command MakeCMPI(std::size_t index, int address, WordField field = Word::MaxField(), std::size_t index_register = 0)
-{
-	return Command{56 + index, address, index_register, field};
-}
-} // namespace
-
 TEST(CMPA, Comparing_RA_With_Same_Field_Of_Memory_Cell)
 {
 	NiceMock<ComputerListenerMock> listener;

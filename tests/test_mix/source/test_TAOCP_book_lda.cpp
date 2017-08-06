@@ -14,11 +14,6 @@ Word MakeTestWord(int address, int b3, int b4, int b5)
 	return data;
 }
 
-Command MakeLDA(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
-{
-	return Command{8, address, index_register, field};
-}
-
 class LDA_TAOCP_Book_Test : public ::testing::Test
 {
 private:

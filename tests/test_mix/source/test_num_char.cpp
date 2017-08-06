@@ -2,18 +2,6 @@
 
 using namespace mix;
 
-namespace {
-Command MakeNUM()
-{
-	return Command{5, 0, 0, WordField::FromByte(0)};
-}
-
-Command MakeCHAR()
-{
-	return Command{5, 0, 0, WordField::FromByte(1)};
-}
-} // namespace
-
 TEST(Num, Gets_Decimal_Number_From_RAX_Registers_And_Changes_Absolute_Value_Of_RA)
 {
 	Computer mix;

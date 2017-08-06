@@ -2,31 +2,6 @@
 
 using namespace mix;
 
-namespace {
-
-Command MakeSTA(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
-{
-	return Command{24, address, index_register, field};
-}
-
-Command MakeLDA(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
-{
-	return Command{8, address, index_register, field};
-}
-
-Command MakeADD(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
-{
-	return Command{1, address, index_register, field};
-}
-
-// #TODO: move these functions from all tests to some helper header
-Command MakeSUB(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
-{
-	return Command{2, address, index_register, field};
-}
-
-} // namespace
-
 TEST(ADD_TAOCP_Book_Test, Register_A_Bytes_Sum)
 {
 	const auto k_byte{Byte::Max()};

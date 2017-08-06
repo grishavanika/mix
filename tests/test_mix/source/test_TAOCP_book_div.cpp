@@ -3,10 +3,6 @@
 using namespace mix;
 
 namespace {
-Command MakeMULL(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
-{
-	return Command{4, address, index_register, field};
-}
 
 Sign IntSign(int v)
 {
@@ -38,7 +34,7 @@ TEST(DIV_TAOCP_Book_Test, Div_RAX_With_Cell_Sets_Sign_Of_Result_To_RA)
 
 	const auto ra_sign_before_div = mix.ra().sign();
 
-	mix.execute(MakeMULL(1000));
+	mix.execute(MakeDIV(1000));
 
 	ASSERT_EQ(17 / 3, mix.ra().abs_value());
 	ASSERT_EQ(17 % 3, mix.rx().abs_value());
@@ -47,7 +43,7 @@ TEST(DIV_TAOCP_Book_Test, Div_RAX_With_Cell_Sets_Sign_Of_Result_To_RA)
 	ASSERT_EQ(IntSign(17 / 3), mix.ra().sign());
 }
 
-TEST(DIV_TAOCP_Book_Test, XXXXX)
+TEST(DIV_TAOCP_Book_Test, Usual_Dividing_With_RAX)
 {
 	Computer mix;
 
@@ -75,7 +71,7 @@ TEST(DIV_TAOCP_Book_Test, XXXXX)
 
 	const auto ra_sign_before_div = mix.ra().sign();
 
-	mix.execute(MakeMULL(1000));
+	mix.execute(MakeDIV(1000));
 
 	ASSERT_EQ(0, mix.ra().value(WordField{1, 1}));
 	ASSERT_EQ(617, mix.ra().value(WordField{2, 3}));

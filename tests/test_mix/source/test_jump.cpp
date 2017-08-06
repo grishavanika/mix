@@ -4,60 +4,6 @@ using namespace mix;
 using ::testing::_;
 using ::testing::NiceMock;
 
-namespace {
-
-Command MakeJMP(WordValue address, std::size_t index_register = 0)
-{
-	return Command{39, address, index_register, WordField::FromByte(0)};
-}
-
-Command MakeJSJ(WordValue address, std::size_t index_register = 0)
-{
-	return Command{39, address, index_register, WordField::FromByte(1)};
-}
-
-Command MakeJOV(WordValue address, std::size_t index_register = 0)
-{
-	return Command{39, address, index_register, WordField::FromByte(2)};
-}
-
-Command MakeJNOV(WordValue address, std::size_t index_register = 0)
-{
-	return Command{39, address, index_register, WordField::FromByte(3)};
-}
-
-Command MakeJL(WordValue address, std::size_t index_register = 0)
-{
-	return Command{39, address, index_register, WordField::FromByte(4)};
-}
-
-Command MakeJE(WordValue address, std::size_t index_register = 0)
-{
-	return Command{39, address, index_register, WordField::FromByte(5)};
-}
-
-Command MakeJG(WordValue address, std::size_t index_register = 0)
-{
-	return Command{39, address, index_register, WordField::FromByte(6)};
-}
-
-Command MakeJGE(WordValue address, std::size_t index_register = 0)
-{
-	return Command{39, address, index_register, WordField::FromByte(7)};
-}
-
-Command MakeJNE(WordValue address, std::size_t index_register = 0)
-{
-	return Command{39, address, index_register, WordField::FromByte(8)};
-}
-
-Command MakeJLE(WordValue address, std::size_t index_register = 0)
-{
-	return Command{39, address, index_register, WordField::FromByte(9)};
-}
-
-} // namespace
-
 TEST(JMP, Jump_Changes_Current_Command_And_Sets_RJ_To_Next_After_Next_Command)
 {
 	ComputerListenerMock listener;
