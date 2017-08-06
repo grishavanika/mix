@@ -53,6 +53,11 @@ inline Command MakeIN(WordValue address, DeviceId device_id, std::size_t index_r
 	return Command{36, address, index_register, WordField::FromByte(device_id)};
 }
 
+inline Command MakeOUT(WordValue address, DeviceId device_id, std::size_t index_register = 0)
+{
+	return Command{37, address, index_register, WordField::FromByte(device_id)};
+}
+
 inline Command MakeJRED(WordValue address, DeviceId device_id, std::size_t index_register = 0)
 {
 	return Command{38, address, index_register, WordField::FromByte(device_id)};

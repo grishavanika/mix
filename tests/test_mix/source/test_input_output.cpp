@@ -130,3 +130,30 @@ TEST(IOJBUS, Does_Jump_If_Device_Is_Busy)
 
 	ASSERT_EQ(1001, mix.next_command());
 }
+
+TEST(IOOutput, Reads_Device_Block_Size_Cells_To_Memory)
+{
+	const DeviceId k_device_id = 16;
+
+	auto device_mock = std::make_unique<DeviceMock>();
+	EXPECT_CALL(*device_mock, ready()).WillOnce(Return(true));
+	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(3));
+	EXPECT_CALL(*device_mock, read_next(_)).Times(0);
+	EXPECT_CALL(*device_mock, write_next(0, Word{42})).Times(3);
+
+	NiceMock<ComputerListenerMock> listener;
+	EXPECT_CALL(listener, on_device_read(_, _)).Times(0);
+	EXPECT_CALL(listener, on_device_write(k_device_id, 0)).Times(3);
+	EXPECT_CALL(listener, on_wait_on_device(_)).Times(0);
+
+	Computer mix{&listener};
+	mix.replace_device(k_device_id, std::move(device_mock));
+	mix.set_rx(Register{7}); // Should be ignored
+
+	mix.set_memory(1000, Word{42});
+	mix.set_memory(1001, Word{42});
+	mix.set_memory(1002, Word{42});
+
+	mix.execute(MakeOUT(1000, k_device_id));
+}
+
