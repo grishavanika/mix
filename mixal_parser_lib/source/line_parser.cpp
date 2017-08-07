@@ -27,3 +27,8 @@ const AddressParser* LineParser::address() const
 {
 	return address_ ? &*address_ : nullptr;
 }
+
+std::string_view LineParser::str() const
+{
+	throw NotImplemented{};
+}
