@@ -18,6 +18,7 @@ public:
 
 private:
 	OperationId id_{OperationId::Unknown};
+	std::string_view str_;
 };
 
 } // namespace mixal

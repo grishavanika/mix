@@ -3,14 +3,21 @@
 
 using namespace mixal;
 
-void OperationParser::parse(std::string_view /*str*/)
+void OperationParser::parse(std::string_view str)
 {
-	throw NotImplemented{};
+	const auto id = OperationIdFromString(str);
+	if (id == OperationId::Unknown)
+	{
+		throw UnknownOperationId{};
+	}
+
+	id_ = id;
+	str_ = str;
 }
 
 std::string_view OperationParser::str() const
 {
-	throw NotImplemented{};
+	return str_;
 }
 
 bool OperationParser::is_pseudo_operation() const
