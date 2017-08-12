@@ -1,11 +1,34 @@
 #include <mixal/line_parser.h>
 #include <mixal/parse_exceptions.h>
 
+#include <core/string.h>
+
+#include <cassert>
+
 using namespace mixal;
 
-void LineParser::parse(std::string_view /*str*/)
+namespace {
+
+const char k_comment_begin_char = '*';
+
+bool IsCommentBeginning(std::string_view str)
+{
+	auto without_first_whitespaces = core::LeftTrim(str);
+	return !without_first_whitespaces.empty() &&
+		(without_first_whitespaces.front() == '*');
+}
+
+} // namespace
+
+void LineParser::parse(std::string_view str)
 {
 	clear();
+
+	if (IsCommentBeginning(str))
+	{
+		comment_ = core::LeftTrim(str);
+		return;
+	}
 
 	throw NotImplemented{};
 }
