@@ -67,6 +67,8 @@ bool IsValidLabel(std::string_view str)
 
 void LabelParser::parse(std::string_view str)
 {
+	clear();
+
 	auto label = core::Trim(str);
 	if (label.empty())
 	{
@@ -108,4 +110,10 @@ std::optional<LocalSymbolId> LabelParser::local_symbol_id() const
 bool LabelParser::empty() const
 {
 	return name_.empty();
+}
+
+void LabelParser::clear()
+{
+	local_symbol_id_.reset();
+	name_ = {};
 }

@@ -20,6 +20,9 @@ public:
 	const AddressParser* address() const;
 
 private:
+	void clear();
+
+private:
 	std::optional<std::string_view> comment_;
 	std::optional<LabelParser> label_;
 	std::optional<OperationParser> operation_;

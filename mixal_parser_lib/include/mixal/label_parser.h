@@ -24,6 +24,9 @@ public:
 	std::optional<LocalSymbolId> local_symbol_id() const;
 
 private:
+	void clear();
+
+private:
 	std::optional<LocalSymbolId> local_symbol_id_;
 	std::string_view name_;
 };

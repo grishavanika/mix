@@ -17,6 +17,9 @@ public:
 	OperationId id() const;
 
 private:
+	void clear();
+
+private:
 	OperationId id_{OperationId::Unknown};
 	std::string_view str_;
 };

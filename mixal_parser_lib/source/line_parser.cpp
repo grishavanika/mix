@@ -5,6 +5,8 @@ using namespace mixal;
 
 void LineParser::parse(std::string_view /*str*/)
 {
+	clear();
+
 	throw NotImplemented{};
 }
 
@@ -31,4 +33,12 @@ const AddressParser* LineParser::address() const
 std::string_view LineParser::str() const
 {
 	throw NotImplemented{};
+}
+
+void LineParser::clear()
+{
+	comment_.reset();
+	label_.reset();
+	operation_.reset();
+	address_.reset();
 }

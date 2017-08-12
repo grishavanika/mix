@@ -5,6 +5,8 @@ using namespace mixal;
 
 void OperationParser::parse(std::string_view str)
 {
+	clear();
+
 	const auto id = OperationIdFromString(str);
 	if (id == OperationId::Unknown)
 	{
@@ -37,3 +39,8 @@ OperationId OperationParser::id() const
 	return id_;
 }
 
+void OperationParser::clear()
+{
+	id_ = OperationId::Unknown;
+	str_ = {};
+}
