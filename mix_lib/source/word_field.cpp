@@ -1,6 +1,8 @@
 #include <mix/word_field.h>
 #include <mix/word.h>
 
+#include <ostream>
+
 #include <cassert>
 
 using namespace mix;
@@ -74,9 +76,19 @@ WordField WordField::shift_bytes_right() const
 }
 
 namespace mix {
+
 bool operator==(const WordField& lhs, const WordField& rhs)
 {
 	return (lhs.left_ == rhs.left_) &&
 		(lhs.right_ == rhs.right_);
 }
+
+std::ostream& operator<<(std::ostream& o, const WordField& wf)
+{
+	o << '(' << wf.left_byte_index()
+		<< ':' << wf.right_byte_index()
+		<< ')';
+	return o;
+}
+
 } // namespace mix

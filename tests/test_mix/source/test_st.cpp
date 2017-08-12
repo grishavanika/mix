@@ -16,6 +16,16 @@ struct STParam
 	int start_address;
 };
 
+std::ostream& operator<<(std::ostream& o, const STParam& param)
+{
+	o << "rA and rX: " << param.value << ". "
+		<< "Store rA to " << param.start_address << ". "
+		<< "Store rX to " << (param.start_address + 1) << ". "
+		<< "Initial memory value: " << param.initial_cell_value << " " << param.field << ". "
+		<< "Expected memory value: " << param.final_cell_value;
+	return o;
+}
+
 Register MakeRegister(Sign sign, int b1, int b2, int b3, int b4, int b5)
 {
 	Register r;
@@ -132,6 +142,15 @@ struct STIParam
 	// Store RI[1-6] to [address + 0; address + 5]
 	int start_address;
 };
+
+std::ostream& operator<<(std::ostream& o, const STIParam& param)
+{
+	o << "rI[1; 6]: " << param.value << ". "
+		<< "Store all rIs to " << param.start_address << "... "
+		<< "Initial memory value: " << param.initial_cell_value << " " << param.field << ". "
+		<< "Expected memory value: " << param.final_cell_value;
+	return o;
+}
 
 class STITest :
 	public ::testing::TestWithParam<STIParam>

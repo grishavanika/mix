@@ -20,6 +20,14 @@ struct OperationIdParam
 	std::string_view str;
 };
 
+std::ostream& operator<<(std::ostream& o, const OperationIdParam& param)
+{
+	o << "Expect " << param.str << " (" << static_cast<int>(param.id) << ") "
+		<< "operation to be "
+		<< ((param.type == OperationType::Native) ? "native" : "pseudo");
+	return o;
+}
+
 class OperationParserTest :
 	public ::testing::TestWithParam<OperationIdParam>
 {

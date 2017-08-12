@@ -17,6 +17,13 @@ struct LDParam
 	WordField field;
 };
 
+std::ostream& operator<<(std::ostream& o, const LDParam& param)
+{
+	o << "Memory address: " << param.address
+		<< " with content: " << param.value << " " << param.field;
+	return o;
+}
+
 class LDTest :
 	public ::testing::TestWithParam<LDParam>
 {

@@ -2,6 +2,7 @@
 #include <core/type_utils.h>
 
 #include <stdexcept>
+#include <ostream>
 
 #include <climits>
 
@@ -99,6 +100,12 @@ inline bool operator==(const Byte& lhs, const Byte& rhs)
 inline bool operator!=(const Byte& lhs, const Byte& rhs)
 {
 	return !(lhs == rhs);
+}
+
+inline std::ostream& operator<<(std::ostream& o, const Byte& b)
+{
+	o << +b.value();
+	return o;
 }
 
 // #TODO: std::numeric_limits<> specialization

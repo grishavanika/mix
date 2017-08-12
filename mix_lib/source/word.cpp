@@ -197,6 +197,16 @@ bool operator==(const Word& lhs, const Word& rhs)
 		(lhs.bytes_ == rhs.bytes_);
 }
 
+std::ostream& operator<<(std::ostream& o, const Word& w)
+{
+	o << w.sign() << '|';
+	for (const auto& b : w.bytes())
+	{
+		o << b << '|';
+	}
+	return o;
+}
+
 } // namespace mix
 
 

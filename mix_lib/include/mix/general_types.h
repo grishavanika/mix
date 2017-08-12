@@ -1,4 +1,5 @@
 #pragma once
+#include <ostream>
 
 namespace mix {
 
@@ -39,5 +40,11 @@ enum class DeviceType
 
 using DeviceId = unsigned char;
 using DeviceBlockId = int;
+
+inline std::ostream& operator<<(std::ostream& o, Sign sign)
+{
+	o << ((sign == Sign::Positive) ? '+' : '-');
+	return o;
+}
 
 } // namespace mix

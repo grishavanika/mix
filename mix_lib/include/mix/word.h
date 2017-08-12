@@ -5,6 +5,7 @@
 #include <mix/word_value.h>
 
 #include <array>
+#include <iosfwd>
 
 #include <climits>
 
@@ -61,6 +62,8 @@ private:
 };
 
 bool operator==(const Word& lhs, const Word& rhs);
+
+std::ostream& operator<<(std::ostream& o, const Word& w);
 
 } // namespace mix
 

@@ -35,6 +35,16 @@ struct AddParam
 	int address;
 };
 
+std::ostream& operator<<(::std::ostream& os, const AddParam& param)
+{
+	os << "Expected " << param.expected_value << " value "
+		<< (param.should_be_overflow ? "with" : "without") << " overflow. "
+		<< "rA: " << param.ra << ". "
+		<< "Memory address: " << param.address
+		<< " with content: " << param.w << " " << param.field;
+	return os;
+}
+
 class AddTest :
 	public ::testing::TestWithParam<AddParam>
 {

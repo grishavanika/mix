@@ -1,6 +1,8 @@
 #pragma once
 #include <mix/byte.h>
 
+#include <iosfwd>
+
 namespace mix {
 
 class WordField
@@ -32,6 +34,8 @@ private:
 };
 
 bool operator==(const WordField& lhs, const WordField& rhs);
+
+std::ostream& operator<<(std::ostream& o, const WordField& wf);
 
 } // namespace mix
 

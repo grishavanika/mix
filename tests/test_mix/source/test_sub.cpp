@@ -35,6 +35,16 @@ struct SubParam
 	int address;
 };
 
+std::ostream& operator<<(::std::ostream& os, const SubParam& param)
+{
+	os << "Expected " << param.expected_value << " value "
+		<< (param.should_be_overflow ? "with" : "without") << " overflow. "
+		<< "rA: " << param.ra << ". "
+		<< "Memory address: " << param.address
+		<< " with content: " << param.w << " " << param.field;
+	return os;
+}
+
 class SubTest :
 	public ::testing::TestWithParam<SubParam>
 {
