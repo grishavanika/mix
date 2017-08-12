@@ -70,3 +70,27 @@ TEST(StringWriteInto, Returns_Valid_C_String_Pointer_To_String_Buffer)
 	const bool buffer_is_the_same = (strncmp(&str[0], result, 99) == 0);
 	ASSERT_TRUE(buffer_is_the_same);
 }
+
+TEST(StringTrimming, Left_Trim_Cuts_Only_Prefix_White_Spaces)
+{
+	ASSERT_EQ("xxxx   ",	LeftTrim("xxxx   "));
+	ASSERT_EQ("xxxx ",		LeftTrim("\t xxxx "));
+	ASSERT_EQ("",			LeftTrim("      "));
+	ASSERT_EQ("x c y ",		LeftTrim("     x c y "));
+}
+
+TEST(StringTrimming, Right_Trim_Cuts_Only_Suffix_White_Spaces)
+{
+	ASSERT_EQ(" yyyyy",		RightTrim(" yyyyy  "));
+	ASSERT_EQ("yyyy",		RightTrim("yyyy \t\t\t"));
+	ASSERT_EQ("",			RightTrim("      "));
+	ASSERT_EQ("  x c y",	RightTrim("  x c y      "));
+}
+
+TEST(StringTrimming, Trim_Cuts_Suffix_And_Prefix_White_Spaces)
+{
+	ASSERT_EQ("xxxx",	Trim("  xxxx   "));
+	ASSERT_EQ("xxxx",	Trim("\t xxxx \t\t"));
+	ASSERT_EQ("",		Trim("      "));
+	ASSERT_EQ("x c y",	Trim("     x c y "));
+}
