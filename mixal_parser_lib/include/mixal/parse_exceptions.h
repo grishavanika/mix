@@ -33,5 +33,15 @@ public:
 	}
 };
 
+class InvalidLine :
+	public std::logic_error
+{
+public:
+	InvalidLine()
+		: std::logic_error{"Invalid line"}
+	{
+	}
+};
+
 } // namespace mixal
 

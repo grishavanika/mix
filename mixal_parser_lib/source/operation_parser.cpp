@@ -3,18 +3,27 @@
 
 using namespace mixal;
 
-void OperationParser::parse(std::string_view str)
+bool OperationParser::try_parse(std::string_view str)
 {
 	clear();
 
 	const auto id = OperationIdFromString(str);
 	if (id == OperationId::Unknown)
 	{
-		throw UnknownOperationId{};
+		return false;
 	}
 
 	id_ = id;
 	str_ = str;
+	return true;
+}
+
+void OperationParser::parse(std::string_view str)
+{
+	if (!try_parse(str))
+	{
+		throw UnknownOperationId{};
+	}
 }
 
 std::string_view OperationParser::str() const

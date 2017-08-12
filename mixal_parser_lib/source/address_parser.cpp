@@ -1,14 +1,22 @@
 #include <mixal/address_parser.h>
 #include <mixal/parse_exceptions.h>
 
+#include <core/string.h>
+
 using namespace mixal;
 
-void AddressParser::parse(std::string_view /*str*/)
+void AddressParser::parse(std::string_view str)
 {
+	auto address_expr = core::Trim(str);
+	if (address_expr.empty())
+	{
+		return;
+	}
+
 	throw NotImplemented{};
 }
 
 std::string_view AddressParser::str() const
 {
-	throw NotImplemented{};
+	return "";
 }

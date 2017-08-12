@@ -9,6 +9,8 @@ class OperationParser final :
 {
 public:
 	virtual void parse(std::string_view str) override;
+	bool try_parse(std::string_view str);
+
 	virtual std::string_view str() const override;
 
 	bool is_pseudo_operation() const;

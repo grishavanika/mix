@@ -21,4 +21,52 @@ TEST(LineParser, Ignores_Line_Left_White_Spaces_For_Comment_Line)
 	ASSERT_EQ("* comment", *p.comment());
 }
 
+TEST(LineParser, Parses_Line_With_Single_Operation)
+{
+	LineParser p;
+	p.parse("STA");
+	ASSERT_TRUE(p.operation());
+	ASSERT_EQ(OperationId::STA, p.operation()->id());
+}
+
+TEST(LineParser, Line_With_Single_Operation_Can_Contain_WhiteSpaces)
+{
+	{
+		LineParser p;
+		p.parse("  LDA");
+		ASSERT_TRUE(p.operation());
+		ASSERT_EQ(OperationId::LDA, p.operation()->id());
+	}
+
+	{
+		LineParser p;
+		p.parse("  LD2N     ");
+		ASSERT_TRUE(p.operation());
+		ASSERT_EQ(OperationId::LD2N, p.operation()->id());
+	}
+}
+
+TEST(LineParser, Line_Can_Not_Contain_Only_Label)
+{
+	LineParser p;
+
+	ASSERT_THROW({
+		p.parse("LABEL  ");
+	}, InvalidLine);
+}
+
+TEST(LineParser, Address_Column_Can_Be_Empty)
+{
+	LineParser p;
+	p.parse("LABEL  JNE");
+
+	ASSERT_TRUE(p.label());
+	ASSERT_TRUE(p.operation());
+	ASSERT_EQ(OperationId::JNE, p.operation()->id());
+
+	p.parse("8H  INC1   ");
+	ASSERT_TRUE(p.label());
+	ASSERT_TRUE(p.operation());
+	ASSERT_EQ(OperationId::INC1, p.operation()->id());
+}
 
