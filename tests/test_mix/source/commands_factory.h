@@ -1,6 +1,8 @@
 #pragma once
 #include <mix/command.h>
 
+#include <cassert>
+
 namespace mix {
 
 inline Command MakeADD(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
@@ -36,6 +38,33 @@ inline Command MakeCHAR()
 inline Command MakeLDA(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
 {
 	return Command{8, address, index_register, field};
+}
+
+inline Command MakeLDI(std::size_t index, int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
+{
+	assert((index >= 1) && (index <= 6));
+	return Command{8 + index, address, index_register, field};
+}
+
+inline Command MakeLDX(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
+{
+	return Command{15, address, index_register, field};
+}
+
+inline Command MakeLDAN(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
+{
+	return Command{16, address, index_register, field};
+}
+
+inline Command MakeLDIN(std::size_t index, int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
+{
+	assert((index >= 1) && (index <= 6));
+	return Command{16 + index, address, index_register, field};
+}
+
+inline Command MakeLDXN(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
+{
+	return Command{23, address, index_register, field};
 }
 
 inline Command MakeSTA(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)

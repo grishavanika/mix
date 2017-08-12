@@ -39,44 +39,6 @@ protected:
 		mix.set_memory(param.address, data);
 	}
 
-	Command make_lda() const
-	{
-		const auto& param = GetParam();
-		return Command{8, param.address, 0, param.field};
-	}
-
-	Command make_ldx() const
-	{
-		const auto& param = GetParam();
-		return Command{15, param.address, 0, param.field};
-	}
-
-	Command make_ldan() const
-	{
-		const auto& param = GetParam();
-		return Command{16, param.address, 0, param.field};
-	}
-
-	Command make_ldxn() const
-	{
-		const auto& param = GetParam();
-		return Command{23, param.address, 0, param.field};
-	}
-
-	Command make_ldi(std::size_t index) const
-	{
-		const auto& param = GetParam();
-		assert((index >= 1) && (index <= 6));
-		return Command{8 + index, param.address, 0, param.field};
-	}
-
-	Command make_ldin(std::size_t index) const
-	{
-		const auto& param = GetParam();
-		assert((index >= 1) && (index <= 6));
-		return Command{16 + index, param.address, 0, param.field};
-	}
-
 	std::tuple<int, Sign> expected_value(bool reverse_sign) const
 	{
 		const auto& param = GetParam();
@@ -157,12 +119,13 @@ protected:
 
 TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_Of_Registers_For_LD_Commnads)
 {
-	mix.execute(make_lda());
-	mix.execute(make_ldx());
+	const auto& param = GetParam();
+	mix.execute(MakeLDA(param.address, param.field));
+	mix.execute(MakeLDX(param.address, param.field));
 
 	for (std::size_t index = 1; index <= 6; ++index)
 	{
-		mix.execute(make_ldi(index));
+		mix.execute(MakeLDI(index, param.address, param.field));
 	}
 
 	check_all_registers(
@@ -171,12 +134,13 @@ TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_Of_Registers_For_L
 
 TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_Of_Registers_With_Reverse_Sign_For_LD_N_Commnads)
 {
-	mix.execute(make_ldan());
-	mix.execute(make_ldxn());
+	const auto& param = GetParam();
+	mix.execute(MakeLDAN(param.address, param.field));
+	mix.execute(MakeLDXN(param.address, param.field));
 
 	for (std::size_t index = 1; index <= 6; ++index)
 	{
-		mix.execute(make_ldin(index));
+		mix.execute(MakeLDIN(index, param.address, param.field));
 	}
 
 	check_all_registers(
