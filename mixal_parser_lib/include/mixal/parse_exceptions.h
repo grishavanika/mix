@@ -23,5 +23,15 @@ public:
 	}
 };
 
+class InvalidLabel :
+	public std::logic_error
+{
+public:
+	InvalidLabel()
+		: std::logic_error{"Invalid label"}
+	{
+	}
+};
+
 } // namespace mixal
 
