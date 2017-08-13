@@ -23,6 +23,7 @@ private:
 
 	bool eof() const;
 	char move_to_next_char();
+	void put_char_back();
 	char current_char() const;
 	void skip_white_spaces();
 

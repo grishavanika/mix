@@ -1,5 +1,6 @@
 #pragma once
 #include <stdexcept>
+#include <string>
 
 namespace mixal {
 
@@ -52,6 +53,16 @@ class InvalidExpression :
 public:
 	InvalidExpression(const char* details)
 		: std::logic_error{std::string{"Invalid Expression: "} +details}
+	{
+	}
+};
+
+class InvalidField :
+	public std::logic_error
+{
+public:
+	InvalidField()
+		: std::logic_error{"Invalid Field"}
 	{
 	}
 };

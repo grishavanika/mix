@@ -19,8 +19,9 @@ std::string_view ExpressionParser::build_non_empty_expr(
 	while (!eof() && pred(current_char()))
 	{
 		move_to_next_char();
-		if (completed(build_result()))
+		if (!completed(build_result()))
 		{
+			put_char_back();
 			break;
 		}
 	}

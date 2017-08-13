@@ -100,6 +100,13 @@ char ExpressionParser::move_to_next_char()
 	return ch;
 }
 
+void ExpressionParser::put_char_back()
+{
+	assert(parse_pos_ != 0);
+	--parse_pos_;
+	assert(!std::isspace(current_char()));
+}
+
 void ExpressionParser::skip_white_spaces()
 {
 	while (!eof() && std::isspace(parse_str_[parse_pos_]))

@@ -98,8 +98,8 @@ TEST(ExpressionParser, Full_Token_Is_Unary_Op_With_Basic_Expression_And_Binary_O
 TEST(ExpressionParser, Parses_All_Token_To_The_Vector_With_Left_To_Right_Order)
 {
 	ExpressionParser p;
-	//           1 | 2|   3| 4|
-	p.parse("  -1 + 5 * 20 / 6  ");
+	//           1 |2|   3| 4|
+	p.parse("  -1 + 5*20 / 6  ");
 	const auto& tokens = p.expression().tokens;
 	ASSERT_EQ(4u, tokens.size());
 

@@ -22,15 +22,6 @@ extern const BinaryOperation k_binary_operations[] =
 
 namespace {
 
-bool IsStringPartOfAmbigiousBinaryOperation(const std::string_view& str)
-{
-	// Since `/` (divide) and `//` (special MIXAL binary operation)
-	// have the same beginning we can't say if, for example, `/` string is completed (full)
-	// binary operation string or not
-
-	return (str == "/");
-}
-
 bool IsCurrentAddressChar(char ch)
 {
 	return (ch == k_current_address_marker);
@@ -173,15 +164,6 @@ bool IsCompletedUnaryOperation(const std::string_view& str)
 
 bool IsCompletedBinaryOperation(const std::string_view& str)
 {
-	// Returning false for ambiguous context-dependent operations (line `/` and `//`).
-	// Note: this work-around can be handled differently by introducing such thing
-	// as in which way to parse something: try to eat biggest possible string 
-	// or stop with less-possible valid string
-	if (IsStringPartOfAmbigiousBinaryOperation(str))
-	{
-		return false;
-	}
-
 	auto it = find(begin(k_binary_operations), end(k_binary_operations), str);
 	return (it != end(k_binary_operations));
 }
@@ -198,8 +180,16 @@ bool IsCompletedBasicExpression(const std::string_view& str)
 	{
 		return IsCurrentAddressSymbol(str);
 	}
-	
-	return (str.size() >= k_max_symbol_length);
+	else if (IsNumberBegin(first_char))
+	{
+		return IsNumber(str);
+	}
+	else if (IsSymbolBegin(first_char))
+	{
+		return IsSymbol(str);
+	}
+
+	return false;
 }
 
 } // namespace mixal

@@ -25,6 +25,11 @@ inline bool operator==(const ExpressionToken& lhs, const ExpressionToken& rhs)
 		(lhs.binary_op == rhs.binary_op);
 }
 
+inline bool operator==(const Expression& lhs, const Expression& rhs)
+{
+	return (lhs.tokens == rhs.tokens);
+}
+
 } // namespace mixal
 
 
