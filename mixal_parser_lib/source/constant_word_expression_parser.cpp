@@ -6,10 +6,8 @@
 
 using namespace mixal;
 
-void ConstantWordExpressionParser::parse(std::string_view str)
+void ConstantWordExpressionParser::do_parse(std::string_view str)
 {
-	clear();
-
 	auto expressions = core::Split(str, ',');
 
 	for (auto expr : expressions)
@@ -56,7 +54,7 @@ const WordExpression& ConstantWordExpressionParser::expression() const
 	return final_expression_;
 }
 
-void ConstantWordExpressionParser::clear()
+void ConstantWordExpressionParser::do_clear()
 {
 	expression_ = {};
 	final_expression_ = {};

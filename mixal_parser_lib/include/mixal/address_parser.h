@@ -6,8 +6,9 @@ namespace mixal {
 class AddressParser final :
 	public IParser
 {
-public:
-	virtual void parse(std::string_view str) override;
+private:
+	virtual void do_parse(std::string_view str) override;
+	virtual void do_clear() override;
 };
 
 } // namespace mixal

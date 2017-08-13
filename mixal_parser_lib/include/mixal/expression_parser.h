@@ -7,14 +7,12 @@ class ExpressionParser final :
 	public IParser
 {
 public:
-
-public:
-	virtual void parse(std::string_view str) override;
-
 	const Expression& expression() const;
 
 private:
-	void clear();
+	virtual void do_parse(std::string_view str) override;
+	virtual void do_clear() override;
+
 	void parse_basic_expr_with_optional_unary_op();
 	void parse_basic_expr_with_unary_op();
 	void parse_basic_expr_with_binary_op();

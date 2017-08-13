@@ -5,7 +5,7 @@
 
 using namespace mixal;
 
-void AddressParser::parse(std::string_view str)
+void AddressParser::do_parse(std::string_view str)
 {
 	auto address_expr = core::Trim(str);
 	if (address_expr.empty())
@@ -14,4 +14,8 @@ void AddressParser::parse(std::string_view str)
 	}
 
 	throw NotImplemented{};
+}
+
+void AddressParser::do_clear()
+{
 }

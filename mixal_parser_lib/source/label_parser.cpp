@@ -34,10 +34,8 @@ LocalSymbolId ParseLocalSymbol(std::string_view str)
 
 } // namespace
 
-void LabelParser::parse(std::string_view str)
+void LabelParser::do_parse(std::string_view str)
 {
-	clear();
-
 	auto label = core::Trim(str);
 	if (label.empty())
 	{
@@ -76,7 +74,7 @@ bool LabelParser::empty() const
 	return name_.empty();
 }
 
-void LabelParser::clear()
+void LabelParser::do_clear()
 {
 	local_symbol_id_.reset();
 	name_ = {};

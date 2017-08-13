@@ -53,3 +53,5 @@ TEST(ConstantWordExpressionParser, Multiple_Expressions_Can_Be_Specified)
 		ASSERT_EQ(expr_parser.expression(), token.expression);
 	}
 }
+
+

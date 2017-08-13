@@ -8,7 +8,6 @@ class OperationParser final :
 	public IParser
 {
 public:
-	virtual void parse(std::string_view str) override;
 	bool try_parse(std::string_view str);
 
 	bool is_pseudo_operation() const;
@@ -17,7 +16,8 @@ public:
 	OperationId id() const;
 
 private:
-	void clear();
+	virtual void do_parse(std::string_view str) override;
+	virtual void do_clear() override;
 
 private:
 	OperationId id_{OperationId::Unknown};

@@ -10,10 +10,8 @@
 
 using namespace mixal;
 
-void ExpressionParser::parse(std::string_view str)
+void ExpressionParser::do_parse(std::string_view str)
 {
-	clear();
-	
 	parse_str_ = core::Trim(str);
 	
 	parse_basic_expr_with_optional_unary_op();
@@ -31,7 +29,7 @@ const Expression& ExpressionParser::expression() const
 	return final_expression_;
 }
 
-void ExpressionParser::clear()
+void ExpressionParser::do_clear()
 {
 	expression_ = {};
 	final_expression_ = {};

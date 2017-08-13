@@ -8,12 +8,12 @@ class ConstantWordExpressionParser :
 	public IParser
 {
 public:
-	virtual void parse(std::string_view str) override;
-
 	const WordExpression& expression() const;
 
 private:
-	void clear();
+	virtual void do_parse(std::string_view str) override;
+	virtual void do_clear() override;
+
 	void parse_single_word_expr(std::string_view str);
 	Expression parse_expr(std::string_view str);
 	std::optional<Expression> parse_field_expr(std::string_view str);

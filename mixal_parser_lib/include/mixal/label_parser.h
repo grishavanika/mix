@@ -12,15 +12,14 @@ class LabelParser final :
 	public IParser
 {
 public:
-	virtual void parse(std::string_view str) override;
-
 	bool empty() const;
 	std::string_view name() const;
 	bool is_local_symbol() const;
 	std::optional<LocalSymbolId> local_symbol_id() const;
 
 private:
-	void clear();
+	virtual void do_parse(std::string_view str) override;
+	virtual void do_clear() override;
 
 private:
 	std::optional<LocalSymbolId> local_symbol_id_;

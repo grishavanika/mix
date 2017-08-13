@@ -6,10 +6,8 @@
 
 using namespace mixal;
 
-void WordFieldParser::parse(std::string_view str)
+void WordFieldParser::do_parse(std::string_view str)
 {
-	clear();
-
 	auto field_str = core::Trim(str);
 	if (field_str.empty())
 	{
@@ -37,7 +35,7 @@ void WordFieldParser::parse(std::string_view str)
 	expression_ = expr_parser.expression();
 }
 
-void WordFieldParser::clear()
+void WordFieldParser::do_clear()
 {
 	expression_.reset();
 }

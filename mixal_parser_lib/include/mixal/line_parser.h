@@ -11,15 +11,14 @@ class LineParser final :
 	public IParser
 {
 public:
-	virtual void parse(std::string_view line) override;
-
 	const std::string_view* comment() const;
 	const LabelParser* label() const;
 	const OperationParser* operation() const;
 	const AddressParser* address() const;
 
 private:
-	void clear();
+	virtual void do_parse(std::string_view line) override;
+	virtual void do_clear() override;
 
 private:
 	std::optional<std::string_view> comment_;

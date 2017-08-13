@@ -20,10 +20,8 @@ bool IsCommentBeginning(std::string_view str)
 
 } // namespace
 
-void LineParser::parse(std::string_view str)
+void LineParser::do_parse(std::string_view str)
 {
-	clear();
-
 	if (IsCommentBeginning(str))
 	{
 		comment_ = core::LeftTrim(str);
@@ -109,7 +107,7 @@ const AddressParser* LineParser::address() const
 	return address_ ? &*address_ : nullptr;
 }
 
-void LineParser::clear()
+void LineParser::do_clear()
 {
 	comment_.reset();
 	label_.reset();

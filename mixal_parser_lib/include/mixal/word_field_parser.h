@@ -8,13 +8,12 @@ class WordFieldParser final :
 	public IParser
 {
 public:
-	virtual void parse(std::string_view str) override;
-
 	bool empty() const;
 	std::optional<Expression> expression();
 
 private:
-	void clear();
+	virtual void do_parse(std::string_view str) override;
+	virtual void do_clear() override;
 
 private:
 	std::optional<Expression> expression_;
