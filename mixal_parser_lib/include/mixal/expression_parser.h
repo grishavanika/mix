@@ -1,9 +1,5 @@
 #include <mixal/parser.h>
-#include <mixal/parsers_utils.h>
-
-#include <memory>
-#include <optional>
-#include <vector>
+#include <mixal/expression.h>
 
 namespace mixal {
 
@@ -11,18 +7,12 @@ class ExpressionParser final :
 	public IParser
 {
 public:
-	struct Token
-	{
-		std::optional<UnaryOperation> unary_op;
-		BasicExpression basic_expr;
-		std::optional<BinaryOperation> binary_op;
-	};
 
 public:
 	virtual void parse(std::string_view str) override;
 	virtual std::string_view str() const override;
 
-	const std::vector<Token>& tokens() const;
+	const Expression& expression() const;
 
 private:
 	void clear();
@@ -44,14 +34,12 @@ private:
 	std::string_view build_non_empty_expr(CharPredicate pred, CompletenessPredicate completed);
 
 private:
-	std::vector<Token> tokens_;
-	std::vector<Token> final_tokens_;
+	Expression expression_;
+	Expression final_expression_;
 	std::string_view parse_str_;
 	std::size_t parse_pos_;
-	Token current_token_;
+	ExpressionToken current_token_;
 };
-
-bool operator==(const ExpressionParser::Token& lhs, const ExpressionParser::Token& rhs);
 
 } // namespace mixal
 

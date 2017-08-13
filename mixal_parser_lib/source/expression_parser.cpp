@@ -23,7 +23,7 @@ void ExpressionParser::parse(std::string_view str)
 		parse_basic_expr_with_binary_op();
 	}
 
-	swap(tokens_, final_tokens_);
+	std::swap(expression_, final_expression_);
 }
 
 std::string_view ExpressionParser::str() const
@@ -31,18 +31,18 @@ std::string_view ExpressionParser::str() const
 	return parse_str_;
 }
 
-const std::vector<ExpressionParser::Token>& ExpressionParser::tokens() const
+const Expression& ExpressionParser::expression() const
 {
-	return final_tokens_;
+	return final_expression_;
 }
 
 void ExpressionParser::clear()
 {
-	tokens_.clear();
-	final_tokens_.clear();
+	expression_ = {};
+	final_expression_ = {};
 	parse_str_ = {};
 	parse_pos_ = 0;
-	current_token_ = Token{};
+	current_token_ = ExpressionToken{};
 }
 
 void ExpressionParser::parse_basic_expr_with_optional_unary_op()
@@ -126,17 +126,6 @@ void ExpressionParser::throw_error(const char* details) const
 
 void ExpressionParser::finish_current_token()
 {
-	tokens_.push_back(std::move(current_token_));
-	current_token_ = Token{};
+	expression_.tokens.push_back(std::move(current_token_));
+	current_token_ = ExpressionToken{};
 }
-
-namespace mixal {
-
-bool operator==(const ExpressionParser::Token& lhs, const ExpressionParser::Token& rhs)
-{
-	return (lhs.unary_op == rhs.unary_op) &&
-		(lhs.basic_expr == rhs.basic_expr) &&
-		(lhs.binary_op == rhs.binary_op);
-}
-
-} // namespace mixal
