@@ -15,8 +15,3 @@ void AddressParser::parse(std::string_view str)
 
 	throw NotImplemented{};
 }
-
-std::string_view AddressParser::str() const
-{
-	return "";
-}

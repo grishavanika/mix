@@ -14,7 +14,6 @@ bool OperationParser::try_parse(std::string_view str)
 	}
 
 	id_ = id;
-	str_ = str;
 	return true;
 }
 
@@ -24,11 +23,6 @@ void OperationParser::parse(std::string_view str)
 	{
 		throw UnknownOperationId{};
 	}
-}
-
-std::string_view OperationParser::str() const
-{
-	return str_;
 }
 
 bool OperationParser::is_pseudo_operation() const
@@ -51,5 +45,4 @@ OperationId OperationParser::id() const
 void OperationParser::clear()
 {
 	id_ = OperationId::Unknown;
-	str_ = {};
 }

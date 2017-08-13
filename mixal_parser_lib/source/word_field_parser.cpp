@@ -34,19 +34,12 @@ void WordFieldParser::parse(std::string_view str)
 	ExpressionParser expr_parser;
 	expr_parser.parse(expr_str);
 
-	str_ = field_str;
 	expression_ = expr_parser.expression();
-}
-
-std::string_view WordFieldParser::str() const
-{
-	return str_;
 }
 
 void WordFieldParser::clear()
 {
 	expression_.reset();
-	str_ = {};
 }
 
 bool WordFieldParser::empty() const

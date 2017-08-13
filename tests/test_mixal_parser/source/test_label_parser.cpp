@@ -12,7 +12,6 @@ TEST(LabelParser, Empty_String_IsValid_Label)
 	p.parse("");
 	ASSERT_FALSE(p.is_local_symbol());
 	ASSERT_EQ("", p.name());
-	ASSERT_EQ("", p.str());
 	ASSERT_TRUE(p.empty());
 }
 
@@ -36,11 +35,9 @@ TEST(LabelParser, White_Spaces_Are_Stripped)
 
 	p.parse("   CC01XX  ");
 	ASSERT_EQ("CC01XX", p.name());
-	ASSERT_EQ("CC01XX", p.str());
 
 	p.parse("  2H ");
 	ASSERT_EQ("2H", p.name());
-	ASSERT_EQ("2H", p.str());
 }
 
 TEST(LabelParser, Too_Long_Labels_Throws_InvalidLabel)

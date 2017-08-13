@@ -12,7 +12,6 @@ class LineParser final :
 {
 public:
 	virtual void parse(std::string_view line) override;
-	virtual std::string_view str() const override;
 
 	const std::string_view* comment() const;
 	const LabelParser* label() const;

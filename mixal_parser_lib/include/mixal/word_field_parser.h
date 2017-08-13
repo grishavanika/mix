@@ -9,7 +9,6 @@ class WordFieldParser final :
 {
 public:
 	virtual void parse(std::string_view str) override;
-	virtual std::string_view str() const override;
 
 	bool empty() const;
 	std::optional<Expression> expression();
@@ -19,7 +18,6 @@ private:
 
 private:
 	std::optional<Expression> expression_;
-	std::string_view str_;
 };
 
 } // namespace mixal

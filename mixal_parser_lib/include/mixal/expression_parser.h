@@ -10,7 +10,6 @@ public:
 
 public:
 	virtual void parse(std::string_view str) override;
-	virtual std::string_view str() const override;
 
 	const Expression& expression() const;
 

@@ -80,18 +80,6 @@ TEST_P(OperationParserTest, Does_Not_Throw_For_Known_UpperCase_Operations)
 	ASSERT_EQ(param.id, parser.id());
 }
 
-TEST_P(OperationParserTest, Stores_Original_String_As_Str_On_Successfull_Parse)
-{
-	const auto& param = GetParam();
-
-	OperationParser parser;
-	ASSERT_NO_THROW({
-		parser.parse(param.str);
-	});
-
-	ASSERT_EQ(param.str, parser.str());
-}
-
 TEST_P(OperationParserTest, Has_Valid_Pseudo_Or_Native_Operation_Flags)
 {
 	const auto& param = GetParam();

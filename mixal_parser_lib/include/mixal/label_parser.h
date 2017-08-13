@@ -13,7 +13,6 @@ class LabelParser final :
 {
 public:
 	virtual void parse(std::string_view str) override;
-	virtual std::string_view str() const override;
 
 	bool empty() const;
 	std::string_view name() const;

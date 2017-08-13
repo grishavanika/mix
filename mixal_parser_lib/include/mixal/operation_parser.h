@@ -11,8 +11,6 @@ public:
 	virtual void parse(std::string_view str) override;
 	bool try_parse(std::string_view str);
 
-	virtual std::string_view str() const override;
-
 	bool is_pseudo_operation() const;
 	bool is_native_operation() const;
 
@@ -23,7 +21,6 @@ private:
 
 private:
 	OperationId id_{OperationId::Unknown};
-	std::string_view str_;
 };
 
 } // namespace mixal

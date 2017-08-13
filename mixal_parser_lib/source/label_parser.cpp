@@ -56,11 +56,6 @@ void LabelParser::parse(std::string_view str)
 	name_ = label;
 }
 
-std::string_view LabelParser::str() const
-{
-	return name();
-}
-
 std::string_view LabelParser::name() const
 {
 	return name_;

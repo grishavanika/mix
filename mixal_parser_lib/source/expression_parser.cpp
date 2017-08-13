@@ -26,11 +26,6 @@ void ExpressionParser::parse(std::string_view str)
 	std::swap(expression_, final_expression_);
 }
 
-std::string_view ExpressionParser::str() const
-{
-	return parse_str_;
-}
-
 const Expression& ExpressionParser::expression() const
 {
 	return final_expression_;
