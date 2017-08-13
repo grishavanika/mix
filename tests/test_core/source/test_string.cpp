@@ -94,3 +94,29 @@ TEST(StringTrimming, Trim_Cuts_Suffix_And_Prefix_White_Spaces)
 	ASSERT_EQ("",		Trim("      "));
 	ASSERT_EQ("x c y",	Trim("     x c y "));
 }
+
+TEST(StringSplit, Empty_String_Split_Returns_Array_With_Empty_String)
+{
+	auto parts = Split("", ' ');
+	ASSERT_EQ(1u, parts.size());
+	ASSERT_EQ("", parts[0]);
+}
+
+TEST(StringSplit, String_With_Only_Separator_Is_Divided_Into_Two_Empty_Strings)
+{
+	auto parts = Split(",", ',');
+	ASSERT_EQ(2u, parts.size());
+	ASSERT_EQ("", parts[0]);
+	ASSERT_EQ("", parts[1]);
+}
+
+TEST(StringSplit, Splits_String_Into_Parts_Without_Separator)
+{
+	auto parts = Split("1:2:3:4", ':');
+	ASSERT_EQ(4u, parts.size());
+	ASSERT_EQ("1", parts[0]);
+	ASSERT_EQ("2", parts[1]);
+	ASSERT_EQ("3", parts[2]);
+	ASSERT_EQ("4", parts[3]);
+}
+

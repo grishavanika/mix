@@ -84,4 +84,33 @@ std::string_view Trim(std::string_view str)
 	return LeftTrim(RightTrim(str));
 }
 
+std::vector<std::string_view> Split(std::string_view str, char ch)
+{
+	std::vector<std::string_view> parts;
+
+	std::size_t prev_pos = 0;
+
+	auto push_new_part = [&](std::size_t end)
+	{
+		parts.emplace_back(str.data() + prev_pos, end - prev_pos);
+	};
+
+	std::size_t pos = 0;
+
+	auto find_next = [&]()
+	{
+		pos = str.find(ch, prev_pos);
+		return pos;
+	};
+
+	while (find_next() != str.npos)
+	{
+		push_new_part(pos);
+		prev_pos = pos + 1;
+	}
+
+	push_new_part(str.size());
+	return parts;
+}
+
 } // namespace core
