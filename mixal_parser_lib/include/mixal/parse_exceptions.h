@@ -4,65 +4,80 @@
 
 namespace mixal {
 
-// #TODO: use custom basic class that will separate
-// all exceptions from "only MIXAL-parser" one
-
-class NotImplemented :
+class ParseError :
 	public std::logic_error
 {
 public:
+	using std::logic_error::logic_error;
+};
+
+
+class NotImplemented :
+	public ParseError
+{
+public:
 	NotImplemented()
-		: std::logic_error{"Not implemented"}
+		: ParseError{"Not implemented"}
 	{
 	}
 };
 
 class UnknownOperationId :
-	public std::logic_error
+	public ParseError
 {
 public:
 	UnknownOperationId()
-		: std::logic_error{"Unknown operation id"}
+		: ParseError{"Unknown operation id"}
 	{
 	}
 };
 
 class InvalidLabel :
-	public std::logic_error
+	public ParseError
 {
 public:
 	InvalidLabel()
-		: std::logic_error{"Invalid label"}
+		: ParseError{"Invalid label"}
 	{
 	}
 };
 
 class InvalidLine :
-	public std::logic_error
+	public ParseError
 {
 public:
 	InvalidLine()
-		: std::logic_error{"Invalid line"}
+		: ParseError{"Invalid line"}
 	{
 	}
 };
 
 class InvalidExpression :
-	public std::logic_error
+	public ParseError
 {
 public:
 	InvalidExpression(const char* details)
-		: std::logic_error{std::string{"Invalid Expression: "} +details}
+		: ParseError{std::string{"Invalid Expression: "} +details}
 	{
 	}
 };
 
 class InvalidField :
-	public std::logic_error
+	public ParseError
 {
 public:
 	InvalidField()
-		: std::logic_error{"Invalid Field"}
+		: ParseError{"Invalid Field"}
+	{
+	}
+};
+
+class InvalidLiteral :
+	public ParseError
+{
+public:
+	InvalidLiteral()
+		: ParseError{"Invalid Literal"}
 	{
 	}
 };
