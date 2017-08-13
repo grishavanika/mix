@@ -12,9 +12,6 @@ class LabelParser final :
 	public IParser
 {
 public:
-	static const std::size_t k_max_label_length = 10;
-
-public:
 	virtual void parse(std::string_view str) override;
 	virtual std::string_view str() const override;
 

@@ -1,5 +1,6 @@
 #include <mixal/label_parser.h>
 #include <mixal/parse_exceptions.h>
+#include <mixal/parsers_utils.h>
 
 #include <gtest/gtest.h>
 
@@ -44,8 +45,8 @@ TEST(LabelParser, White_Spaces_Are_Stripped)
 
 TEST(LabelParser, Too_Long_Labels_Throws_InvalidLabel)
 {
-	std::string str(LabelParser::k_max_label_length + 1, 'X');
-	ASSERT_GT(str.size(), LabelParser::k_max_label_length);
+	std::string str(k_max_symbol_length + 1, 'X');
+	ASSERT_GT(str.size(), k_max_symbol_length);
 
 	LabelParser p;
 	ASSERT_THROW(

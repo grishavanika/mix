@@ -1,5 +1,6 @@
 #include <mixal/label_parser.h>
 #include <mixal/parse_exceptions.h>
+#include <mixal/parsers_utils.h>
 
 #include <core/string.h>
 
@@ -31,38 +32,6 @@ LocalSymbolId ParseLocalSymbol(std::string_view str)
 	return (str.front() - '0');
 }
 
-bool IsMixAlphaCharacter(char symbol)
-{
-	// #TODO: get alpha-chars from MIX chars table
-	return std::isalpha(symbol) && std::isupper(symbol);
-}
-
-bool IsValidLabel(std::string_view str)
-{
-	if (str.size() > LabelParser::k_max_label_length)
-	{
-		return false;
-	}
-
-	bool has_alpha_char = false;
-	for (auto symbol : str)
-	{
-		if (std::isdigit(symbol))
-		{
-			continue;
-		}
-
-		if (!IsMixAlphaCharacter(symbol))
-		{
-			return false;
-		}
-		
-		has_alpha_char = true;
-	}
-
-	return has_alpha_char;
-}
-
 } // namespace
 
 void LabelParser::parse(std::string_view str)
@@ -79,7 +48,7 @@ void LabelParser::parse(std::string_view str)
 	{
 		local_symbol_id_ = ParseLocalSymbol(label);
 	}
-	else if (!IsValidLabel(label))
+	else if (!IsSymbol(label))
 	{
 		throw InvalidLabel{};
 	}
