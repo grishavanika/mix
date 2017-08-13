@@ -3,6 +3,9 @@
 
 namespace mixal {
 
+// #TODO: use custom basic class that will separate
+// all exceptions from "only MIXAL-parser" one
+
 class NotImplemented :
 	public std::logic_error
 {
@@ -39,6 +42,16 @@ class InvalidLine :
 public:
 	InvalidLine()
 		: std::logic_error{"Invalid line"}
+	{
+	}
+};
+
+class InvalidExpression :
+	public std::logic_error
+{
+public:
+	InvalidExpression(const char* details)
+		: std::logic_error{std::string{"Invalid Expression: "} +details}
 	{
 	}
 };

@@ -3,11 +3,40 @@
 #include <algorithm>
 
 #include <cctype>
+#include <cassert>
 
 namespace mixal {
 
 extern const std::size_t k_max_symbol_length = 10;
 extern const char k_current_address_marker = '*';
+
+extern const UnaryOperation k_unary_operations[] =
+{
+	"-", "+",
+};
+
+extern const BinaryOperation k_binary_operations[] =
+{
+	"-", "+", "*", "/", "//", ":",
+};
+
+namespace {
+
+bool IsStringPartOfAmbigiousBinaryOperation(const std::string_view& str)
+{
+	// Since `/` (divide) and `//` (special MIXAL binary operation)
+	// have the same beginning we can't say if, for example, `/` string is completed (full)
+	// binary operation string or not
+
+	return (str == "/");
+}
+
+bool IsCurrentAddressChar(char ch)
+{
+	return (ch == k_current_address_marker);
+}
+
+} // namespace
 
 bool IsMixAlphaCharacter(char symbol)
 {
@@ -22,10 +51,10 @@ bool IsSymbol(const std::string_view& str)
 		return false;
 	}
 
-	bool has_alpha_char = false;
+	bool has_at_least_one_char = false;
 	for (auto symbol : str)
 	{
-		if (std::isdigit(symbol))
+		if (IsNumberChar(symbol))
 		{
 			continue;
 		}
@@ -35,10 +64,10 @@ bool IsSymbol(const std::string_view& str)
 			return false;
 		}
 
-		has_alpha_char = true;
+		has_at_least_one_char = true;
 	}
 
-	return has_alpha_char;
+	return has_at_least_one_char;
 }
 
 bool IsNumber(const std::string_view& str)
@@ -48,13 +77,13 @@ bool IsNumber(const std::string_view& str)
 		return false;
 	}
 
-	return std::all_of(str.cbegin(), str.cend(), &std::isdigit);
+	return std::all_of(str.cbegin(), str.cend(), &IsNumberChar);
 }
 
 bool IsCurrentAddressSymbol(const std::string_view& str)
 {
 	return (str.size() == 1) &&
-		(str.front() == k_current_address_marker);
+		IsCurrentAddressChar(str.front());
 }
 
 bool IsBasicExpression(const std::string_view& str)
@@ -62,6 +91,115 @@ bool IsBasicExpression(const std::string_view& str)
 	// #NOTE: instead of "any" symbol, basic expression needs
 	// "already defined" symbol (not "forward-reference" symbol)
 	return IsSymbol(str) || IsNumber(str) || IsCurrentAddressSymbol(str);
+}
+
+bool IsUnaryOperationBegin(char ch)
+{
+	for (auto unary_op : k_unary_operations)
+	{
+		assert(!unary_op.empty());
+		if (unary_op.front() == ch)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool IsNumberBegin(char ch)
+{
+	return IsNumberChar(ch);
+}
+
+bool IsSymbolBegin(char ch)
+{
+	return IsSymbolChar(ch);
+}
+
+bool IsBasicExpressionBegin(char ch)
+{
+	// IsSymbolBegin() covers IsNumberBegin()
+	return IsSymbolBegin(ch) ||
+		IsCurrentAddressChar(ch);
+}
+
+bool IsUnaryOperationChar(char ch)
+{
+	for (const auto& unary_op : k_unary_operations)
+	{
+		if (unary_op.find(ch) != unary_op.npos)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool IsBinaryOperationChar(char ch)
+{
+	for (const auto& binary_op : k_binary_operations)
+	{
+		if (binary_op.find(ch) != binary_op.npos)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool IsNumberChar(char ch)
+{
+	return std::isdigit(ch);
+}
+
+bool IsSymbolChar(char ch)
+{
+	return IsMixAlphaCharacter(ch) ||
+		IsNumberChar(ch);
+}
+
+bool IsBasicExpressionChar(char ch)
+{
+	// IsSymbolChar() covers IsNumberChar()
+	return IsCurrentAddressChar(ch) || IsSymbolChar(ch);
+}
+
+bool IsCompletedUnaryOperation(const std::string_view& str)
+{
+	auto it = find(begin(k_unary_operations), end(k_unary_operations), str);
+	return (it != end(k_unary_operations));
+}
+
+bool IsCompletedBinaryOperation(const std::string_view& str)
+{
+	// Returning false for ambiguous context-dependent operations (line `/` and `//`).
+	// Note: this work-around can be handled differently by introducing such thing
+	// as in which way to parse something: try to eat biggest possible string 
+	// or stop with less-possible valid string
+	if (IsStringPartOfAmbigiousBinaryOperation(str))
+	{
+		return false;
+	}
+
+	auto it = find(begin(k_binary_operations), end(k_binary_operations), str);
+	return (it != end(k_binary_operations));
+}
+
+bool IsCompletedBasicExpression(const std::string_view& str)
+{
+	if (str.empty())
+	{
+		return false;
+	}
+
+	const char first_char = str.front();
+	if (IsCurrentAddressChar(first_char))
+	{
+		return IsCurrentAddressSymbol(str);
+	}
+	
+	return (str.size() >= k_max_symbol_length);
 }
 
 } // namespace mixal
