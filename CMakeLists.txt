@@ -41,10 +41,22 @@ if (only_msvc)
 endif()
 
 if (clang_on_msvc)
+	# almost all of these are from VC system headers
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHa")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-argument")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-command-line-argument")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-attributes")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-microsoft-template")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dllimport-static-field-def")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dangling-else")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-logical-op-parentheses")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedef")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-noreturn")
+
+	# investigate why this happens with Clang toolset
+	add_definitions(-D_HAS_CXX17=1)
+	include_directories(SYSTEM "C:/Programs/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.10.25017/include")
 endif()
 
 # Remove unneeded configurations

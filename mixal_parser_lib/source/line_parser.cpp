@@ -15,7 +15,7 @@ bool IsCommentBeginning(std::string_view str)
 {
 	auto without_first_whitespaces = core::LeftTrim(str);
 	return !without_first_whitespaces.empty() &&
-		(without_first_whitespaces.front() == '*');
+		(without_first_whitespaces.front() == k_comment_begin_char);
 }
 
 } // namespace
