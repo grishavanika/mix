@@ -4,8 +4,10 @@
 
 using namespace core;
 
+#if defined(_MSC_VER)
 // Disable totally for this file for test purpose
 #pragma warning(disable:4996)
+#endif
 
 TEST(Sprintf, Behaviour_Is_The_Same_As_For_C_Printf)
 {

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# How to choose default compiler:
+# sudo update-alternatives --config c++
+
 mkdir build
 cd build
 cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=deploy ..

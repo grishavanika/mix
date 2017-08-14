@@ -50,13 +50,13 @@ Byte CharToByte(char ch)
 std::size_t ByteToDecimalDigit(const Byte& byte)
 {
 	const auto digit = (byte.cast_to<std::size_t>() % 10);
-	assert((digit >= 0) && (digit <= 9));
+	assert(digit <= 9);
 	return digit;
 }
 
 Byte DecimalDigitToByte(std::size_t digit)
 {
-	assert((digit >= 0) && (digit <= 9));
+	assert(digit <= 9);
 	return CharToByte('0').cast_to<std::size_t>() + digit;
 }
 
