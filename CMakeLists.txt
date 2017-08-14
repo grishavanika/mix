@@ -41,8 +41,7 @@ if (only_msvc)
 endif()
 
 if (NOT MSVC)
-	# -Werror
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
 endif()
 
 if (clang_on_msvc)
