@@ -50,11 +50,8 @@ void LineParser::do_parse(std::string_view str)
 	std::string_view label_or_operation{line.data(), first_word_end};
 	if (op_parser.try_parse(label_or_operation))
 	{
-		std::string_view address_str{line.data() + first_word_end, line.size() - first_word_end};
-		AddressParser address_parser;
-		address_parser.parse(address_str);
+		address_str_ = {line.data() + first_word_end, line.size() - first_word_end};
 		operation_ = std::move(op_parser);
-		address_ = std::move(address_parser);
 		return;
 	}
 
@@ -78,11 +75,8 @@ void LineParser::do_parse(std::string_view str)
 	op_parser.parse(operation_str);
 
 	const auto address_str_begin = second_word_begin + operation_str.size();
-	std::string_view address_str{line.data() + address_str_begin, line.size() - address_str_begin};
-	AddressParser address_parser;
-	address_parser.parse(address_str);
-
-	address_ = std::move(address_parser);
+	
+	address_str_ = {line.data() + address_str_begin, line.size() - address_str_begin};
 	operation_ = std::move(op_parser);
 	label_ = std::move(label_parser);
 }
@@ -102,9 +96,9 @@ const OperationParser* LineParser::operation() const
 	return operation_ ? &*operation_ : nullptr;
 }
 
-const AddressParser* LineParser::address() const
+std::string_view LineParser::address_str() const
 {
-	return address_ ? &*address_ : nullptr;
+	return address_str_;
 }
 
 void LineParser::do_clear()
@@ -112,5 +106,5 @@ void LineParser::do_clear()
 	comment_.reset();
 	label_.reset();
 	operation_.reset();
-	address_.reset();
+	address_str_ = {};
 }
