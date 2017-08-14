@@ -6,8 +6,8 @@ os:
   - linux
 
 compiler:
-  #- g++
-  - clang
+  - g++
+  #- clang
 
 before_install:
   # From: https://gist.github.com/cotsog/3ce84675af0d74438d91
@@ -17,8 +17,6 @@ before_install:
 install:
   - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-6; fi
   - if [ "$CXX" == "g++" ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90; fi
-  - if [ "$CXX" == "clang++" ]; then sudo apt-get install clang-4.0; fi
-  - if [ "$CXX" == "clang++" ]; then sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-6 90; fi
 
 env:
   - BUILD_CONFIGURATION=Debug
