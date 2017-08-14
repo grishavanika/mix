@@ -2,7 +2,7 @@
 #include <mixal/label_parser.h>
 #include <mixal/operation_parser.h>
 
-#include <optional>
+#include <core/optional.h>
 
 namespace mixal {
 
