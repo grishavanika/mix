@@ -59,10 +59,15 @@ std::string Sprintf(const char* format, ...)
 
 std::string_view LeftTrim(std::string_view str)
 {
-	auto first_not_space = find_if_not(str.begin(), str.end(), &std::isspace);
+	auto first_not_space = std::find_if_not(str.begin(), str.end(),
+		[](char ch)
+		{
+			return std::isspace(ch);
+		});
+
 	if (first_not_space != str.end())
 	{
-		str.remove_prefix(distance(str.begin(), first_not_space));
+		str.remove_prefix(std::distance(str.begin(), first_not_space));
 		return str;
 	}
 	return {};
@@ -70,10 +75,15 @@ std::string_view LeftTrim(std::string_view str)
 
 std::string_view RightTrim(std::string_view str)
 {
-	auto last_not_space = find_if_not(str.rbegin(), str.rend(), &std::isspace);
+	auto last_not_space = find_if_not(str.rbegin(), str.rend(),
+		[](char ch)
+		{
+			return std::isspace(ch);
+		});
+
 	if (last_not_space != str.rend())
 	{
-		str.remove_suffix(distance(str.rbegin(), last_not_space));
+		str.remove_suffix(std::distance(str.rbegin(), last_not_space));
 		return str;
 	}
 	return {};

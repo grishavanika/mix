@@ -6,7 +6,11 @@
 #include <experimental/optional>
 
 namespace std {
-using optional = experimental::optional;
+
+template<typename T>
+using optional = experimental::optional<T>;
+
+constexpr auto nullopt = experimental::nullopt;
 } // namespace std
 
 #else

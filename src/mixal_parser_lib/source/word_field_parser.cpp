@@ -37,12 +37,12 @@ void WordFieldParser::do_parse(std::string_view str)
 
 void WordFieldParser::do_clear()
 {
-	expression_.reset();
+	expression_ = std::nullopt;
 }
 
 bool WordFieldParser::empty() const
 {
-	return !expression_.has_value();
+	return !expression_;
 }
 
 std::optional<Expression> WordFieldParser::expression()

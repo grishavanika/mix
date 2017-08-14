@@ -57,7 +57,7 @@ TEST(LabelParser, Local_Symbol_ID_Is_Valid_For_Valid_Local_Symbol)
 	LabelParser p;
 	p.parse("3H");
 	ASSERT_TRUE(p.is_local_symbol());
-	ASSERT_TRUE(p.local_symbol_id().has_value());
+	ASSERT_TRUE(p.local_symbol_id());
 	ASSERT_EQ(3, *p.local_symbol_id());
 }
 

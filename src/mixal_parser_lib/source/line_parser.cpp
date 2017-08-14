@@ -95,7 +95,11 @@ void LineParser::parse_address_str_with_comment(std::string_view line)
 {
 	line = core::LeftTrim(line);
 
-	auto comment_start_it = find_if(line.begin(), line.end(), &std::islower);
+	auto comment_start_it = std::find_if(line.begin(), line.end(),
+		[](char ch)
+		{
+			return std::islower(ch);
+		});
 
 	if (comment_start_it == line.end())
 	{
@@ -103,7 +107,7 @@ void LineParser::parse_address_str_with_comment(std::string_view line)
 		return;
 	}
 
-	const auto address_str_end = distance(line.begin(), comment_start_it);
+	const auto address_str_end = std::distance(line.begin(), comment_start_it);
 
 	address_str_ = core::RightTrim({line.data(), static_cast<std::size_t>(address_str_end)});
 	comment_ = {line.data() + address_str_end, line.size() - address_str_end};
@@ -131,9 +135,9 @@ std::string_view LineParser::address_str() const
 
 void LineParser::do_clear()
 {
-	comment_.reset();
-	label_.reset();
-	operation_.reset();
+	comment_ = std::nullopt;
+	label_ = std::nullopt;
+	operation_ = std::nullopt;
 	address_str_ = {};
 }
 

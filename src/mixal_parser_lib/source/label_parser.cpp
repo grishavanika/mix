@@ -76,6 +76,6 @@ bool LabelParser::empty() const
 
 void LabelParser::do_clear()
 {
-	local_symbol_id_.reset();
+	local_symbol_id_ = std::nullopt;
 	name_ = {};
 }
