@@ -6,6 +6,14 @@
 
 namespace mixal {
 
+// Given MIXAL line of code, splits it into parts:
+// 1. Single comment line, if line is comment (starts with `*`)
+// 2. LABEL (if any)
+// 3. MIX OPERATION (if line is not comment)
+// 4. ADDRESS-string after OPERATION and to the end of line or to the
+// beginning of the comment (any lower case character).
+// ADDRESS-string should be parsed differently depending on OPERATION
+
 class LineParser final :
 	public IParser
 {
@@ -18,6 +26,8 @@ public:
 private:
 	virtual void do_parse(std::string_view line) override;
 	virtual void do_clear() override;
+
+	void parse_address_str_with_comment(std::string_view line);
 
 private:
 	std::optional<std::string_view> comment_;

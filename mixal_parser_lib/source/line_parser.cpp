@@ -3,7 +3,10 @@
 
 #include <core/string.h>
 
+#include <algorithm>
+
 #include <cassert>
+#include <cctype>
 
 using namespace mixal;
 
@@ -20,6 +23,8 @@ bool IsCommentBeginning(std::string_view str)
 
 } // namespace
 
+// Note: implementation of this function relies on what is
+// LABEL and OPERATION (e.h., strings that can not contain spaces)
 void LineParser::do_parse(std::string_view str)
 {
 	if (IsCommentBeginning(str))
@@ -30,10 +35,10 @@ void LineParser::do_parse(std::string_view str)
 
 	// The idea is next:
 	// 
-	// Given MIXAL line of code: `LABEL OPERATION ADDRESS`,
+	// Given MIXAL line of code: `LABEL OPERATION ADDRESS comment`,
 	// find `OPERATION` column and assume that
 	// everything on the left is `LABEL` and on the right - is `ADDRESS`
-	// (`LABEL` can be optional)
+	// (`LABEL` can be optional, comment should start with any lower-case char)
 
 	auto line = core::LeftTrim(str);
 	auto first_word_end = line.find(' ');
@@ -50,7 +55,8 @@ void LineParser::do_parse(std::string_view str)
 	std::string_view label_or_operation{line.data(), first_word_end};
 	if (op_parser.try_parse(label_or_operation))
 	{
-		address_str_ = {line.data() + first_word_end, line.size() - first_word_end};
+		// Line has NO LABEL
+		parse_address_str_with_comment({line.data() + first_word_end, line.size() - first_word_end});
 		operation_ = std::move(op_parser);
 		return;
 	}
@@ -65,6 +71,7 @@ void LineParser::do_parse(std::string_view str)
 		throw InvalidLine{};
 	}
 
+	// Rest of line contains OPERATION and (possibly) ADDRESS with comment
 	auto second_word_end = line.find(' ', second_word_begin + 1);
 	if (second_word_end == line.npos)
 	{
@@ -73,12 +80,32 @@ void LineParser::do_parse(std::string_view str)
 
 	std::string_view operation_str{line.data() + second_word_begin, second_word_end - second_word_begin};
 	op_parser.parse(operation_str);
-
-	const auto address_str_begin = second_word_begin + operation_str.size();
 	
-	address_str_ = {line.data() + address_str_begin, line.size() - address_str_begin};
 	operation_ = std::move(op_parser);
 	label_ = std::move(label_parser);
+
+	// ... and try to split ADDRESS from comment (if any)
+	const auto address_str_begin = second_word_begin + operation_str.size();
+	std::string_view address_with_comment{line.data() + address_str_begin, line.size() - address_str_begin};
+	parse_address_str_with_comment(address_with_comment);
+}
+
+void LineParser::parse_address_str_with_comment(std::string_view line)
+{
+	line = core::LeftTrim(line);
+
+	auto comment_start_it = find_if(line.begin(), line.end(), &std::islower);
+
+	if (comment_start_it == line.end())
+	{
+		address_str_ = line;
+		return;
+	}
+
+	const auto address_str_end = distance(line.begin(), comment_start_it);
+
+	address_str_ = core::RightTrim({line.data(), static_cast<std::size_t>(address_str_end)});
+	comment_ = {line.data() + address_str_end, line.size() - address_str_end};
 }
 
 const std::string_view* LineParser::comment() const
