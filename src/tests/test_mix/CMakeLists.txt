@@ -26,9 +26,9 @@ target_link_libraries(${exe_name} PRIVATE mix_lib)
 target_link_libraries(${exe_name} PRIVATE gtest gmock gmock_main)
 
 install(TARGETS ${exe_name}
-	DESTINATION bin/tests/Debug
+	DESTINATION bin/Debug/tests
 	CONFIGURATIONS Debug)
 
 install(TARGETS ${exe_name}
-	DESTINATION bin/tests/Release
+	DESTINATION bin/Release/tests
 	CONFIGURATIONS Release)
