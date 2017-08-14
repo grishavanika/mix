@@ -27,14 +27,14 @@ TEST(Sprintf, Behaviour_Is_The_Same_As_For_C_Printf)
 }
 
 #if !defined(_MSC_VER)
-TEST(Sprintf, Result_Is_Truncated_For_Too_Big_Strings)
+TEST(Sprintf, DISABLED_Result_Is_Truncated_For_Too_Big_Strings)
 {
 	std::string too_long(5u * 1024, 'x');
 	auto str = Sprintf("%s", too_long.c_str());
 	ASSERT_NE(too_long.size(), str.size());
 }
 #else
-TEST(Sprintf, DISABLED_Result_Is_NOT_Truncated_For_Too_Big_Strings)
+TEST(Sprintf, Result_Is_NOT_Truncated_For_Too_Big_Strings)
 {
 	std::string too_long(5u * 1024, 'x');
 	auto str = Sprintf("%s", too_long.c_str());
