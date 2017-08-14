@@ -34,7 +34,7 @@ TEST(Sprintf, Result_Is_Truncated_For_Too_Big_Strings)
 	ASSERT_NE(too_long.size(), str.size());
 }
 #else
-TEST(Sprintf, Result_Is_NOT_Truncated_For_Too_Big_Strings)
+TEST(Sprintf, DISABLED_Result_Is_NOT_Truncated_For_Too_Big_Strings)
 {
 	std::string too_long(5u * 1024, 'x');
 	auto str = Sprintf("%s", too_long.c_str());
