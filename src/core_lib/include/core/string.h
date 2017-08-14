@@ -1,6 +1,14 @@
 #pragma once
 #include <string>
+
+#if defined(_MSC_VER) && !defined(__clang__)
 #include <string_view>
+#elif __has_include(<experimental/string_view>)
+#include <experimental/string_view>
+#else
+#include <string_view>
+#endif
+
 #include <vector>
 
 namespace core {
