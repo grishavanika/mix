@@ -11,13 +11,13 @@ compiler:
 
 before_install:
   # From: https://gist.github.com/cotsog/3ce84675af0d74438d91
-  - if ["$compiler" == "g++"]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
-  - if ["$compiler" == "g++"]; then sudo apt-get update -qq; fi
+  - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
+  - if [ "$CXX" == "g++" ]; then sudo apt-get update -qq; fi
 
 install:
-  - if ["$compiler" == "g++"]; then sudo apt-get install -qq g++-6; fi
-  - if ["$compiler" == "g++"]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90; fi
-  - if ["$compiler" == "clang"]; then sudo apt-get install libc++-dev; fi
+  - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-6; fi
+  - if [ "$CXX" == "g++" ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90; fi
+  - if [ "$CXX" == "clang" ]; then sudo apt-get install libc++-dev; fi
 
 env:
   - BUILD_CONFIGURATION=Debug
