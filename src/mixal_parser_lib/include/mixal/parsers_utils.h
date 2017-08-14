@@ -8,6 +8,7 @@ using BinaryOperation = std::string_view;
 using BasicExpression = std::string_view;
 
 extern const std::size_t k_max_symbol_length;
+extern const std::size_t k_max_operation_str_length;
 extern const char k_current_address_marker;
 
 extern const UnaryOperation k_unary_operations[];

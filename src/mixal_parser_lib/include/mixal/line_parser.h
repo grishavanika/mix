@@ -23,6 +23,9 @@ public:
 	const OperationParser* operation() const;
 	std::string_view address_str() const;
 
+	bool has_only_comment() const;
+	bool has_inline_comment() const;
+
 private:
 	virtual void do_parse(std::string_view line) override;
 	virtual void do_clear() override;

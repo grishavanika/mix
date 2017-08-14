@@ -8,6 +8,7 @@
 namespace mixal {
 
 extern const std::size_t k_max_symbol_length = 10;
+extern const std::size_t k_max_operation_str_length = 4;
 extern const char k_current_address_marker = '*';
 
 extern const UnaryOperation k_unary_operations[] =

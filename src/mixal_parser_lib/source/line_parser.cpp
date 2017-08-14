@@ -13,6 +13,7 @@ using namespace mixal;
 namespace {
 
 const char k_comment_begin_char = '*';
+const char k_whitespaces[] = " \t";
 
 bool IsCommentBeginning(std::string_view str)
 {
@@ -41,7 +42,7 @@ void LineParser::do_parse(std::string_view str)
 	// (`LABEL` can be optional, comment should start with any lower-case char)
 
 	auto line = core::LeftTrim(str);
-	auto first_word_end = line.find(' ');
+	auto first_word_end = line.find_first_of(k_whitespaces);
 	if (first_word_end == line.npos)
 	{
 		// All line is some word. The only valid situation is that it's Operation
@@ -64,7 +65,7 @@ void LineParser::do_parse(std::string_view str)
 	LabelParser label_parser;
 	label_parser.parse(label_or_operation);
 
-	auto second_word_begin = line.find_first_not_of(' ', first_word_end + 1);
+	auto second_word_begin = line.find_first_not_of(k_whitespaces, first_word_end + 1);
 	if (second_word_begin == line.npos)
 	{
 		// Line contains only LABEL without OPERATION and ADDRESS
@@ -72,7 +73,7 @@ void LineParser::do_parse(std::string_view str)
 	}
 
 	// Rest of line contains OPERATION and (possibly) ADDRESS with comment
-	auto second_word_end = line.find(' ', second_word_begin + 1);
+	auto second_word_end = line.find_first_of(k_whitespaces, second_word_begin + 1);
 	if (second_word_end == line.npos)
 	{
 		second_word_end = line.size();
@@ -135,3 +136,14 @@ void LineParser::do_clear()
 	operation_.reset();
 	address_str_ = {};
 }
+
+bool LineParser::has_only_comment() const
+{
+	return comment_ ? (comment_->front() == k_comment_begin_char) : false;
+}
+
+bool LineParser::has_inline_comment() const
+{
+	return comment_ ? (comment_->front() != k_comment_begin_char) : false;
+}
+
