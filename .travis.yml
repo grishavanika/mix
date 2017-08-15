@@ -2,6 +2,9 @@ dist: trusty
 language: cpp
 sudo: required
 
+notifications:
+  email: false
+
 os:
   - linux
 
