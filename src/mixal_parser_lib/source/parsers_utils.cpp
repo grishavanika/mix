@@ -10,6 +10,7 @@ namespace mixal {
 extern const std::size_t k_max_symbol_length = 10;
 extern const std::size_t k_max_operation_str_length = 4;
 extern const char k_current_address_marker = '*';
+extern const LocalSymbolId k_max_local_symbol_id = 9;
 
 extern const UnaryOperation k_unary_operations[] =
 {
@@ -69,7 +70,8 @@ bool IsNumber(const std::string_view& str)
 		return false;
 	}
 
-	return std::all_of(str.cbegin(), str.cend(), &IsNumberChar);
+	return !str.empty() &&
+		std::all_of(str.cbegin(), str.cend(), &IsNumberChar);
 }
 
 bool IsCurrentAddressSymbol(const std::string_view& str)
@@ -216,6 +218,11 @@ std::size_t ExpectFirstNonWhiteSpaceChar(char ch, const std::string_view& str, s
 		return str.size();
 	}
 	return first_char;
+}
+
+bool IsValidLocalSymbolId(LocalSymbolId id)
+{
+	return (id >= 0) && (id <= k_max_local_symbol_id);
 }
 
 } // namespace mixal

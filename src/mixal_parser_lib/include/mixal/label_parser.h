@@ -1,12 +1,10 @@
 #pragma once
 #include <mixal/parser.h>
+#include <mixal/parsers_utils.h>
 
 #include <core/optional.h>
 
 namespace mixal {
-
-// In range [0; 9]
-using LocalSymbolId = unsigned char;
 
 class LabelParser final :
 	public IParser
@@ -18,8 +16,10 @@ public:
 	std::optional<LocalSymbolId> local_symbol_id() const;
 
 private:
-	virtual void do_parse(std::string_view str) override;
+	virtual std::size_t do_parse_stream(std::string_view str, std::size_t offset) override;
 	virtual void do_clear() override;
+
+	bool parse_local_symbol();
 
 private:
 	std::optional<LocalSymbolId> local_symbol_id_;

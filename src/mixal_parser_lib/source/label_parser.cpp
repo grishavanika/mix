@@ -1,8 +1,9 @@
 #include <mixal/label_parser.h>
 #include <mixal/parse_exceptions.h>
-#include <mixal/parsers_utils.h>
 
 #include <core/string.h>
+
+#include <sstream>
 
 #include <cassert>
 #include <cctype>
@@ -12,46 +13,83 @@ using namespace mixal;
 namespace {
 
 const char k_local_symbol_label_suffix = 'H';
+const std::string_view k_local_symbols = "BHF";
 
-bool IsMaybeLocalSymbol(std::string_view str)
+bool IsLocalSymbol(std::string_view str)
 {
 	assert(!str.empty());
-	// #TODO: `2F`, `3B` are also local symbols, but they should not be
-	// in the "Label" column
-	if (str.back() != k_local_symbol_label_suffix)
+
+	if (k_local_symbols.find(str.back()) != k_local_symbols.npos)
 	{
-		return false;
+		return IsNumber(str.substr(0, str.size() - 1));
 	}
 
-	return (str.size() == 2) && std::isdigit(str.front());
+	return false;
 }
 
-LocalSymbolId ParseLocalSymbol(std::string_view str)
+LocalSymbolId ParseLocalSymbol(const std::string_view& str)
 {
-	assert(IsMaybeLocalSymbol(str));
-	return (str.front() - '0');
+	assert(IsLocalSymbol(str));
+
+	std::stringstream in;
+	in << str.substr(0, str.size() - 1);
+	LocalSymbolId n = 0;
+	in >> n;
+	assert(in);
+
+	return n;
+}
+
+bool IsValidLabelLocalSymbol(const std::string_view& str)
+{
+	assert(IsLocalSymbol(str));
+	return (str.back() == k_local_symbol_label_suffix);
 }
 
 } // namespace
 
-void LabelParser::do_parse(std::string_view str)
+std::size_t LabelParser::do_parse_stream(std::string_view str, std::size_t offset)
 {
-	auto label = core::Trim(str);
-	if (label.empty())
+	const auto first_non_space = SkipLeftWhiteSpaces(str, offset);
+	if (first_non_space == str.size())
 	{
-		return;
+		return str.size();
 	}
 
-	if (IsMaybeLocalSymbol(str))
+	auto index = first_non_space;
+	for (auto size = str.size(); index < size; ++index)
 	{
-		local_symbol_id_ = ParseLocalSymbol(label);
-	}
-	else if (!IsSymbol(label))
-	{
-		throw InvalidLabel{};
+		if (!IsSymbolChar(str[index]))
+		{
+			break;
+		}
 	}
 
-	name_ = label;
+	name_ = str.substr(first_non_space, index - first_non_space);
+
+	if (!IsSymbol(name_))
+	{
+		return str.npos;
+	}
+
+	if (IsLocalSymbol(name_) &&
+		!parse_local_symbol())
+	{
+		return  str.npos;
+	}
+
+	return first_non_space;
+}
+
+bool LabelParser::parse_local_symbol()
+{
+	if (!IsValidLabelLocalSymbol(name_))
+	{
+		return false;
+	}
+
+	local_symbol_id_ = ParseLocalSymbol(name_);
+	return IsValidLocalSymbolId(*local_symbol_id_);
 }
 
 std::string_view LabelParser::name() const
