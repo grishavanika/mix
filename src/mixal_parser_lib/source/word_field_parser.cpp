@@ -1,5 +1,4 @@
 #include <mixal/word_field_parser.h>
-#include <mixal/parse_exceptions.h>
 #include <mixal/expression_parser.h>
 
 #include <core/string.h>

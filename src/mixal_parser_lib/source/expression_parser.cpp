@@ -1,5 +1,4 @@
 #include <mixal/expression_parser.h>
-#include <mixal/parse_exceptions.h>
 
 #include <core/string.h>
 
@@ -24,6 +23,12 @@ bool IsValid(const Expression& expr)
 		!expr.tokens.back().binary_op;
 }
 
+class InvalidExpression :
+	public std::logic_error
+{
+	using std::logic_error::logic_error;
+};
+
 } // namespace
 
 std::size_t ExpressionParser::do_parse_stream(std::string_view str, std::size_t offset)
@@ -40,7 +45,7 @@ std::size_t ExpressionParser::do_parse_stream(std::string_view str, std::size_t 
 			parse_basic_expr_with_binary_op();
 		}
 	}
-	catch (const ParseError&)
+	catch (const InvalidExpression&)
 	{
 	}
 

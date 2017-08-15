@@ -20,7 +20,7 @@ TEST_F(ConstantWordExpressionParserTest, When_No_Field_Specified_Behaves_Like_Us
 	const auto& token = parser_.expression().tokens[0];
 
 	ExpressionParser expr_parser;
-	expr_parser.parse("*-3");
+	expr_parser.parse_stream("*-3");
 
 	ASSERT_EQ(expr_parser.expression(), token.expression);
 	ASSERT_FALSE(token.field);
@@ -33,10 +33,10 @@ TEST_F(ConstantWordExpressionParserTest, Field_Can_Be_Specified)
 	const auto& token = parser_.expression().tokens[0];
 
 	ExpressionParser expr_parser;
-	expr_parser.parse("*-3");
+	expr_parser.parse_stream("*-3");
 
 	WordFieldParser field_parser;
-	field_parser.parse("(1:3)");
+	field_parser.parse_stream("(1:3)");
 
 	ASSERT_EQ(expr_parser.expression(), token.expression);
 	ASSERT_TRUE(token.field);
@@ -49,7 +49,7 @@ TEST_F(ConstantWordExpressionParserTest, Multiple_Expressions_Can_Be_Specified)
 	ASSERT_EQ(6u, parser_.expression().tokens.size());
 
 	ExpressionParser expr_parser;
-	expr_parser.parse("*-3");
+	expr_parser.parse_stream("*-3");
 
 	for (const auto& token : parser_.expression().tokens)
 	{

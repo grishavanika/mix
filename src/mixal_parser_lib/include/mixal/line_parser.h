@@ -27,7 +27,7 @@ public:
 	bool has_inline_comment() const;
 
 private:
-	virtual void do_parse(std::string_view line) override;
+	virtual std::size_t do_parse_stream(std::string_view str, std::size_t offset) override;
 	virtual void do_clear() override;
 
 	void parse_address_str_with_comment(std::string_view line);

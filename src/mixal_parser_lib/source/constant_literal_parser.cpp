@@ -1,5 +1,4 @@
 #include <mixal/constant_literal_parser.h>
-#include <mixal/parse_exceptions.h>
 #include <mixal/constant_word_expression_parser.h>
 
 #include <core/string.h>

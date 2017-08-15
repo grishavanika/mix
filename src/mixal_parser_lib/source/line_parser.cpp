@@ -1,5 +1,4 @@
 #include <mixal/line_parser.h>
-#include <mixal/parse_exceptions.h>
 
 #include <core/string.h>
 
@@ -23,6 +22,9 @@ bool IsCommentBeginning(std::string_view str)
 
 } // namespace
 
+///////////////////////////////////////////////////////////////////////////////
+// #TODO: change to stream-based parsing !
+
 // Note: implementation of this function relies on what is
 // LABEL and OPERATION (e.g., strings that can not contain spaces)
 //
@@ -32,13 +34,13 @@ bool IsCommentBeginning(std::string_view str)
 // find `OPERATION` column and assume that
 // everything on the left is `LABEL` and on the right - is `ADDRESS`
 // (`LABEL` can be optional, comment should start with any lower-case char)
-void LineParser::do_parse(std::string_view str)
+std::size_t LineParser::do_parse_stream(std::string_view str, std::size_t /*offset*/)
 {
 	auto line = core::LeftTrim(str);
 	if (IsCommentBeginning(line))
 	{
 		comment_ = line;
-		return;
+		return str.size();
 	}
 
 	auto first_word_end = line.find_first_of(k_whitespaces);
@@ -46,9 +48,10 @@ void LineParser::do_parse(std::string_view str)
 	{
 		// All line is some word. The only valid situation is that it's Operation
 		OperationParser op_parser;
-		op_parser.parse(line);
+		auto r = op_parser.parse_stream(line);
+		assert(r != line.npos);
 		operation_ = std::move(op_parser);
-		return;
+		return str.size();
 	}
 
 	OperationParser op_parser;
@@ -58,17 +61,18 @@ void LineParser::do_parse(std::string_view str)
 		// Line has NO LABEL
 		parse_address_str_with_comment(line.substr(first_word_end));
 		operation_ = std::move(op_parser);
-		return;
+		return str.size();
 	}
 
 	LabelParser label_parser;
-	label_parser.parse(label_or_op);
+	auto r = label_parser.parse_stream(label_or_op);
+	assert(r != line.npos);
 
 	auto second_word_begin = line.find_first_not_of(k_whitespaces, first_word_end + 1);
 	if (second_word_begin == line.npos)
 	{
 		// Line contains only LABEL without OPERATION and ADDRESS
-		throw InvalidLine{};
+		return str.npos;
 	}
 
 	// Rest of line contains OPERATION and (possibly) ADDRESS with comment
@@ -78,13 +82,15 @@ void LineParser::do_parse(std::string_view str)
 		second_word_end = line.size();
 	}
 
-	op_parser.parse(line.substr(second_word_begin, second_word_end - second_word_begin));
-	
+	r = op_parser.parse_stream(line.substr(second_word_begin, second_word_end - second_word_begin));
+	assert(r != line.npos);
+
 	operation_ = std::move(op_parser);
 	label_ = std::move(label_parser);
 
 	// ... and try to split ADDRESS from comment (if any)
 	parse_address_str_with_comment(line.substr(second_word_end));
+	return str.size();
 }
 
 void LineParser::parse_address_str_with_comment(std::string_view line)

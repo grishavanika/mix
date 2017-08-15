@@ -1,5 +1,4 @@
 #include <mixal/label_parser.h>
-#include <mixal/parse_exceptions.h>
 
 #include <core/string.h>
 

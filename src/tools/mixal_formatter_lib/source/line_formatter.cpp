@@ -1,6 +1,4 @@
 #include <mixal_formatter/line_formatter.h>
-
-#include <mixal/parse_exceptions.h>
 #include <mixal/line_parser.h>
 #include <mixal/parsers_utils.h>
 
@@ -71,17 +69,14 @@ std::string FormatLine(const std::string& line, const FormatOptions& options /*=
 		return {};
 	}
 
-	try
-	{
-		LineParser line_parser;
-		line_parser.parse(line_view);
-		return BuildLine(line_parser, options);
-	}
-	catch (const ParseError&)
+	LineParser line_parser;
+	if (line_parser.parse_stream(line_view) == line_view.npos)
 	{
 		assert(!"Failed to parse MIXAL line");
 		return line;
 	}
+
+	return BuildLine(line_parser, options);
 }
 
 } // namespace mixal_formatter

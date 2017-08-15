@@ -1,112 +1,107 @@
 #include <mixal/line_parser.h>
-#include <mixal/parse_exceptions.h>
 
-#include <gtest/gtest.h>
+#include "parser_test_fixture.h"
 
 using namespace mixal;
 
-TEST(LineParser, Parses_Line_With_Comment_Leaving_Comment_Unchanged)
+namespace {
+
+class LineParserTest :
+	public ParserTest<LineParser>
 {
-	LineParser p;
-	p.parse("* comment   ");
-	ASSERT_TRUE(p.comment());
-	ASSERT_EQ("* comment   ", *p.comment());
+};
+
+} // namespace
+
+TEST_F(LineParserTest, Parses_Line_With_Comment_Leaving_Comment_Unchanged)
+{
+	parse("* comment   ");
+	ASSERT_TRUE(parser_.comment());
+	ASSERT_EQ("* comment   ", *parser_.comment());
 }
 
-TEST(LineParser, Ignores_Line_Left_White_Spaces_For_Comment_Line)
+TEST_F(LineParserTest, Ignores_Line_Left_White_Spaces_For_Comment_Line)
 {
-	LineParser p;
-	p.parse("       * comment");
-	ASSERT_TRUE(p.comment());
-	ASSERT_EQ("* comment", *p.comment());
+	parse("       * comment");
+	ASSERT_TRUE(parser_.comment());
+	ASSERT_EQ("* comment", *parser_.comment());
 }
 
-TEST(LineParser, Parses_Line_With_Single_Operation)
+TEST_F(LineParserTest, Parses_Line_With_Single_Operation)
 {
-	LineParser p;
-	p.parse("STA");
-	ASSERT_TRUE(p.operation());
-	ASSERT_EQ(OperationId::STA, p.operation()->id());
-	ASSERT_TRUE(p.address_str().empty());
-	ASSERT_FALSE(p.comment());
+	parse("STA");
+	ASSERT_TRUE(parser_.operation());
+	ASSERT_EQ(OperationId::STA, parser_.operation()->id());
+	ASSERT_TRUE(parser_.address_str().empty());
+	ASSERT_FALSE(parser_.comment());
 }
 
-TEST(LineParser, Line_With_Single_Operation_Can_Contain_WhiteSpaces)
+TEST_F(LineParserTest, Line_With_Single_Operation_Can_Contain_WhiteSpaces)
 {
 	{
-		LineParser p;
-		p.parse("  LDA");
-		ASSERT_TRUE(p.operation());
-		ASSERT_EQ(OperationId::LDA, p.operation()->id());
-		ASSERT_TRUE(p.address_str().empty());
-		ASSERT_FALSE(p.comment());
+		parse("  LDA");
+		ASSERT_TRUE(parser_.operation());
+		ASSERT_EQ(OperationId::LDA, parser_.operation()->id());
+		ASSERT_TRUE(parser_.address_str().empty());
+		ASSERT_FALSE(parser_.comment());
 	}
 
 	{
-		LineParser p;
-		p.parse("  LD2N     ");
-		ASSERT_TRUE(p.operation());
-		ASSERT_EQ(OperationId::LD2N, p.operation()->id());
-		ASSERT_TRUE(p.address_str().empty());
-		ASSERT_FALSE(p.comment());
+		parse("  LD2N     ");
+		ASSERT_TRUE(parser_.operation());
+		ASSERT_EQ(OperationId::LD2N, parser_.operation()->id());
+		ASSERT_TRUE(parser_.address_str().empty());
+		ASSERT_FALSE(parser_.comment());
 	}
 }
 
-TEST(LineParser, Line_Can_Not_Contain_Only_Label)
+TEST_F(LineParserTest, Line_Can_Not_Contain_Only_Label)
 {
-	LineParser p;
-
-	ASSERT_THROW({
-		p.parse("LABEL  ");
-	}, ParseError);
+	parse_error("LABEL  ");
 }
 
-TEST(LineParser, Address_Column_Can_Be_Empty)
+TEST_F(LineParserTest, Address_Column_Can_Be_Empty)
 {
-	LineParser p;
-	p.parse("LABEL  JNE");
+	parse("LABEL  JNE");
 
-	ASSERT_TRUE(p.label());
-	ASSERT_TRUE(p.operation());
-	ASSERT_EQ(OperationId::JNE, p.operation()->id());
-	ASSERT_TRUE(p.address_str().empty());
-	ASSERT_FALSE(p.comment());
+	ASSERT_TRUE(parser_.label());
+	ASSERT_TRUE(parser_.operation());
+	ASSERT_EQ(OperationId::JNE, parser_.operation()->id());
+	ASSERT_TRUE(parser_.address_str().empty());
+	ASSERT_FALSE(parser_.comment());
 
-	p.parse("8H  INC1   ");
-	ASSERT_TRUE(p.label());
-	ASSERT_TRUE(p.operation());
-	ASSERT_EQ(OperationId::INC1, p.operation()->id());
-	ASSERT_TRUE(p.address_str().empty());
-	ASSERT_FALSE(p.comment());
+	parse("8H  INC1   ");
+	ASSERT_TRUE(parser_.label());
+	ASSERT_TRUE(parser_.operation());
+	ASSERT_EQ(OperationId::INC1, parser_.operation()->id());
+	ASSERT_TRUE(parser_.address_str().empty());
+	ASSERT_FALSE(parser_.comment());
 }
 
-TEST(LineParser, Can_Contain_In_Line_Comments_That_Starts_With_Lower_Case)
+TEST_F(LineParserTest, Can_Contain_In_Line_Comments_That_Starts_With_Lower_Case)
 {
-	LineParser p;
-	p.parse("ADD some comment  ");
+	parse("ADD some comment  ");
 
-	ASSERT_FALSE(p.label());
-	ASSERT_TRUE(p.operation());
-	ASSERT_EQ(OperationId::ADD, p.operation()->id());
-	ASSERT_TRUE(p.address_str().empty());
-	ASSERT_TRUE(p.comment());
-	ASSERT_EQ("some comment  ", *p.comment());
+	ASSERT_FALSE(parser_.label());
+	ASSERT_TRUE(parser_.operation());
+	ASSERT_EQ(OperationId::ADD, parser_.operation()->id());
+	ASSERT_TRUE(parser_.address_str().empty());
+	ASSERT_TRUE(parser_.comment());
+	ASSERT_EQ("some comment  ", *parser_.comment());
 }
 
-TEST(LineParser, Splits_Label_Op_Address_And_Comment_Into_Separate_Parts_With_No_WhiteSpaces)
+TEST_F(LineParserTest, Splits_Label_Op_Address_And_Comment_Into_Separate_Parts_With_No_WhiteSpaces)
 {
-	LineParser p;
+	parse("START   IN      BUF (TERM)   read a block (70 chars)");
 
-	p.parse("START   IN      BUF (TERM)   read a block (70 chars)");
+	ASSERT_TRUE(parser_.label());
+	ASSERT_EQ("START", parser_.label()->name());
 
-	ASSERT_TRUE(p.label());
-	ASSERT_EQ("START", p.label()->name());
+	ASSERT_TRUE(parser_.operation());
+	ASSERT_EQ(OperationId::IN, parser_.operation()->id());
 
-	ASSERT_TRUE(p.operation());
-	ASSERT_EQ(OperationId::IN, p.operation()->id());
-
-	ASSERT_EQ("BUF (TERM)", p.address_str());
+	ASSERT_EQ("BUF (TERM)", parser_.address_str());
 	
-	ASSERT_TRUE(p.comment());
-	ASSERT_EQ("read a block (70 chars)", *p.comment());
+	ASSERT_TRUE(parser_.comment());
+	ASSERT_EQ("read a block (70 chars)", *parser_.comment());
 }

@@ -44,7 +44,7 @@ TEST_F(ConstantLiteralParserTest, Parse_Expression_Inside_Equal_Chars_Like_W_Exp
 	parse("=11(1:1),77=");
 
 	ConstantWordExpressionParser w_parser;
-	w_parser.parse("11(1:1),77");
+	w_parser.parse_stream("11(1:1),77");
 
 	ASSERT_EQ(w_parser.expression(), parser_.expression());
 }
