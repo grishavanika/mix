@@ -26,8 +26,8 @@ void ConstantWordExpressionParser::parse_single_word_expr(std::string_view str)
 		field_begin = str.size();
 	}
 
-	std::string_view expr_str{str.data(), field_begin};
-	std::string_view field_str{str.data() + field_begin, str.size() - field_begin};
+	auto expr_str = str.substr(0, field_begin);
+	auto field_str = str.substr(field_begin);
 	
 	WordExpressionToken token;
 	token.expression = parse_expr(expr_str);

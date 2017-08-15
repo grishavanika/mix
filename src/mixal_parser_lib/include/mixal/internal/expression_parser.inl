@@ -13,7 +13,7 @@ std::string_view ExpressionParser::build_non_empty_expr(
 	auto build_result = [=]() -> std::string_view
 	{
 		const auto end_pos = parse_pos_;
-		return {parse_str_.data() + start_pos, end_pos - start_pos};
+		return parse_str_.substr(start_pos, end_pos - start_pos);
 	};
 
 	while (!eof() && pred(current_char()))

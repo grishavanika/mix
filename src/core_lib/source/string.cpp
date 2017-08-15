@@ -102,7 +102,7 @@ std::vector<std::string_view> Split(std::string_view str, char ch)
 
 	auto push_new_part = [&](std::size_t end)
 	{
-		parts.emplace_back(str.data() + prev_pos, end - prev_pos);
+		parts.push_back(str.substr(prev_pos, end - prev_pos));
 	};
 
 	std::size_t pos = 0;
