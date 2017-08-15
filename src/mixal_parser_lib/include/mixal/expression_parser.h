@@ -10,7 +10,7 @@ public:
 	const Expression& expression() const;
 
 private:
-	virtual bool do_parse_stream(std::string_view& str) override;
+	virtual std::size_t do_parse_stream(std::string_view str, std::size_t offset) override;
 	virtual void do_clear() override;
 
 	void parse_basic_expr_with_optional_unary_op();
@@ -35,6 +35,7 @@ private:
 	Expression expression_;
 	std::string_view parse_str_;
 	std::size_t parse_pos_;
+	std::size_t last_parsed_token_pos_;
 	ExpressionToken current_token_;
 };
 

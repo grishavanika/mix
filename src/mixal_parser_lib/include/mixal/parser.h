@@ -10,23 +10,25 @@ class IParser
 public:
 	void parse(std::string_view str)
 	{
-		if (!parse_stream(str))
+		if (parse_stream(str) == str.npos)
 		{
 			throw ParseError{"Something went wrong. This code will be removed"};
 		}
 	}
 
-	bool parse_stream(std::string_view& str)
+	std::size_t parse_stream(std::string_view str, std::size_t offset = 0)
 	{
 		do_clear();
 
-		if (!do_parse_stream(str))
+		// #TODO: validate that `offset <= str.size()`
+		const auto pos = do_parse_stream(str, offset);
+
+		if (pos == str.npos)
 		{
 			do_clear();
-			return false;
 		}
 
-		return true;
+		return pos;
 	}
 
 protected:
@@ -40,7 +42,7 @@ private:
 
 	virtual void do_clear() = 0;
 
-	virtual bool do_parse_stream(std::string_view& str)
+	virtual std::size_t do_parse_stream(std::string_view str, std::size_t /*offset*/)
 	{
 		try
 		{
@@ -48,9 +50,10 @@ private:
 		}
 		catch (const ParseError&)
 		{
-			return false;
+			return str.npos;
 		}
-		return true;
+		
+		return str.size();
 	}
 };
 

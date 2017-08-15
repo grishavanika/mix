@@ -7,7 +7,7 @@ using namespace mixal;
 
 namespace {
 
-ExpressionToken BuildToken(
+ExpressionToken Token(
 	std::optional<UnaryOperation> unary_op,
 	BasicExpression basic_expr,
 	std::optional<BinaryOperation> binary_op)
@@ -15,128 +15,151 @@ ExpressionToken BuildToken(
 	return {unary_op, basic_expr, binary_op};
 }
 
-ExpressionToken BuildToken(
+ExpressionToken Token(
 	BasicExpression basic_expr)
 {
-	return BuildToken({}, basic_expr, {});
+	return Token({}, basic_expr, {});
 }
 
-std::string MakeTooLongSymbol()
+ExpressionToken Token(
+	BasicExpression basic_expr,
+	std::optional<BinaryOperation> binary_op)
 {
-	return std::string(2 * k_max_symbol_length, 'A');
+	return {{}, basic_expr, binary_op};
 }
+
+std::string MakeLongestSymbol()
+{
+	return std::string(k_max_symbol_length, 'A');
+}
+
+class ExpressionParserTest :
+	public ::testing::Test
+{
+protected:
+	void parse(std::string_view s)
+	{
+		const auto pos = parser_.parse_stream(s);
+		ASSERT_NE(s.npos, pos);
+		rest_of_parsed_stream_ = s.substr(pos);
+	}
+
+	void parse_error(std::string_view s)
+	{
+		const auto pos = parser_.parse_stream(s);
+		ASSERT_EQ(s.npos, pos);
+	}
+
+	void reminder_stream_is(std::string_view rest_of_stream)
+	{
+		ASSERT_EQ(rest_of_stream, rest_of_parsed_stream_);
+	}
+
+	template<typename... T>
+	void tokens_are(T... tokens)
+	{
+		std::vector<ExpressionToken> expected_tokens{tokens...};
+		ASSERT_EQ(expected_tokens, parser_.expression().tokens);
+	}
+
+protected:
+	ExpressionParser parser_;
+	std::string_view rest_of_parsed_stream_;
+};
 
 } // namespace
 
-TEST(ExpressionParser, Expression_Can_Contain_Only_Number)
+TEST_F(ExpressionParserTest, Expression_Can_Contain_Only_Number)
 {
-	ExpressionParser p;
-	p.parse(" 42  ");
-	const auto& tokens = p.expression().tokens;
-	ASSERT_EQ(1u, tokens.size());
-	ASSERT_EQ(BuildToken("42"), tokens.front());
+	parse(" 42  ");
+	tokens_are(Token("42"));
+	reminder_stream_is("  ");
 }
 
-TEST(ExpressionParser, Expression_Can_Contain_Only_Symbol)
+TEST_F(ExpressionParserTest, Expression_Can_Contain_Only_Symbol)
 {
-	ExpressionParser p;
-	p.parse("LABEL");
-	const auto& tokens = p.expression().tokens;
-	ASSERT_EQ(1u, tokens.size());
-	ASSERT_EQ(BuildToken("LABEL"), tokens.front());
+	parse("LABEL");
+	tokens_are(Token("LABEL"));
+	reminder_stream_is("");
 }
 
-TEST(ExpressionParser, Expression_Can_Contain_Only_Current_Address_Counter)
+TEST_F(ExpressionParserTest, Expression_Can_Contain_Only_Current_Address_Counter)
 {
-	ExpressionParser p;
-	p.parse(" *");
-	const auto& tokens = p.expression().tokens;
-	ASSERT_EQ(1u, tokens.size());
-	ASSERT_EQ(BuildToken("*"), tokens.front());
+	parse(" *");
+	tokens_are(Token("*"));
+	reminder_stream_is("");
 }
 
-TEST(ExpressionParser, Expression_Can_Contain_Basic_Expression_With_Unary_Op_In_The_Beginning)
+TEST_F(ExpressionParserTest, Expression_Can_Contain_Basic_Expression_With_Unary_Op_In_The_Beginning)
 {
-	ExpressionParser p;
-	p.parse(" -*");
-	const auto& tokens = p.expression().tokens;
-	ASSERT_EQ(1u, tokens.size());
-
-	ASSERT_EQ(BuildToken("-", "*", {}), tokens.front());
+	parse(" -*");
+	tokens_are(Token("-", "*", {}));
+	reminder_stream_is("");
 }
 
-TEST(ExpressionParser, Expression_With_Only_Unary_Op_Will_Throw_InvalidExpression)
+TEST_F(ExpressionParserTest, Expression_With_Only_Unary_Op_Will_Fail)
 {
-	ExpressionParser p;
-
-	ASSERT_THROW({
-		p.parse("+");
-	}, ParseError);
+	parse_error("+");
 }
 
-TEST(ExpressionParser, Differentiate_Current_Address_Symbol_From_Multiply_Binary_Operation)
+TEST_F(ExpressionParserTest, Differentiate_Current_Address_Symbol_From_Multiply_Binary_Operation)
 {
-	ExpressionParser p;
-	p.parse("***");
-	const auto& tokens = p.expression().tokens;
-	ASSERT_EQ(2u, tokens.size());
-
-	ASSERT_EQ(BuildToken({}, "*", "*"), tokens[0]);
-	ASSERT_EQ(BuildToken("*"), tokens[1]);
+	parse("***");
+	tokens_are(Token({}, "*", "*"), Token("*"));
+	reminder_stream_is("");
 }
 
-TEST(ExpressionParser, Full_Token_Is_Unary_Op_With_Basic_Expression_And_Binary_Op)
+TEST_F(ExpressionParserTest, Full_Token_Is_Unary_Op_With_Basic_Expression_And_Binary_Op)
 {
-	ExpressionParser p;
-	p.parse("+ * - 3");
-	const auto& tokens = p.expression().tokens;
-	ASSERT_EQ(2u, tokens.size());
-
-	ASSERT_EQ(BuildToken("+", "*", "-"), tokens[0]);
+	parse("+ * - 3");
+	tokens_are(Token("+", "*", "-"), Token("3"));
+	reminder_stream_is("");
 }
 
-TEST(ExpressionParser, Parses_All_Token_To_The_Vector_With_Left_To_Right_Order)
+TEST_F(ExpressionParserTest, Parses_All_Token_To_The_Vector_With_Left_To_Right_Order)
 {
-	ExpressionParser p;
-	//           1 |2|   3| 4|
-	p.parse("  -1 + 5*20 / 6  ");
-	const auto& tokens = p.expression().tokens;
-	ASSERT_EQ(4u, tokens.size());
+	//         1 |2|   3|4|
+	parse("  -1 + 5*20 / 6  ");
 
-	ASSERT_EQ(BuildToken("-", "1", "+"), tokens[0]);
-	ASSERT_EQ(BuildToken({}, "5", "*"), tokens[1]);
-	ASSERT_EQ(BuildToken({}, "20", "/"), tokens[2]);
-	ASSERT_EQ(BuildToken("6"), tokens[3]);
+	tokens_are(
+		Token("-", "1", "+"),
+		Token("5", "*"),
+		Token("20", "/"),
+		Token("6"));
+
+	reminder_stream_is("  ");
 }
 
-TEST(ExpressionParser, Parses_Mix_Field_Specification_As_Binary_Op)
+TEST_F(ExpressionParserTest, Parses_Mix_Field_Specification_As_Binary_Op)
 {
-	ExpressionParser p;
-	p.parse("1:3");
-	const auto& tokens = p.expression().tokens;
-	ASSERT_EQ(2u, tokens.size());
+	parse("1:3");
 
-	ASSERT_EQ(BuildToken({}, "1", ":"), tokens[0]);
-	ASSERT_EQ(BuildToken("3"), tokens[1]);
+	tokens_are(
+		Token("1", ":"),
+		Token("3"));
+
+	reminder_stream_is("");
 }
 
-TEST(ExpressionParser, Parses_Special_MIXAL_Binary_Operations)
+TEST_F(ExpressionParserTest, Parses_Special_MIXAL_Binary_Operations)
 {
-	ExpressionParser p;
-	p.parse("1 // 3");
-	const auto& tokens = p.expression().tokens;
-	ASSERT_EQ(2u, tokens.size());
+	parse("1 // 3");
 
-	ASSERT_EQ(BuildToken({}, "1", "//"), tokens[0]);
-	ASSERT_EQ(BuildToken("3"), tokens[1]);
+	tokens_are(
+		Token("1", "//"),
+		Token("3"));
+	
+	reminder_stream_is("");
 }
 
-TEST(ExpressionParser, Parses_As_Much_As_Possible)
+TEST_F(ExpressionParserTest, Parses_As_Much_As_Possible)
 {
-	ExpressionParser p;
-	auto long_symbol = MakeTooLongSymbol();
-	std::string_view stream{long_symbol};
+	auto symbol = MakeLongestSymbol();
+	auto too_long_symbol = symbol + symbol;
+	
+	parse(too_long_symbol);
 
-	ASSERT_TRUE(p.parse_stream(stream));
-	// TODO: more checks
+	tokens_are(Token(symbol));
+
+	reminder_stream_is(symbol);
 }

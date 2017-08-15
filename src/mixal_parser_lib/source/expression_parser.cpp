@@ -26,9 +26,10 @@ bool IsValid(const Expression& expr)
 
 } // namespace
 
-bool ExpressionParser::do_parse_stream(std::string_view& str)
+std::size_t ExpressionParser::do_parse_stream(std::string_view str, std::size_t offset)
 {
 	parse_str_ = str;
+	parse_pos_ = offset;
 
 	try
 	{
@@ -48,7 +49,7 @@ bool ExpressionParser::do_parse_stream(std::string_view& str)
 		finish_current_token();
 	}
 
-	return IsValid(expression_);
+	return IsValid(expression_) ? last_parsed_token_pos_ : str.npos;
 }
 
 const Expression& ExpressionParser::expression() const
@@ -62,6 +63,7 @@ void ExpressionParser::do_clear()
 	parse_str_ = {};
 	parse_pos_ = 0;
 	current_token_ = ExpressionToken{};
+	last_parsed_token_pos_ = 0;
 }
 
 void ExpressionParser::parse_basic_expr_with_optional_unary_op()

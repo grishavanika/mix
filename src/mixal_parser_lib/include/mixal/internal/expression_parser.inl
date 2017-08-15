@@ -32,6 +32,8 @@ std::string_view ExpressionParser::build_non_empty_expr(
 		// #TODO: add caller context to this error
 		throw_error("Expecting non-empty expression");
 	}
+
+	last_parsed_token_pos_ = parse_pos_;
 	return result;
 }
 
