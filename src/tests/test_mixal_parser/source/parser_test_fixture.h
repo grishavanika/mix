@@ -10,14 +10,14 @@ protected:
 	void parse(std::string_view s)
 	{
 		const auto pos = parser_.parse_stream(s);
-		ASSERT_NE(s.npos, pos);
+		ASSERT_FALSE(IsInvalidStreamPosition(pos));
 		rest_of_parsed_stream_ = s.substr(pos);
 	}
 
 	void parse_error(std::string_view s)
 	{
 		const auto pos = parser_.parse_stream(s);
-		ASSERT_EQ(s.npos, pos);
+		ASSERT_TRUE(IsInvalidStreamPosition(pos));
 	}
 
 	void reminder_stream_is(std::string_view rest_of_stream)
