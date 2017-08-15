@@ -6,6 +6,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <iostream>
 
 #include <cassert>
 
@@ -72,7 +73,8 @@ std::string FormatLine(const std::string& line, const FormatOptions& options /*=
 	LineParser line_parser;
 	if (IsInvalidStreamPosition(line_parser.parse_stream(line_view)))
 	{
-		assert(!"Failed to parse MIXAL line");
+		std::cerr << "Failed to parse MIXAL line of code: \n\t"
+			<< line_view << "\n";
 		return line;
 	}
 

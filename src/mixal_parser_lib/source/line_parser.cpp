@@ -14,7 +14,7 @@ namespace {
 const char k_comment_begin_char = '*';
 const char k_whitespaces[] = " \t";
 
-bool IsCommentBeginning(std::string_view str)
+bool IsCommentBeginning(const std::string_view& str)
 {
 	return !str.empty() &&
 		(str.front() == k_comment_begin_char);
@@ -22,83 +22,58 @@ bool IsCommentBeginning(std::string_view str)
 
 } // namespace
 
-///////////////////////////////////////////////////////////////////////////////
-// #TODO: change to stream-based parsing !
-
-// Note: implementation of this function relies on what is
-// LABEL and OPERATION (e.g., strings that can not contain spaces)
-//
-// The idea is next:
-// 
-// Given MIXAL line of code: `LABEL OPERATION ADDRESS comment`,
-// find `OPERATION` column and assume that
-// everything on the left is `LABEL` and on the right - is `ADDRESS`
-// (`LABEL` can be optional, comment should start with any lower-case char)
-std::size_t LineParser::do_parse_stream(std::string_view str, std::size_t /*offset*/)
+std::size_t LineParser::do_parse_stream(std::string_view str, std::size_t offset)
 {
-	auto line = core::LeftTrim(str);
-	if (IsCommentBeginning(line))
+	const auto first_char_pos = SkipLeftWhiteSpaces(str, offset);
+	if (first_char_pos == str.size())
 	{
-		comment_ = line;
-		return str.size();
-	}
-
-	auto first_word_end = line.find_first_of(k_whitespaces);
-	if (IsInvalidStreamPosition(first_word_end))
-	{
-		// All line is some word. The only valid situation is that it's Operation
-		OperationParser op_parser;
-		auto r = op_parser.parse_stream(line);
-		assert(!IsInvalidStreamPosition(r));
-		(void)r;
-		operation_ = std::move(op_parser);
-		return str.size();
-	}
-
-	OperationParser op_parser;
-	auto label_or_op = line.substr(0, first_word_end);
-	if (op_parser.parse_stream(label_or_op) == label_or_op.size())
-	{
-		// Line has NO LABEL
-		parse_address_str_with_comment(line.substr(first_word_end));
-		operation_ = std::move(op_parser);
-		return str.size();
-	}
-
-	LabelParser label_parser;
-	auto r = label_parser.parse_stream(label_or_op);
-	assert(!IsInvalidStreamPosition(r));
-	(void)r;
-
-	auto second_word_begin = line.find_first_not_of(k_whitespaces, first_word_end + 1);
-	if (IsInvalidStreamPosition(second_word_begin))
-	{
-		// Line contains only LABEL without OPERATION and ADDRESS
 		return InvalidStreamPosition();
 	}
 
-	// Rest of line contains OPERATION and (possibly) ADDRESS with comment
-	auto second_word_end = line.find_first_of(k_whitespaces, second_word_begin + 1);
-	if (IsInvalidStreamPosition(second_word_end))
+	if (IsCommentBeginning(str.substr(first_char_pos)))
 	{
-		second_word_end = line.size();
+		comment_ = str.substr(first_char_pos);
+		return str.size();
 	}
 
-	r = op_parser.parse_stream(line.substr(second_word_begin, second_word_end - second_word_begin));
-	assert(!IsInvalidStreamPosition(r));
-	(void)r;
-
-	operation_ = std::move(op_parser);
-	label_ = std::move(label_parser);
-
-	// ... and try to split ADDRESS from comment (if any)
-	parse_address_str_with_comment(line.substr(second_word_end));
-	return str.size();
+	auto pos = try_parse_line_without_label(str, first_char_pos);
+	if (IsInvalidStreamPosition(pos))
+	{
+		pos = try_parse_line_with_label(str, first_char_pos);
+	}
+	
+	return pos;
 }
 
-void LineParser::parse_address_str_with_comment(std::string_view line)
+std::size_t LineParser::try_parse_line_without_label(const std::string_view& str, std::size_t offset)
 {
-	line = core::LeftTrim(line);
+	OperationParser op_parser;
+	const auto op_end = op_parser.parse_stream(str, offset);
+	if (IsInvalidStreamPosition(op_end))
+	{
+		return InvalidStreamPosition();
+	}
+
+	operation_ = std::move(op_parser);
+	return parse_address_str_with_comment(str, op_end);
+}
+
+std::size_t LineParser::try_parse_line_with_label(const std::string_view& str, std::size_t offset)
+{
+	LabelParser label_parser;
+	const auto label_end = label_parser.parse_stream(str, offset);
+	if (IsInvalidStreamPosition(label_end))
+	{
+		return InvalidStreamPosition();
+	}
+	
+	label_ = std::move(label_parser);
+	return try_parse_line_without_label(str, label_end);
+}
+
+std::size_t LineParser::parse_address_str_with_comment(const std::string_view& str, std::size_t offset)
+{
+	auto line = core::LeftTrim(str.substr(offset));
 
 	const auto comment_start = core::FindIf(line, &islower);
 
@@ -108,6 +83,8 @@ void LineParser::parse_address_str_with_comment(std::string_view line)
 	{
 		comment_ = line.substr(comment_start);
 	}
+
+	return str.size();
 }
 
 const std::string_view* LineParser::comment() const

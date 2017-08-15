@@ -77,7 +77,7 @@ std::size_t LabelParser::do_parse_stream(std::string_view str, std::size_t offse
 		return InvalidStreamPosition();
 	}
 
-	return first_non_space;
+	return index;
 }
 
 bool LabelParser::parse_local_symbol()
