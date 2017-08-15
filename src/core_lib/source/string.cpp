@@ -65,7 +65,7 @@ std::string_view LeftTrim(std::string_view str)
 		return !std::isspace(ch);
 	});
 
-	if (first_not_space != str.npos)
+	if (first_not_space != std::string_view::npos)
 	{
 		str.remove_prefix(first_not_space);
 		return str;
@@ -113,7 +113,7 @@ std::vector<std::string_view> Split(std::string_view str, char ch)
 		return pos;
 	};
 
-	while (find_next() != str.npos)
+	while (find_next() != std::string_view::npos)
 	{
 		push_new_part(pos);
 		prev_pos = pos + 1;

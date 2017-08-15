@@ -54,7 +54,9 @@ std::size_t ExpressionParser::do_parse_stream(std::string_view str, std::size_t 
 		finish_current_token();
 	}
 
-	return IsValid(expression_) ? last_parsed_token_pos_ : str.npos;
+	return IsValid(expression_)
+		? last_parsed_token_pos_
+		: InvalidStreamPosition();
 }
 
 const Expression& ExpressionParser::expression() const

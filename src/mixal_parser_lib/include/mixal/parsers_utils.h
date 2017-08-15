@@ -42,5 +42,8 @@ bool IsValidLocalSymbolId(LocalSymbolId id);
 std::size_t SkipLeftWhiteSpaces(const std::string_view& str, std::size_t offset = 0);
 std::size_t ExpectFirstNonWhiteSpaceChar(char ch, const std::string_view& str, std::size_t offset = 0);
 
+std::size_t InvalidStreamPosition();
+bool IsInvalidStreamPosition(std::size_t pos);
+
 } // namespace mixal
 

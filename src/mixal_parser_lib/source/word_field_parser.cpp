@@ -18,20 +18,20 @@ std::size_t WordFieldParser::do_parse_stream(std::string_view str, std::size_t o
 
 	if (str[first_char_pos] != '(')
 	{
-		return str.npos;
+		return InvalidStreamPosition();
 	}
 
 	ExpressionParser expr_parser;
 	const auto expr_end = expr_parser.parse_stream(str, first_char_pos + 1);
-	if (expr_end == str.npos)
+	if (IsInvalidStreamPosition(expr_end))
 	{
-		return str.npos;
+		return InvalidStreamPosition();
 	}
 
 	const auto first_char_after_expr = ExpectFirstNonWhiteSpaceChar(')', str, expr_end);
 	if (first_char_after_expr == str.size())
 	{
-		return str.npos;
+		return InvalidStreamPosition();
 	}
 
 	expression_ = expr_parser.expression();

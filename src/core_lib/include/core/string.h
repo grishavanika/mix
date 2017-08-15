@@ -30,14 +30,14 @@ std::string_view Trim(std::string_view str);
 std::vector<std::string_view> Split(std::string_view str, char ch);
 
 template<typename Pred>
-std::size_t FindIf(std::string_view str, Pred p)
+std::size_t FindIf(const std::string_view& str, Pred p)
 {
 	const auto begin = str.cbegin();
 	const auto end = str.cend();
 	const auto it = std::find_if(begin, end, std::move(p));
 
 	return (it == end)
-		? str.npos
+		? std::string_view::npos
 		: static_cast<std::size_t>(std::distance(begin, it));
 }
 

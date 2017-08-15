@@ -70,7 +70,7 @@ std::string FormatLine(const std::string& line, const FormatOptions& options /*=
 	}
 
 	LineParser line_parser;
-	if (line_parser.parse_stream(line_view) == line_view.npos)
+	if (IsInvalidStreamPosition(line_parser.parse_stream(line_view)))
 	{
 		assert(!"Failed to parse MIXAL line");
 		return line;

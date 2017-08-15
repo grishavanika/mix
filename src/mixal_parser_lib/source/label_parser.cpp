@@ -14,11 +14,11 @@ namespace {
 const char k_local_symbol_label_suffix = 'H';
 const std::string_view k_local_symbols = "BHF";
 
-bool IsLocalSymbol(std::string_view str)
+bool IsLocalSymbol(const std::string_view& str)
 {
 	assert(!str.empty());
 
-	if (k_local_symbols.find(str.back()) != k_local_symbols.npos)
+	if (k_local_symbols.find(str.back()) != std::string_view::npos)
 	{
 		return IsNumber(str.substr(0, str.size() - 1));
 	}
@@ -68,13 +68,13 @@ std::size_t LabelParser::do_parse_stream(std::string_view str, std::size_t offse
 
 	if (!IsSymbol(name_))
 	{
-		return str.npos;
+		return InvalidStreamPosition();
 	}
 
 	if (IsLocalSymbol(name_) &&
 		!parse_local_symbol())
 	{
-		return  str.npos;
+		return InvalidStreamPosition();
 	}
 
 	return first_non_space;

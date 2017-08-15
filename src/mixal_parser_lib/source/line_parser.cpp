@@ -44,12 +44,12 @@ std::size_t LineParser::do_parse_stream(std::string_view str, std::size_t /*offs
 	}
 
 	auto first_word_end = line.find_first_of(k_whitespaces);
-	if (first_word_end == line.npos)
+	if (IsInvalidStreamPosition(first_word_end))
 	{
 		// All line is some word. The only valid situation is that it's Operation
 		OperationParser op_parser;
 		auto r = op_parser.parse_stream(line);
-		assert(r != line.npos);
+		assert(!IsInvalidStreamPosition(r));
 		operation_ = std::move(op_parser);
 		return str.size();
 	}
@@ -66,24 +66,24 @@ std::size_t LineParser::do_parse_stream(std::string_view str, std::size_t /*offs
 
 	LabelParser label_parser;
 	auto r = label_parser.parse_stream(label_or_op);
-	assert(r != line.npos);
+	assert(!IsInvalidStreamPosition(r));
 
 	auto second_word_begin = line.find_first_not_of(k_whitespaces, first_word_end + 1);
-	if (second_word_begin == line.npos)
+	if (IsInvalidStreamPosition(second_word_begin))
 	{
 		// Line contains only LABEL without OPERATION and ADDRESS
-		return str.npos;
+		return InvalidStreamPosition();
 	}
 
 	// Rest of line contains OPERATION and (possibly) ADDRESS with comment
 	auto second_word_end = line.find_first_of(k_whitespaces, second_word_begin + 1);
-	if (second_word_end == line.npos)
+	if (IsInvalidStreamPosition(second_word_end))
 	{
 		second_word_end = line.size();
 	}
 
 	r = op_parser.parse_stream(line.substr(second_word_begin, second_word_end - second_word_begin));
-	assert(r != line.npos);
+	assert(!IsInvalidStreamPosition(r));
 
 	operation_ = std::move(op_parser);
 	label_ = std::move(label_parser);
@@ -101,7 +101,7 @@ void LineParser::parse_address_str_with_comment(std::string_view line)
 
 	address_str_ = core::RightTrim(line.substr(0, comment_start));
 	
-	if (comment_start != line.npos)
+	if (!IsInvalidStreamPosition(comment_start))
 	{
 		comment_ = line.substr(comment_start);
 	}

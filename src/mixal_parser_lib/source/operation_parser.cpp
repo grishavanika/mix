@@ -26,14 +26,14 @@ std::size_t OperationParser::do_parse_stream(std::string_view str, std::size_t o
 	const auto first_non_space = SkipLeftWhiteSpaces(str, offset);
 	if (first_non_space == str.size())
 	{
-		return str.npos;
+		return InvalidStreamPosition();
 	}
 	const auto first_space = FirstWhiteSpace(str, first_non_space);
 
 	id_ = OperationIdFromString(str.substr(first_non_space, first_space - first_non_space));
 	if (id_ == OperationId::Unknown)
 	{
-		return str.npos;
+		return InvalidStreamPosition();
 	}
 
 	return first_space;

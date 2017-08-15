@@ -122,7 +122,7 @@ bool IsUnaryOperationChar(char ch)
 {
 	for (const auto& unary_op : k_unary_operations)
 	{
-		if (unary_op.find(ch) != unary_op.npos)
+		if (unary_op.find(ch) != std::string_view::npos)
 		{
 			return true;
 		}
@@ -134,7 +134,7 @@ bool IsBinaryOperationChar(char ch)
 {
 	for (const auto& binary_op : k_binary_operations)
 	{
-		if (binary_op.find(ch) != binary_op.npos)
+		if (binary_op.find(ch) != std::string_view::npos)
 		{
 			return true;
 		}
@@ -223,6 +223,16 @@ std::size_t ExpectFirstNonWhiteSpaceChar(char ch, const std::string_view& str, s
 bool IsValidLocalSymbolId(LocalSymbolId id)
 {
 	return (id >= 0) && (id <= k_max_local_symbol_id);
+}
+
+std::size_t InvalidStreamPosition()
+{
+	return std::string_view::npos;
+}
+
+bool IsInvalidStreamPosition(std::size_t pos)
+{
+	return (pos == InvalidStreamPosition());
 }
 
 } // namespace mixal

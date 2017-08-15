@@ -10,26 +10,26 @@ std::size_t LiteralParser::do_parse_stream(std::string_view str, std::size_t off
 	const auto first_char_pos = ExpectFirstNonWhiteSpaceChar('=', str, offset);
 	if (first_char_pos == str.size())
 	{
-		return str.npos;
+		return InvalidStreamPosition();
 	}
 
 	WValueParser wvalue_parser;
 	const auto expr_end = wvalue_parser.parse_stream(str, first_char_pos + 1);
-	if (expr_end == str.npos)
+	if (IsInvalidStreamPosition(expr_end))
 	{
-		return str.npos;
+		return InvalidStreamPosition();
 	}
 
 	const auto first_char_after_expr = ExpectFirstNonWhiteSpaceChar('=', str, expr_end);
 	if (first_char_after_expr == str.size())
 	{
-		return str.npos;
+		return InvalidStreamPosition();
 	}
 
 	const auto expression_length = (first_char_after_expr - first_char_pos - 1);
 	if (expression_length > k_max_symbol_length)
 	{
-		return str.npos;
+		return InvalidStreamPosition();
 	}
 
 	value_ = wvalue_parser.value();

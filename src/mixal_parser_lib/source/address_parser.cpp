@@ -14,7 +14,7 @@ std::size_t AddressParser::do_parse_stream(std::string_view str, std::size_t off
 		return str.size();
 	}
 
-	return str.npos;
+	return InvalidStreamPosition();
 }
 
 void AddressParser::do_clear()
