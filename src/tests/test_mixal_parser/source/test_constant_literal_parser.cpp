@@ -11,7 +11,7 @@ TEST(ConstantLiteralParser, Throws_InvalidLiteral_Exception_If_Not_Surrounded_Wi
 	ConstantLiteralParser p;
 	ASSERT_THROW({
 		p.parse("1000");
-	}, InvalidLiteral);
+	}, ParseError);
 }
 
 TEST(ConstantLiteralParser, Throws_ParseError_Expression_In_Equal_Chars_Is_Empty)
@@ -52,5 +52,5 @@ TEST(ConstantLiteralParser, Throws_ParseError_Expression_For_Too_Long_Expression
 
 	ASSERT_THROW({
 		p.parse(literal);
-	}, InvalidLiteral);
+	}, ParseError);
 }

@@ -40,12 +40,12 @@ TEST(OperationParser, Does_Not_Ignore_WhiteSpaces)
 	ASSERT_THROW({
 		OperationParser parser;
 		parser.parse("   ADD");
-	}, UnknownOperationId);
+	}, ParseError);
 
 	ASSERT_THROW({
 		OperationParser parser;
 		parser.parse("SUB   ");
-	}, UnknownOperationId);
+	}, ParseError);
 }
 
 TEST(OperationParser, Accepts_Only_All_Uppercase)
@@ -53,7 +53,7 @@ TEST(OperationParser, Accepts_Only_All_Uppercase)
 	ASSERT_THROW({
 		OperationParser parser;
 		parser.parse("sta");
-	}, UnknownOperationId);
+	}, ParseError);
 
 	OperationParser parser;
 	parser.parse("STA");
@@ -65,7 +65,7 @@ TEST(OperationParser, Throws_UnknownOperationId_On_Empty_String)
 	ASSERT_THROW({
 		OperationParser parser;
 		parser.parse("");
-	}, UnknownOperationId);
+	}, ParseError);
 }
 
 TEST_P(OperationParserTest, Does_Not_Throw_For_Known_UpperCase_Operations)

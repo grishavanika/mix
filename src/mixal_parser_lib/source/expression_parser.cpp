@@ -10,29 +10,55 @@
 
 using namespace mixal;
 
-void ExpressionParser::do_parse(std::string_view str)
+namespace
 {
-	parse_str_ = core::Trim(str);
-	
-	parse_basic_expr_with_optional_unary_op();
 
-	while (!eof())
+bool IsValid(const ExpressionToken& token)
+{
+	return !token.basic_expr.empty();
+}
+
+bool IsValid(const Expression& expr)
+{
+	return !expr.tokens.empty() &&
+		!expr.tokens.back().binary_op;
+}
+
+} // namespace
+
+bool ExpressionParser::do_parse_stream(std::string_view& str)
+{
+	parse_str_ = str;
+
+	try
 	{
-		parse_basic_expr_with_binary_op();
+		parse_basic_expr_with_optional_unary_op();
+
+		while (!eof())
+		{
+			parse_basic_expr_with_binary_op();
+		}
+	}
+	catch (const ParseError&)
+	{
 	}
 
-	std::swap(expression_, final_expression_);
+	if (IsValid(current_token_))
+	{
+		finish_current_token();
+	}
+
+	return IsValid(expression_);
 }
 
 const Expression& ExpressionParser::expression() const
 {
-	return final_expression_;
+	return expression_;
 }
 
 void ExpressionParser::do_clear()
 {
 	expression_ = {};
-	final_expression_ = {};
 	parse_str_ = {};
 	parse_pos_ = 0;
 	current_token_ = ExpressionToken{};
@@ -40,6 +66,8 @@ void ExpressionParser::do_clear()
 
 void ExpressionParser::parse_basic_expr_with_optional_unary_op()
 {
+	skip_white_spaces();
+
 	const auto ch = current_char();
 	if (IsUnaryOperationBegin(ch))
 	{
@@ -56,6 +84,7 @@ void ExpressionParser::parse_basic_expr_with_optional_unary_op()
 void ExpressionParser::parse_basic_expr_with_unary_op()
 {
 	current_token_.unary_op = build_non_empty_expr(&IsUnaryOperationChar, &IsCompletedUnaryOperation);
+
 	parse_single_basic_expr();
 }
 
@@ -71,12 +100,6 @@ void ExpressionParser::parse_basic_expr_with_binary_op()
 void ExpressionParser::parse_single_basic_expr()
 {
 	current_token_.basic_expr = build_non_empty_expr(&IsBasicExpressionChar, &IsCompletedBasicExpression);
-	
-	skip_white_spaces();
-	if (eof())
-	{
-		finish_current_token();
-	}
 }
 
 bool ExpressionParser::eof() const
@@ -95,9 +118,14 @@ char ExpressionParser::move_to_next_char()
 
 void ExpressionParser::put_char_back()
 {
-	assert(parse_pos_ != 0);
-	--parse_pos_;
-	assert(!std::isspace(current_char()));
+	if ((parse_pos_ != 0) &&
+		!std::isspace(parse_str_[parse_pos_ - 1]))
+	{
+		--parse_pos_;
+		return;
+	}
+
+	throw_error("Invalid Parser's state");
 }
 
 void ExpressionParser::skip_white_spaces()
@@ -126,6 +154,7 @@ void ExpressionParser::throw_error(const char* details) const
 
 void ExpressionParser::finish_current_token()
 {
+	assert(IsValid(current_token_));
 	expression_.tokens.push_back(std::move(current_token_));
 	current_token_ = ExpressionToken{};
 }

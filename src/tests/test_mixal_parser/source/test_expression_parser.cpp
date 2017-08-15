@@ -71,7 +71,7 @@ TEST(ExpressionParser, Expression_With_Only_Unary_Op_Will_Throw_InvalidExpressio
 
 	ASSERT_THROW({
 		p.parse("+");
-	}, InvalidExpression);
+	}, ParseError);
 }
 
 TEST(ExpressionParser, Differentiate_Current_Address_Symbol_From_Multiply_Binary_Operation)
@@ -131,12 +131,12 @@ TEST(ExpressionParser, Parses_Special_MIXAL_Binary_Operations)
 	ASSERT_EQ(BuildToken("3"), tokens[1]);
 }
 
-TEST(ExpressionParser, Fails_To_Parse_Expressions_With_Too_Long_Symbols)
+TEST(ExpressionParser, Parses_As_Much_As_Possible)
 {
 	ExpressionParser p;
 	auto long_symbol = MakeTooLongSymbol();
+	std::string_view stream{long_symbol};
 
-	ASSERT_THROW({
-		p.parse(long_symbol);
-	}, InvalidExpression);
+	ASSERT_TRUE(p.parse_stream(stream));
+	// TODO: more checks
 }

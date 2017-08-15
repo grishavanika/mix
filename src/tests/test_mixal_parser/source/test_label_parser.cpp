@@ -26,7 +26,7 @@ TEST(LabelParser, Should_Contain_At_Least_One_Alphabetic_Char)
 	ASSERT_THROW(
 	{
 		p.parse("03421");
-	}, InvalidLabel);
+	}, ParseError);
 }
 
 TEST(LabelParser, White_Spaces_Are_Stripped)
@@ -49,7 +49,7 @@ TEST(LabelParser, Too_Long_Labels_Throws_InvalidLabel)
 	ASSERT_THROW(
 	{
 		p.parse(str);
-	}, InvalidLabel);
+	}, ParseError);
 }
 
 TEST(LabelParser, Local_Symbol_ID_Is_Valid_For_Valid_Local_Symbol)
@@ -92,5 +92,5 @@ TEST(LabelParser, Only_MIX_Chars_Are_Accepted)
 	ASSERT_THROW(
 	{
 		p.parse("xx");
-	}, InvalidLabel);
+	}, ParseError);
 }

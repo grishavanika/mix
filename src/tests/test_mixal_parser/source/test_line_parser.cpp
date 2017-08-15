@@ -58,7 +58,7 @@ TEST(LineParser, Line_Can_Not_Contain_Only_Label)
 
 	ASSERT_THROW({
 		p.parse("LABEL  ");
-	}, InvalidLine);
+	}, ParseError);
 }
 
 TEST(LineParser, Address_Column_Can_Be_Empty)

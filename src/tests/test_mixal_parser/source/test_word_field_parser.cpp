@@ -18,11 +18,11 @@ TEST(WordFieldParser, Throws_InvalidField_Exception_If_Parentheses_Are_Missed)
 	WordFieldParser p;
 	ASSERT_THROW({
 		p.parse("(");
-	}, InvalidField);
+	}, ParseError);
 
 	ASSERT_THROW({
 		p.parse(")");
-	}, InvalidField);
+	}, ParseError);
 }
 
 TEST(WordFieldParser, Throws_InvalidExpression_Exception_For_Empty_Expression_Inside_Parentheses)
@@ -30,7 +30,7 @@ TEST(WordFieldParser, Throws_InvalidExpression_Exception_For_Empty_Expression_In
 	WordFieldParser p;
 	ASSERT_THROW({
 		p.parse("()");
-	}, InvalidExpression);
+	}, ParseError);
 }
 
 TEST(WordFieldParser, Parses_Sring_As_Expression_Inside_Parentheses)
