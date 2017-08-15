@@ -17,31 +17,30 @@ const char k_whitespaces[] = " \t";
 
 bool IsCommentBeginning(std::string_view str)
 {
-	auto without_first_whitespaces = core::LeftTrim(str);
-	return !without_first_whitespaces.empty() &&
-		(without_first_whitespaces.front() == k_comment_begin_char);
+	return !str.empty() &&
+		(str.front() == k_comment_begin_char);
 }
 
 } // namespace
 
 // Note: implementation of this function relies on what is
-// LABEL and OPERATION (e.h., strings that can not contain spaces)
+// LABEL and OPERATION (e.g., strings that can not contain spaces)
+//
+// The idea is next:
+// 
+// Given MIXAL line of code: `LABEL OPERATION ADDRESS comment`,
+// find `OPERATION` column and assume that
+// everything on the left is `LABEL` and on the right - is `ADDRESS`
+// (`LABEL` can be optional, comment should start with any lower-case char)
 void LineParser::do_parse(std::string_view str)
 {
-	if (IsCommentBeginning(str))
+	auto line = core::LeftTrim(str);
+	if (IsCommentBeginning(line))
 	{
-		comment_ = core::LeftTrim(str);
+		comment_ = line;
 		return;
 	}
 
-	// The idea is next:
-	// 
-	// Given MIXAL line of code: `LABEL OPERATION ADDRESS comment`,
-	// find `OPERATION` column and assume that
-	// everything on the left is `LABEL` and on the right - is `ADDRESS`
-	// (`LABEL` can be optional, comment should start with any lower-case char)
-
-	auto line = core::LeftTrim(str);
 	auto first_word_end = line.find_first_of(k_whitespaces);
 	if (first_word_end == line.npos)
 	{
@@ -53,17 +52,17 @@ void LineParser::do_parse(std::string_view str)
 	}
 
 	OperationParser op_parser;
-	std::string_view label_or_operation{line.data(), first_word_end};
-	if (op_parser.try_parse(label_or_operation))
+	auto label_or_op = line.substr(0, first_word_end);
+	if (op_parser.try_parse(label_or_op))
 	{
 		// Line has NO LABEL
-		parse_address_str_with_comment({line.data() + first_word_end, line.size() - first_word_end});
+		parse_address_str_with_comment(line.substr(first_word_end));
 		operation_ = std::move(op_parser);
 		return;
 	}
 
 	LabelParser label_parser;
-	label_parser.parse(label_or_operation);
+	label_parser.parse(label_or_op);
 
 	auto second_word_begin = line.find_first_not_of(k_whitespaces, first_word_end + 1);
 	if (second_word_begin == line.npos)
@@ -79,38 +78,27 @@ void LineParser::do_parse(std::string_view str)
 		second_word_end = line.size();
 	}
 
-	std::string_view operation_str{line.data() + second_word_begin, second_word_end - second_word_begin};
-	op_parser.parse(operation_str);
+	op_parser.parse(line.substr(second_word_begin, second_word_end - second_word_begin));
 	
 	operation_ = std::move(op_parser);
 	label_ = std::move(label_parser);
 
 	// ... and try to split ADDRESS from comment (if any)
-	const auto address_str_begin = second_word_begin + operation_str.size();
-	std::string_view address_with_comment{line.data() + address_str_begin, line.size() - address_str_begin};
-	parse_address_str_with_comment(address_with_comment);
+	parse_address_str_with_comment(line.substr(second_word_end));
 }
 
 void LineParser::parse_address_str_with_comment(std::string_view line)
 {
 	line = core::LeftTrim(line);
 
-	auto comment_start_it = std::find_if(line.begin(), line.end(),
-		[](char ch)
-		{
-			return std::islower(ch);
-		});
+	const auto comment_start = core::FindIf(line, &std::islower);
 
-	if (comment_start_it == line.end())
+	address_str_ = core::RightTrim(line.substr(0, comment_start));
+	
+	if (comment_start != line.npos)
 	{
-		address_str_ = line;
-		return;
+		comment_ = line.substr(comment_start);
 	}
-
-	const auto address_str_end = std::distance(line.begin(), comment_start_it);
-
-	address_str_ = core::RightTrim({line.data(), static_cast<std::size_t>(address_str_end)});
-	comment_ = {line.data() + address_str_end, line.size() - address_str_end};
 }
 
 const std::string_view* LineParser::comment() const
@@ -143,11 +131,11 @@ void LineParser::do_clear()
 
 bool LineParser::has_only_comment() const
 {
-	return comment_ ? (comment_->front() == k_comment_begin_char) : false;
+	return comment_ && IsCommentBeginning(*comment_);
 }
 
 bool LineParser::has_inline_comment() const
 {
-	return comment_ ? (comment_->front() != k_comment_begin_char) : false;
+	return comment_ && !IsCommentBeginning(*comment_);
 }
 

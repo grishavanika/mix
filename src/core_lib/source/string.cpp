@@ -1,6 +1,7 @@
 #include <core/string.h>
 
 #include <algorithm>
+#include <functional>
 
 #include <cstdio>
 #include <cstdarg>
@@ -59,15 +60,14 @@ std::string Sprintf(const char* format, ...)
 
 std::string_view LeftTrim(std::string_view str)
 {
-	auto first_not_space = std::find_if_not(str.begin(), str.end(),
-		[](char ch)
-		{
-			return std::isspace(ch);
-		});
-
-	if (first_not_space != str.end())
+	auto first_not_space = FindIf(str, [](char ch)
 	{
-		str.remove_prefix(std::distance(str.begin(), first_not_space));
+		return !std::isspace(ch);
+	});
+
+	if (first_not_space != str.npos)
+	{
+		str.remove_prefix(first_not_space);
 		return str;
 	}
 	return {};

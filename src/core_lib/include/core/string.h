@@ -15,6 +15,7 @@ using string_view = experimental::string_view;
 #endif
 
 #include <vector>
+#include <algorithm>
 
 namespace core {
 
@@ -27,6 +28,27 @@ std::string_view RightTrim(std::string_view str);
 std::string_view Trim(std::string_view str);
 
 std::vector<std::string_view> Split(std::string_view str, char ch);
+
+template<typename Pred>
+std::size_t FindIf(std::string_view str, Pred p)
+{
+	const auto begin = str.cbegin();
+	const auto end = str.cend();
+	
+	// GCC sometimes complains that it can't infer `Predicate` type of
+	// parameter (for example, when `Pred` is `&std::isspace` and parameter type is `int`).
+	// Hence, making explicit callable with right type to do implicit arguments
+	// conventions later, in the lambda's body 
+	const auto it = std::find_if(begin, end,
+		[p = std::move(p)](char ch)
+	{
+		return p(ch);
+	});
+
+	return (it == end)
+		? str.npos
+		: static_cast<std::size_t>(std::distance(begin, it));
+}
 
 } // namespace core
 
