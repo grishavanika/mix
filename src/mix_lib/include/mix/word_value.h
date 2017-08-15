@@ -1,11 +1,12 @@
 #pragma once
+#include <mix/config.h>
 #include <mix/general_types.h>
 
 #include <cstddef>
 
 namespace mix {
 
-class WordValue
+class MIX_LIB_EXPORT WordValue
 {
 public:
 	// #TODO: should be std::int32_t.

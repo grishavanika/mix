@@ -1,3 +1,4 @@
+#include <mix/config.h>
 #include <mix/registers.h>
 #include <mix/general_types.h>
 #include <mix/device_controller.h>
@@ -7,7 +8,7 @@ namespace mix {
 class Command;
 class IComputerListener;
 
-class Computer
+class MIX_LIB_EXPORT Computer
 {
 public:
 	static constexpr std::size_t k_index_registers_count = 6;

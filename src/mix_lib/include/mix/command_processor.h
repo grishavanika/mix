@@ -1,4 +1,5 @@
 #pragma once
+#include <mix/config.h>
 #include <mix/registers.h>
 
 #include <array>
@@ -10,7 +11,7 @@ class Command;
 class Word;
 class WordValue;
 
-class CommandProcessor
+class MIX_LIB_EXPORT CommandProcessor
 {
 public:
 	static constexpr std::size_t k_commands_count = 64;

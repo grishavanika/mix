@@ -1,4 +1,5 @@
 #pragma once
+#include <mix/config.h>
 #include <mix/general_types.h>
 
 #include <memory>
@@ -8,7 +9,7 @@ namespace mix {
 class IIODevice;
 class IIODeviceListener;
 
-class DeviceController
+class MIX_LIB_EXPORT DeviceController
 {
 public:
 	static constexpr std::size_t k_max_devices_count = 21;

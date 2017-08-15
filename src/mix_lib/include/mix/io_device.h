@@ -1,10 +1,11 @@
 #pragma once
+#include <mix/config.h>
 #include <mix/word.h>
 #include <mix/general_types.h>
 
 namespace mix {
 
-class IIODeviceListener
+class MIX_LIB_EXPORT IIODeviceListener
 {
 public:
 	virtual void on_device_read(DeviceId, DeviceBlockId) {}

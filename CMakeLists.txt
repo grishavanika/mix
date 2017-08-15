@@ -72,6 +72,11 @@ if (clang_on_msvc)
 	include_directories(SYSTEM "C:/Programs/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.10.25017/include")
 endif()
 
+if (MSVC)
+	# class needs to have dll-interface to be used by clients of class
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251")
+endif ()
+
 # Remove unneeded configurations
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 

@@ -1,11 +1,12 @@
 #pragma once
+#include <mix/config.h>
 #include <mix/word.h>
 #include <mix/word_field.h>
 #include <mix/registers.h>
 
 namespace mix {
 
-class Command
+class MIX_LIB_EXPORT Command
 {
 public:
 	explicit Command(const Word& word);

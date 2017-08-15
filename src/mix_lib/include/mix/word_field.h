@@ -1,11 +1,12 @@
 #pragma once
+#include <mix/config.h>
 #include <mix/byte.h>
 
 #include <iosfwd>
 
 namespace mix {
 
-class WordField
+class MIX_LIB_EXPORT WordField
 {
 public:
 	explicit WordField(std::size_t left, std::size_t right);
@@ -26,15 +27,18 @@ public:
 	WordField shift_bytes_right() const;
 
 private:
-	friend bool operator==(const WordField& lhs, const WordField& rhs);
+	friend MIX_LIB_EXPORT
+	bool operator==(const WordField& lhs, const WordField& rhs);
 
 private:
 	std::size_t left_;
 	std::size_t right_;
 };
 
+MIX_LIB_EXPORT
 bool operator==(const WordField& lhs, const WordField& rhs);
 
+MIX_LIB_EXPORT
 std::ostream& operator<<(std::ostream& o, const WordField& wf);
 
 } // namespace mix

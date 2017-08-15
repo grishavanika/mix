@@ -1,16 +1,17 @@
 #pragma once
+#include <mix/config.h>
 #include <mix/word.h>
 
 namespace mix {
 
-class Register : public Word
+class MIX_LIB_EXPORT Register : public Word
 {
 public:
 	using Word::Word;
 };
 
 // #TODO: use composition over inheritance
-class IndexRegister : public Register
+class MIX_LIB_EXPORT IndexRegister : public Register
 {
 public:
 	explicit IndexRegister();
@@ -30,7 +31,7 @@ private:
 	bool is_undefined_index(std::size_t index) const;
 };
 
-class AddressRegister : public IndexRegister
+class MIX_LIB_EXPORT AddressRegister : public IndexRegister
 {
 public:
 	using IndexRegister::IndexRegister;

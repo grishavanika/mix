@@ -1,4 +1,5 @@
 #pragma once
+#include <mix/config.h>
 #include <mix/io_device.h>
 
 #include <cstddef>
@@ -7,7 +8,7 @@ namespace mix {
 
 class Command;
 
-class IComputerListener :
+class MIX_LIB_EXPORT IComputerListener :
 	public IIODeviceListener
 {
 public:

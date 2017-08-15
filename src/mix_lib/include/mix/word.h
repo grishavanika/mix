@@ -11,7 +11,7 @@
 
 namespace mix {
 
-class Word
+class MIX_LIB_EXPORT Word
 {
 public:
 	static constexpr std::size_t k_bytes_count = 5;
@@ -54,15 +54,18 @@ public:
 private:
 	void set_value(std::size_t value, Sign sign, const WordField& field, bool owerwrite_sign);
 
-	friend bool operator==(const Word& lhs, const Word& rhs);
+	friend MIX_LIB_EXPORT
+	bool operator==(const Word& lhs, const Word& rhs);
 
 private:
 	BytesArray bytes_;
 	Sign sign_;
 };
 
+MIX_LIB_EXPORT
 bool operator==(const Word& lhs, const Word& rhs);
 
+MIX_LIB_EXPORT
 std::ostream& operator<<(std::ostream& o, const Word& w);
 
 } // namespace mix
