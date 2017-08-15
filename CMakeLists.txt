@@ -2,6 +2,15 @@ cmake_minimum_required(VERSION 3.2)
 project(mix)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+set(build_shared_lib OFF)
+if (build_shared_lib)
+	set(lib_type SHARED)
+else()
+	set(lib_type STATIC)
+endif()
+
+set(bin_folders "tools;tests")
+
 # Note: to avoid Visual Studio 2017 "Error: Specified cast is not valid." 
 # you need to disable "Enable Faster Project Load" option
 # (under Tools / Options / Text Editor / C/C++ / Experimental / Project)
