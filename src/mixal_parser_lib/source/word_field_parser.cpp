@@ -8,22 +8,6 @@
 
 using namespace mixal;
 
-namespace
-{
-
-std::size_t SkipLeftWhiteSpaces(const std::string_view& str, std::size_t offset = 0)
-{
-	assert(offset <= str.size());
-	auto last_not_space = find_if_not(str.begin() + offset, str.end(), &isspace);
-	if (last_not_space == str.end())
-	{
-		return str.size();
-	}
-	return static_cast<std::size_t>(distance(str.begin(), last_not_space));
-}
-
-} // namespace
-
 std::size_t WordFieldParser::do_parse_stream(std::string_view str, std::size_t offset)
 {
 	const auto first_char_pos = SkipLeftWhiteSpaces(str, offset);
@@ -45,9 +29,8 @@ std::size_t WordFieldParser::do_parse_stream(std::string_view str, std::size_t o
 		return str.npos;
 	}
 
-	const auto first_char_after_expr = SkipLeftWhiteSpaces(str, expr_end);
-	if ((first_char_after_expr == str.size()) ||
-		(str[first_char_after_expr] != ')'))
+	const auto first_char_after_expr = ExpectFirstNonWhiteSpaceChar(')', str, expr_end);
+	if (first_char_after_expr == str.size())
 	{
 		return str.npos;
 	}

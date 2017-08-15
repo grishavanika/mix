@@ -42,11 +42,11 @@ private:
 
 	virtual void do_clear() = 0;
 
-	virtual std::size_t do_parse_stream(std::string_view str, std::size_t /*offset*/)
+	virtual std::size_t do_parse_stream(std::string_view str, std::size_t offset)
 	{
 		try
 		{
-			do_parse(str);
+			do_parse(str.substr(offset));
 		}
 		catch (const ParseError&)
 		{

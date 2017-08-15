@@ -1,3 +1,4 @@
+#pragma once
 #include <mixal/parser.h>
 #include <mixal/expression.h>
 

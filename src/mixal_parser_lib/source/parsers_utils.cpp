@@ -193,4 +193,29 @@ bool IsCompletedBasicExpression(const std::string_view& str)
 	return false;
 }
 
+std::size_t SkipLeftWhiteSpaces(const std::string_view& str, std::size_t offset /*= 0*/)
+{
+	if (offset > str.size())
+	{
+		return str.size();
+	}
+
+	auto last_not_space = find_if_not(str.begin() + offset, str.end(), &isspace);
+	if (last_not_space == str.end())
+	{
+		return str.size();
+	}
+	return static_cast<std::size_t>(distance(str.begin(), last_not_space));
+}
+
+std::size_t ExpectFirstNonWhiteSpaceChar(char ch, const std::string_view& str, std::size_t offset /*= 0*/)
+{
+	const auto first_char = SkipLeftWhiteSpaces(str, offset);
+	if ((first_char == str.size()) || (str[first_char] != ch))
+	{
+		return str.size();
+	}
+	return first_char;
+}
+
 } // namespace mixal

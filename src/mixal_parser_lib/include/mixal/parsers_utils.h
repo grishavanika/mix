@@ -34,5 +34,9 @@ bool IsCompletedUnaryOperation(const std::string_view& str);
 bool IsCompletedBinaryOperation(const std::string_view& str);
 bool IsCompletedBasicExpression(const std::string_view& str);
 
+// Both functions return position of first non-space character or `str.size()` otherwice
+std::size_t SkipLeftWhiteSpaces(const std::string_view& str, std::size_t offset = 0);
+std::size_t ExpectFirstNonWhiteSpaceChar(char ch, const std::string_view& str, std::size_t offset = 0);
+
 } // namespace mixal
 

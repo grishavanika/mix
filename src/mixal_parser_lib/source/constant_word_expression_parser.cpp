@@ -1,62 +1,71 @@
 #include <mixal/constant_word_expression_parser.h>
-#include <mixal/expression_parser.h>
-#include <mixal/word_field_parser.h>
 
 #include <core/string.h>
 
 using namespace mixal;
 
-void ConstantWordExpressionParser::do_parse(std::string_view str)
+std::size_t ConstantWordExpressionParser::do_parse_stream(std::string_view str, std::size_t offset)
 {
-	auto expressions = core::Split(str, ',');
+	auto pos = offset;
+	auto last_parsed_expr_pos = str.npos;
 
-	for (auto expr : expressions)
+	while (pos < str.size())
 	{
-		parse_single_word_expr(core::Trim(expr));
+		const auto expr_end = parse_expr_with_field(str, pos);
+		if (expr_end == str.npos)
+		{
+			break;
+		}
+		last_parsed_expr_pos = expr_end;
+
+		pos = ExpectFirstNonWhiteSpaceChar(',', str, expr_end);
+		if (pos != str.size())
+		{
+			pos = pos + 1;
+		}
 	}
 
-	std::swap(expression_, final_expression_);
+	return expression_.tokens.empty()
+		? str.npos
+		: last_parsed_expr_pos;
 }
 
-void ConstantWordExpressionParser::parse_single_word_expr(std::string_view str)
+std::size_t ConstantWordExpressionParser::parse_expr_with_field(std::string_view str, std::size_t offset)
 {
-	auto field_begin = str.find('(');
-	if (field_begin == str.npos)
+	ExpressionParser expr_parser;
+	const auto expr_end = expr_parser.parse_stream(str, offset);
+	if (expr_end == str.npos)
 	{
-		field_begin = str.size();
+		return str.npos;
 	}
 
-	auto expr_str = str.substr(0, field_begin);
-	auto field_str = str.substr(field_begin);
-	
+	WordFieldParser field_parser;
+	auto field_end = field_parser.parse_stream(str, expr_end);
+	if (field_end == str.npos)
+	{
+		field_end = expr_end;
+	}
+
+	add_token(std::move(expr_parser), std::move(field_parser));
+	return field_end;
+}
+
+void ConstantWordExpressionParser::add_token(ExpressionParser&& expr, WordFieldParser&& field)
+{
 	WordExpressionToken token;
-	token.expression = parse_expr(expr_str);
-	token.field = parse_field_expr(field_str);
+	token.expression = expr.expression();
+	token.field = field.expression();
+
 	expression_.tokens.push_back(std::move(token));
-}
-
-Expression ConstantWordExpressionParser::parse_expr(std::string_view str)
-{
-	ExpressionParser parser;
-	parser.parse(str);
-	return parser.expression();
-}
-
-std::optional<Expression> ConstantWordExpressionParser::parse_field_expr(std::string_view str)
-{
-	WordFieldParser parser;
-	parser.parse(str);
-	return parser.expression();
 }
 
 const WordExpression& ConstantWordExpressionParser::expression() const
 {
-	return final_expression_;
+	return expression_;
 }
 
 void ConstantWordExpressionParser::do_clear()
 {
 	expression_ = {};
-	final_expression_ = {};
 }
 

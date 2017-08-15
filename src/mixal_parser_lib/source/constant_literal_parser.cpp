@@ -6,34 +6,36 @@
 
 using namespace mixal;
 
-void ConstantLiteralParser::do_parse(std::string_view str)
+std::size_t ConstantLiteralParser::do_parse_stream(std::string_view str, std::size_t offset)
 {
-	auto literal_str = core::Trim(str);
-
-	if (literal_str.size() < 2)
+	const auto first_char_pos = ExpectFirstNonWhiteSpaceChar('=', str, offset);
+	if (first_char_pos == str.size())
 	{
-		throw InvalidLiteral{};
+		return str.npos;
 	}
 
-	if ((literal_str.front() != '=') ||
-		(literal_str.back() != '='))
+	ConstantWordExpressionParser expr_parser;
+	const auto expr_end = expr_parser.parse_stream(str, first_char_pos + 1);
+	if (expr_end == str.npos)
 	{
-		throw InvalidLiteral{};
+		return str.npos;
 	}
 
-	literal_str.remove_prefix(1);
-	literal_str.remove_suffix(1);
-
-	if (literal_str.size() > k_max_symbol_length)
+	const auto first_char_after_expr = ExpectFirstNonWhiteSpaceChar('=', str, expr_end);
+	if (first_char_after_expr == str.size())
 	{
-		throw InvalidLiteral{};
+		return str.npos;
 	}
 
-	ConstantWordExpressionParser parser;
-	parser.parse(literal_str);
+	const auto expression_length = (first_char_after_expr - first_char_pos - 1);
+	if (expression_length > k_max_symbol_length)
+	{
+		return str.npos;
+	}
 
-	expression_ = parser.expression();
+	expression_ = expr_parser.expression();
 
+	return (first_char_after_expr + 1);
 }
 
 void ConstantLiteralParser::do_clear()
