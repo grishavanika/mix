@@ -1,10 +1,10 @@
-#include <mixal/constant_word_expression_parser.h>
+#include <mixal/w_value_parser.h>
 
 #include <core/string.h>
 
 using namespace mixal;
 
-std::size_t ConstantWordExpressionParser::do_parse_stream(std::string_view str, std::size_t offset)
+std::size_t WValueParser::do_parse_stream(std::string_view str, std::size_t offset)
 {
 	auto pos = offset;
 	auto last_parsed_expr_pos = str.npos;
@@ -25,12 +25,12 @@ std::size_t ConstantWordExpressionParser::do_parse_stream(std::string_view str, 
 		}
 	}
 
-	return expression_.tokens.empty()
+	return value_.tokens.empty()
 		? str.npos
 		: last_parsed_expr_pos;
 }
 
-std::size_t ConstantWordExpressionParser::parse_expr_with_field(std::string_view str, std::size_t offset)
+std::size_t WValueParser::parse_expr_with_field(std::string_view str, std::size_t offset)
 {
 	ExpressionParser expr_parser;
 	const auto expr_end = expr_parser.parse_stream(str, offset);
@@ -50,22 +50,22 @@ std::size_t ConstantWordExpressionParser::parse_expr_with_field(std::string_view
 	return field_end;
 }
 
-void ConstantWordExpressionParser::add_token(ExpressionParser&& expr, WordFieldParser&& field)
+void WValueParser::add_token(ExpressionParser&& expr, WordFieldParser&& field)
 {
-	WordExpressionToken token;
+	WValueToken token;
 	token.expression = expr.expression();
 	token.field = field.expression();
 
-	expression_.tokens.push_back(std::move(token));
+	value_.tokens.push_back(std::move(token));
 }
 
-const WordExpression& ConstantWordExpressionParser::expression() const
+const WValue& WValueParser::value() const
 {
-	return expression_;
+	return value_;
 }
 
-void ConstantWordExpressionParser::do_clear()
+void WValueParser::do_clear()
 {
-	expression_ = {};
+	value_ = {};
 }
 

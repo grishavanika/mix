@@ -4,11 +4,11 @@
 
 namespace mixal {
 
-class ConstantWordExpressionParser :
+class WValueParser :
 	public IParser
 {
 public:
-	const WordExpression& expression() const;
+	const WValue& value() const;
 
 private:
 	virtual std::size_t do_parse_stream(std::string_view str, std::size_t offset);
@@ -18,7 +18,7 @@ private:
 	void add_token(ExpressionParser&& expr, WordFieldParser&& field);
 
 private:
-	WordExpression expression_;
+	WValue value_;
 };
 
 } // namespace mixal

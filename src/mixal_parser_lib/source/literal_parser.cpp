@@ -1,11 +1,11 @@
-#include <mixal/constant_literal_parser.h>
-#include <mixal/constant_word_expression_parser.h>
+#include <mixal/literal_parser.h>
+#include <mixal/w_value_parser.h>
 
 #include <core/string.h>
 
 using namespace mixal;
 
-std::size_t ConstantLiteralParser::do_parse_stream(std::string_view str, std::size_t offset)
+std::size_t LiteralParser::do_parse_stream(std::string_view str, std::size_t offset)
 {
 	const auto first_char_pos = ExpectFirstNonWhiteSpaceChar('=', str, offset);
 	if (first_char_pos == str.size())
@@ -13,8 +13,8 @@ std::size_t ConstantLiteralParser::do_parse_stream(std::string_view str, std::si
 		return str.npos;
 	}
 
-	ConstantWordExpressionParser expr_parser;
-	const auto expr_end = expr_parser.parse_stream(str, first_char_pos + 1);
+	WValueParser wvalue_parser;
+	const auto expr_end = wvalue_parser.parse_stream(str, first_char_pos + 1);
 	if (expr_end == str.npos)
 	{
 		return str.npos;
@@ -32,18 +32,18 @@ std::size_t ConstantLiteralParser::do_parse_stream(std::string_view str, std::si
 		return str.npos;
 	}
 
-	expression_ = expr_parser.expression();
+	value_ = wvalue_parser.value();
 
 	return (first_char_after_expr + 1);
 }
 
-void ConstantLiteralParser::do_clear()
+void LiteralParser::do_clear()
 {
-	expression_ = {};
+	value_ = {};
 }
 
-const WordExpression& ConstantLiteralParser::expression() const
+const WValue& LiteralParser::value() const
 {
-	return expression_;
+	return value_;
 }
 
