@@ -91,7 +91,7 @@ void LineParser::parse_address_str_with_comment(std::string_view line)
 {
 	line = core::LeftTrim(line);
 
-	const auto comment_start = core::FindIf(line, &std::islower);
+	const auto comment_start = core::FindIf(line, &islower);
 
 	address_str_ = core::RightTrim(line.substr(0, comment_start));
 	

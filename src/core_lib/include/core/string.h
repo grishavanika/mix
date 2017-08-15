@@ -34,16 +34,7 @@ std::size_t FindIf(std::string_view str, Pred p)
 {
 	const auto begin = str.cbegin();
 	const auto end = str.cend();
-	
-	// GCC sometimes complains that it can't infer `Predicate` type of
-	// parameter (for example, when `Pred` is `&std::isspace` and parameter type is `int`).
-	// Hence, making explicit callable with right type to do implicit arguments
-	// conventions later, in the lambda's body 
-	const auto it = std::find_if(begin, end,
-		[p = std::move(p)](char ch)
-	{
-		return p(ch);
-	});
+	const auto it = std::find_if(begin, end, std::move(p));
 
 	return (it == end)
 		? str.npos
