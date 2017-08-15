@@ -4,35 +4,57 @@
 
 #include <core/string.h>
 
+#include <cassert>
+
 using namespace mixal;
 
-void WordFieldParser::do_parse(std::string_view str)
+namespace
 {
-	auto field_str = core::Trim(str);
-	if (field_str.empty())
+
+std::size_t SkipLeftWhiteSpaces(const std::string_view& str, std::size_t offset = 0)
+{
+	assert(offset <= str.size());
+	auto last_not_space = find_if_not(str.begin() + offset, str.end(), &isspace);
+	if (last_not_space == str.end())
 	{
-		return;
+		return str.size();
+	}
+	return static_cast<std::size_t>(distance(str.begin(), last_not_space));
+}
+
+} // namespace
+
+std::size_t WordFieldParser::do_parse_stream(std::string_view str, std::size_t offset)
+{
+	const auto first_char_pos = SkipLeftWhiteSpaces(str, offset);
+	if (first_char_pos == str.size())
+	{
+		// Empty `WordField` is valid
+		return str.size();
 	}
 
-	if (field_str.size() < 2)
+	if (str[first_char_pos] != '(')
 	{
-		throw InvalidField{};
+		return str.npos;
 	}
-
-	if ((field_str.front() != '(') ||
-		(field_str.back() != ')'))
-	{
-		throw InvalidField{};
-	}
-
-	auto expr_str = field_str;
-	expr_str.remove_prefix(1);
-	expr_str.remove_suffix(1);
 
 	ExpressionParser expr_parser;
-	expr_parser.parse(expr_str);
+	const auto expr_end = expr_parser.parse_stream(str, first_char_pos + 1);
+	if (expr_end == str.npos)
+	{
+		return str.npos;
+	}
+
+	const auto first_char_after_expr = SkipLeftWhiteSpaces(str, expr_end);
+	if ((first_char_after_expr == str.size()) ||
+		(str[first_char_after_expr] != ')'))
+	{
+		return str.npos;
+	}
 
 	expression_ = expr_parser.expression();
+
+	return (first_char_after_expr + 1);
 }
 
 void WordFieldParser::do_clear()

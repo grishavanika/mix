@@ -1,7 +1,6 @@
 #include <mixal/expression_parser.h>
-#include <mixal/parse_exceptions.h>
 
-#include <gtest/gtest.h>
+#include "parser_test_fixture.h"
 
 using namespace mixal;
 
@@ -34,37 +33,15 @@ std::string MakeLongestSymbol()
 }
 
 class ExpressionParserTest :
-	public ::testing::Test
+	public ParserTest<ExpressionParser>
 {
 protected:
-	void parse(std::string_view s)
-	{
-		const auto pos = parser_.parse_stream(s);
-		ASSERT_NE(s.npos, pos);
-		rest_of_parsed_stream_ = s.substr(pos);
-	}
-
-	void parse_error(std::string_view s)
-	{
-		const auto pos = parser_.parse_stream(s);
-		ASSERT_EQ(s.npos, pos);
-	}
-
-	void reminder_stream_is(std::string_view rest_of_stream)
-	{
-		ASSERT_EQ(rest_of_stream, rest_of_parsed_stream_);
-	}
-
 	template<typename... T>
 	void tokens_are(T... tokens)
 	{
 		std::vector<ExpressionToken> expected_tokens{tokens...};
 		ASSERT_EQ(expected_tokens, parser_.expression().tokens);
 	}
-
-protected:
-	ExpressionParser parser_;
-	std::string_view rest_of_parsed_stream_;
 };
 
 } // namespace
@@ -162,4 +139,26 @@ TEST_F(ExpressionParserTest, Parses_As_Much_As_Possible)
 	tokens_are(Token(symbol));
 
 	reminder_stream_is(symbol);
+}
+
+TEST_F(ExpressionParserTest, Fails_To_Parse_Unknow_Expression)
+{
+	parse_error("(1:5)");
+}
+
+TEST_F(ExpressionParserTest, Parses_Valid_Expression_Part_And_Leaves_Rest_Unchanged)
+{
+	parse("00001 =LABEL=");
+	tokens_are(Token("00001"));
+	reminder_stream_is(" =LABEL=");
+}
+
+TEST_F(ExpressionParserTest, Partial_Expressions_Are_Not_Valid)
+{
+	// `*` is multiplication in this case,
+	// so expression on the rigth of `*` should be valid
+	// basic expression, but it's not (`(1:1)` is field)
+	// 
+	// #TODO: errors reporting
+	parse_error("XXXX * (1:1)");
 }

@@ -1,48 +1,51 @@
 #include <mixal/word_field_parser.h>
 #include <mixal/expression_parser.h>
-#include <mixal/parse_exceptions.h>
 
-#include <gtest/gtest.h>
+#include "parser_test_fixture.h"
 
 using namespace mixal;
 
-TEST(WordFieldParser, Empty_String_Is_Valid)
+namespace {
+
+class WordFieldParserTest :
+	public ParserTest<WordFieldParser>
 {
-	WordFieldParser p;
-	p.parse("");
-	ASSERT_TRUE(p.empty());
+};
+
+} // namespace
+
+TEST_F(WordFieldParserTest, Empty_String_Is_Valid)
+{
+	parse("");
+	reminder_stream_is("");
 }
 
-TEST(WordFieldParser, Throws_InvalidField_Exception_If_Parentheses_Are_Missed)
+TEST_F(WordFieldParserTest, Fails_If_Parentheses_Are_Missed)
 {
-	WordFieldParser p;
-	ASSERT_THROW({
-		p.parse("(");
-	}, ParseError);
-
-	ASSERT_THROW({
-		p.parse(")");
-	}, ParseError);
+	parse_error("(");
+	parse_error(")");
 }
 
-TEST(WordFieldParser, Throws_InvalidExpression_Exception_For_Empty_Expression_Inside_Parentheses)
+TEST_F(WordFieldParserTest, Fails_If_Expression_Is_Empty_Inside_Parentheses)
 {
-	WordFieldParser p;
-	ASSERT_THROW({
-		p.parse("()");
-	}, ParseError);
+	parse_error("()");
 }
 
-TEST(WordFieldParser, Parses_Sring_As_Expression_Inside_Parentheses)
+TEST_F(WordFieldParserTest, Parses_Sring_As_Expression_Inside_Parentheses)
 {
-	WordFieldParser field_parser;
-
-	field_parser.parse(" ( -1+5*20//6 ) ");
-	ASSERT_FALSE(field_parser.empty());
-	ASSERT_TRUE(field_parser.expression());
+	parse(" ( -1+5*20//6 ) ");
+	ASSERT_FALSE(parser_.empty());
+	ASSERT_TRUE(parser_.expression());
 
 	ExpressionParser expr_parser;
-	expr_parser.parse("-1 + 5  * 20 // 6");
-	ASSERT_EQ(expr_parser.expression(), *field_parser.expression());
+	expr_parser.parse_stream("-1 + 5  * 20 // 6");
+	ASSERT_EQ(expr_parser.expression(), *parser_.expression());
 }
 
+TEST_F(WordFieldParserTest, Ignores_Rest_Of_Non_Field_Expression)
+{
+	parse("(1:2),1000");
+	ASSERT_TRUE(parser_.expression());
+	
+	reminder_stream_is(",1000");
+}
