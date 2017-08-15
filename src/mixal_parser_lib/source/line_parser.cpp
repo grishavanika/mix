@@ -50,6 +50,7 @@ std::size_t LineParser::do_parse_stream(std::string_view str, std::size_t /*offs
 		OperationParser op_parser;
 		auto r = op_parser.parse_stream(line);
 		assert(!IsInvalidStreamPosition(r));
+		(void)r;
 		operation_ = std::move(op_parser);
 		return str.size();
 	}
@@ -67,6 +68,7 @@ std::size_t LineParser::do_parse_stream(std::string_view str, std::size_t /*offs
 	LabelParser label_parser;
 	auto r = label_parser.parse_stream(label_or_op);
 	assert(!IsInvalidStreamPosition(r));
+	(void)r;
 
 	auto second_word_begin = line.find_first_not_of(k_whitespaces, first_word_end + 1);
 	if (IsInvalidStreamPosition(second_word_begin))
@@ -84,6 +86,7 @@ std::size_t LineParser::do_parse_stream(std::string_view str, std::size_t /*offs
 
 	r = op_parser.parse_stream(line.substr(second_word_begin, second_word_end - second_word_begin));
 	assert(!IsInvalidStreamPosition(r));
+	(void)r;
 
 	operation_ = std::move(op_parser);
 	label_ = std::move(label_parser);
