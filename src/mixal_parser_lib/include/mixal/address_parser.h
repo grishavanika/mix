@@ -7,7 +7,7 @@ class AddressParser final :
 	public IParser
 {
 private:
-	virtual void do_parse(std::string_view str) override;
+	virtual std::size_t do_parse_stream(std::string_view str, std::size_t offset) override;
 	virtual void do_clear() override;
 };
 

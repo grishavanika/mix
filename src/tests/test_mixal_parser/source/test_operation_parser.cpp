@@ -1,7 +1,6 @@
 #include <mixal/operation_parser.h>
-#include <mixal/parse_exceptions.h>
 
-#include <gtest/gtest.h>
+#include "parser_test_fixture.h"
 
 using namespace mixal;
 
@@ -29,81 +28,66 @@ std::ostream& operator<<(std::ostream& o, const OperationIdParam& param)
 }
 
 class OperationParserTest :
-	public ::testing::TestWithParam<OperationIdParam>
+	public ParserTest<OperationParser>
+{
+};
+
+class OperationParserTestParam :
+	public OperationParserTest,
+	public ::testing::WithParamInterface<OperationIdParam>
 {
 };
 
 } // namespace
 
-TEST(OperationParser, Does_Not_Ignore_WhiteSpaces)
+TEST_F(OperationParserTest, Ignores_WhiteSpaces)
 {
-	ASSERT_THROW({
-		OperationParser parser;
-		parser.parse("   ADD");
-	}, ParseError);
+	parse("   ADD");
+	reminder_stream_is("");
+	ASSERT_EQ(OperationId::ADD, parser_.id());
 
-	ASSERT_THROW({
-		OperationParser parser;
-		parser.parse("SUB   ");
-	}, ParseError);
+	parse("SUB   ");
+	ASSERT_EQ(OperationId::SUB, parser_.id());
+	reminder_stream_is("   ");
 }
 
-TEST(OperationParser, Accepts_Only_All_Uppercase)
+TEST_F(OperationParserTest, Accepts_Only_All_Uppercase)
 {
-	ASSERT_THROW({
-		OperationParser parser;
-		parser.parse("sta");
-	}, ParseError);
-
-	OperationParser parser;
-	parser.parse("STA");
-	ASSERT_EQ(OperationId::STA, parser.id());
+	parse_error("sta");
 }
 
-TEST(OperationParser, Throws_UnknownOperationId_On_Empty_String)
+TEST_F(OperationParserTest, Fails_On_Empty_String)
 {
-	ASSERT_THROW({
-		OperationParser parser;
-		parser.parse("");
-	}, ParseError);
+	parse_error("");
 }
 
-TEST_P(OperationParserTest, Does_Not_Throw_For_Known_UpperCase_Operations)
+TEST_P(OperationParserTestParam, Does_Not_Fail_For_Known_UpperCase_Operations)
 {
 	const auto& param = GetParam();
-
-	OperationParser parser;
-	ASSERT_NO_THROW({
-		parser.parse(param.str);
-	});
-
-	ASSERT_EQ(param.id, parser.id());
+	parse(param.str);
+	ASSERT_EQ(param.id, parser_.id());
 }
 
-TEST_P(OperationParserTest, Has_Valid_Pseudo_Or_Native_Operation_Flags)
+TEST_P(OperationParserTestParam, Has_Valid_Pseudo_Or_Native_Operation_Flags)
 {
 	const auto& param = GetParam();
-
-	OperationParser parser;
-	ASSERT_NO_THROW({
-		parser.parse(param.str);
-	});
+	parse(param.str);
 
 	switch (param.type)
 	{
 	case OperationType::Native:
-		ASSERT_TRUE(parser.is_native_operation());
-		ASSERT_FALSE(parser.is_pseudo_operation());
+		ASSERT_TRUE(parser_.is_native_operation());
+		ASSERT_FALSE(parser_.is_pseudo_operation());
 		break;
 	case OperationType::Pseudo:
-		ASSERT_TRUE(parser.is_pseudo_operation());
-		ASSERT_FALSE(parser.is_native_operation());
+		ASSERT_TRUE(parser_.is_pseudo_operation());
+		ASSERT_FALSE(parser_.is_native_operation());
 		break;
 	}
 }
 
 INSTANTIATE_TEST_CASE_P(ValidOperationStrings,
-	OperationParserTest,
+	OperationParserTestParam,
 	::testing::Values(
 		/*00*/OperationIdParam{OperationId::ADD, OperationType::Native, "ADD"},
 		/*01*/OperationIdParam{OperationId::MUL, OperationType::Native, "MUL"},

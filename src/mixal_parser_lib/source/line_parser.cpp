@@ -53,7 +53,7 @@ void LineParser::do_parse(std::string_view str)
 
 	OperationParser op_parser;
 	auto label_or_op = line.substr(0, first_word_end);
-	if (op_parser.try_parse(label_or_op))
+	if (op_parser.parse_stream(label_or_op) == label_or_op.size())
 	{
 		// Line has NO LABEL
 		parse_address_str_with_comment(line.substr(first_word_end));

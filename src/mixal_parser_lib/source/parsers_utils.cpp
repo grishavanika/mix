@@ -200,12 +200,12 @@ std::size_t SkipLeftWhiteSpaces(const std::string_view& str, std::size_t offset 
 		return str.size();
 	}
 
-	auto last_not_space = find_if_not(str.begin() + offset, str.end(), &isspace);
+	auto last_not_space = std::find_if_not(str.begin() + offset, str.end(), &isspace);
 	if (last_not_space == str.end())
 	{
 		return str.size();
 	}
-	return static_cast<std::size_t>(distance(str.begin(), last_not_space));
+	return static_cast<std::size_t>(std::distance(str.begin(), last_not_space));
 }
 
 std::size_t ExpectFirstNonWhiteSpaceChar(char ch, const std::string_view& str, std::size_t offset /*= 0*/)

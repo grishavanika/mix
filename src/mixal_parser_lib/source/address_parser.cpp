@@ -1,19 +1,20 @@
 #include <mixal/address_parser.h>
-#include <mixal/parse_exceptions.h>
+#include <mixal/parsers_utils.h>
 
 #include <core/string.h>
 
 using namespace mixal;
 
-void AddressParser::do_parse(std::string_view str)
+std::size_t AddressParser::do_parse_stream(std::string_view str, std::size_t offset)
 {
-	auto address_expr = core::Trim(str);
-	if (address_expr.empty())
+	const auto first_char_pos = SkipLeftWhiteSpaces(str, offset);
+	if (first_char_pos == str.size())
 	{
-		return;
+		// Empty `Address` is valid
+		return str.size();
 	}
 
-	throw NotImplemented{};
+	return str.npos;
 }
 
 void AddressParser::do_clear()
