@@ -4,7 +4,7 @@
 
 namespace mixal {
 
-class ExpressionParser final :
+class MIXAL_PARSER_LIB_EXPORT ExpressionParser final :
 	public IParser
 {
 public:

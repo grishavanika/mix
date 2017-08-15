@@ -4,7 +4,7 @@
 
 namespace mixal {
 
-class OperationParser final :
+class MIXAL_PARSER_LIB_EXPORT OperationParser final :
 	public IParser
 {
 public:

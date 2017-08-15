@@ -3,7 +3,7 @@
 
 namespace mixal {
 
-class AddressParser final :
+class MIXAL_PARSER_LIB_EXPORT AddressParser final :
 	public IParser
 {
 private:

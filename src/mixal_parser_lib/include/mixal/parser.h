@@ -1,9 +1,10 @@
 #pragma once
+#include <mixal/config.h>
 #include <mixal/parsers_utils.h>
 
 namespace mixal {
 
-class IParser
+class MIXAL_PARSER_LIB_EXPORT IParser
 {
 public:
 	std::size_t parse_stream(std::string_view str, std::size_t offset = 0);

@@ -6,7 +6,7 @@
 
 namespace mixal {
 
-class LineParser final :
+class MIXAL_PARSER_LIB_EXPORT LineParser final :
 	public IParser
 {
 public:

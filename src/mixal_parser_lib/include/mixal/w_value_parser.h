@@ -4,7 +4,7 @@
 
 namespace mixal {
 
-class WValueParser :
+class MIXAL_PARSER_LIB_EXPORT WValueParser final :
 	public IParser
 {
 public:

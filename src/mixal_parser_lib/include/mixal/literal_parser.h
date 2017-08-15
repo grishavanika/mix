@@ -4,7 +4,7 @@
 
 namespace mixal {
 
-class LiteralParser :
+class MIXAL_PARSER_LIB_EXPORT LiteralParser final :
 	public IParser
 {
 public:

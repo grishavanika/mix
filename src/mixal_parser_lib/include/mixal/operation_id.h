@@ -1,4 +1,6 @@
 #pragma once
+#include <mixal/config.h>
+
 #include <core/string.h>
 
 namespace mixal {
@@ -188,7 +190,10 @@ enum class OperationId
 	Count
 };
 
+MIXAL_PARSER_LIB_EXPORT
 std::string_view OperationIdToString(OperationId id);
+
+MIXAL_PARSER_LIB_EXPORT
 OperationId OperationIdFromString(std::string_view str);
 
 } // namespace mixal
