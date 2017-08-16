@@ -5,7 +5,7 @@
 namespace mixal {
 
 class MIXAL_PARSER_LIB_EXPORT WValueParser final :
-	public IParser
+	public ParserBase
 {
 public:
 	const WValue& value() const;

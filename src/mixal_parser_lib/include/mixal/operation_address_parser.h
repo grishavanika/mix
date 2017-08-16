@@ -23,7 +23,7 @@ struct MIXALOpParser
 
 // Operation-dependent parsing of MIXAL ADDRESS column
 class MIXAL_PARSER_LIB_EXPORT OperationAddressParser final :
-	public IParser
+	public ParserBase
 {
 public:
 	explicit OperationAddressParser(OperationId operation);

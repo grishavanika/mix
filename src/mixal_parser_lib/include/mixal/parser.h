@@ -4,7 +4,7 @@
 
 namespace mixal {
 
-class MIXAL_PARSER_LIB_EXPORT IParser
+class MIXAL_PARSER_LIB_EXPORT ParserBase
 {
 public:
 	std::size_t parse_stream(std::string_view str, std::size_t offset = 0);
@@ -13,8 +13,8 @@ public:
 	std::string_view str() const;
 
 protected:
-	IParser() = default;
-	~IParser() = default;
+	ParserBase() = default;
+	~ParserBase() = default;
 
 	virtual void do_clear() = 0;
 	virtual std::size_t do_parse_stream(std::string_view str, std::size_t offset) = 0;
@@ -27,7 +27,7 @@ private:
 	bool is_valid_{false};
 };
 
-inline std::size_t IParser::parse_stream(std::string_view str, std::size_t offset /*= 0*/)
+inline std::size_t ParserBase::parse_stream(std::string_view str, std::size_t offset /*= 0*/)
 {
 	clear();
 
@@ -50,18 +50,18 @@ inline std::size_t IParser::parse_stream(std::string_view str, std::size_t offse
 	return pos;
 }
 
-inline void IParser::clear()
+inline void ParserBase::clear()
 {
 	is_valid_ = false;
 	do_clear();
 }
 
-inline bool IParser::is_valid() const
+inline bool ParserBase::is_valid() const
 {
 	return is_valid_;
 }
 
-inline std::string_view IParser::str() const
+inline std::string_view ParserBase::str() const
 {
 	return str_;
 }

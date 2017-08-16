@@ -52,7 +52,7 @@ std::size_t OperationAddressParser::do_parse_stream(std::string_view str, std::s
 
 std::size_t OperationAddressParser::parse_as_mix(const std::string_view& str, std::size_t offset)
 {
-	auto try_parse = [&](IParser& p)
+	auto try_parse = [&](ParserBase& p)
 	{
 		if (!IsInvalidStreamPosition(offset))
 		{

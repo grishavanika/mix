@@ -5,7 +5,7 @@
 namespace mixal {
 
 class MIXAL_PARSER_LIB_EXPORT ExpressionParser final :
-	public IParser
+	public ParserBase
 {
 public:
 	const Expression& expression() const;

@@ -7,7 +7,7 @@
 namespace mixal {
 
 class MIXAL_PARSER_LIB_EXPORT LineParser final :
-	public IParser
+	public ParserBase
 {
 public:
 	ConstOptionalRef<std::string_view> comment() const;

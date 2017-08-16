@@ -5,7 +5,7 @@
 namespace mixal {
 
 class MIXAL_PARSER_LIB_EXPORT FieldParser final :
-	public IParser
+	public ParserBase
 {
 public:
 	bool empty() const;

@@ -5,7 +5,7 @@
 namespace mixal {
 
 class MIXAL_PARSER_LIB_EXPORT OperationParser final :
-	public IParser
+	public ParserBase
 {
 public:
 	bool is_mix_operation() const;

@@ -7,7 +7,7 @@
 namespace mixal {
 
 class MIXAL_PARSER_LIB_EXPORT LabelParser final :
-	public IParser
+	public ParserBase
 {
 public:
 	bool empty() const;
