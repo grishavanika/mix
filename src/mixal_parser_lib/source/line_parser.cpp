@@ -12,7 +12,6 @@ using namespace mixal;
 namespace {
 
 const char k_comment_begin_char = '*';
-const char k_whitespaces[] = " \t";
 
 bool IsCommentBeginning(const std::string_view& str)
 {
