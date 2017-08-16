@@ -107,9 +107,9 @@ ConstOptionalRef<OperationParser> LineParser::operation() const
 	return operation_;
 }
 
-std::string_view LineParser::address_str() const
+ConstOptionalRef<OperationAddressParser> LineParser::address() const
 {
-	return address_ ? address_->str() : std::string_view{};
+	return address_;
 }
 
 void LineParser::do_clear()

@@ -48,8 +48,10 @@ std::string BuildLine(const LineParser& line_parser, const FormatOptions& option
 
 	// #TODO: special handling of `ALF` command
 
+	assert(line_parser.address());
+
 	stream << std::setw(k_address_str_width) << std::left
-		<< line_parser.address_str();
+		<< line_parser.address()->str();
 
 	if (line_parser.has_inline_comment())
 	{

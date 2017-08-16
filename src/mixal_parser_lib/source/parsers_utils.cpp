@@ -185,7 +185,9 @@ bool IsCompletedBasicExpression(const std::string_view& str)
 	}
 	else if (IsNumberBegin(first_char))
 	{
-		return IsNumber(str);
+		// Since Symbol can also start as Number,
+		// need to check both: symbol & number validness
+		return IsNumber(str) || IsSymbol(str);
 	}
 	else if (IsSymbolBegin(first_char))
 	{

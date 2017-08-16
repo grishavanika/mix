@@ -17,8 +17,6 @@ public:
 	ConstOptionalRef<OperationParser> operation() const;
 	ConstOptionalRef<OperationAddressParser> address() const;
 
-	std::string_view address_str() const;
-
 	bool has_only_comment() const;
 	bool has_inline_comment() const;
 

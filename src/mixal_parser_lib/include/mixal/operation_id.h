@@ -176,7 +176,7 @@ enum class OperationId
 	JXNP	= 156,
 
 	MIXOpBegin		= NOP,
-	MIXOpEnd		= CMPX,
+	MIXOpEnd		= JXNP,
 	
 	CON		= 157,
 	EQU		= 158,
