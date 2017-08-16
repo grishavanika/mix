@@ -201,4 +201,16 @@ OperationId OperationIdFromString(std::string_view str)
 	return OperationId::Unknown;
 }
 
+bool IsMIXOperation(OperationId id)
+{
+	return (id >= OperationId::MIXOpBegin) &&
+		(id <= OperationId::MIXOpEnd);
+}
+
+bool IsMIXALOperation(OperationId id)
+{
+	return (id >= OperationId::MIXALOpBegin) &&
+		(id <= OperationId::MIXALOpEnd);
+}
+
 } // namespace mixal

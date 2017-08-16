@@ -175,8 +175,8 @@ enum class OperationId
 	JXNZ	= 155,
 	JXNP	= 156,
 
-	NativeBegin		= NOP,
-	NativeEnd		= CMPX,
+	MIXOpBegin		= NOP,
+	MIXOpEnd		= CMPX,
 	
 	CON		= 157,
 	EQU		= 158,
@@ -184,8 +184,8 @@ enum class OperationId
 	END		= 160,
 	ALF		= 161,
 
-	PseudoBegin		= CON,
-	PseudoEnd		= ALF,
+	MIXALOpBegin	= CON,
+	MIXALOpEnd		= ALF,
 
 	Count
 };
@@ -195,6 +195,12 @@ std::string_view OperationIdToString(OperationId id);
 
 MIXAL_PARSER_LIB_EXPORT
 OperationId OperationIdFromString(std::string_view str);
+
+MIXAL_PARSER_LIB_EXPORT
+bool IsMIXOperation(OperationId id);
+
+MIXAL_PARSER_LIB_EXPORT
+bool IsMIXALOperation(OperationId id);
 
 } // namespace mixal
 

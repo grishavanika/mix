@@ -39,16 +39,14 @@ std::size_t OperationParser::do_parse_stream(std::string_view str, std::size_t o
 	return first_space;
 }
 
-bool OperationParser::is_pseudo_operation() const
+bool OperationParser::is_mix_operation() const
 {
-	return (id_ >= OperationId::PseudoBegin) &&
-		(id_ <= OperationId::PseudoEnd);
+	return IsMIXOperation(id_);
 }
 
-bool OperationParser::is_native_operation() const
+bool OperationParser::is_mixal_operation() const
 {
-	return (id_ >= OperationId::NativeBegin) &&
-		(id_ <= OperationId::NativeEnd);
+	return IsMIXALOperation(id_);
 }
 
 OperationId OperationParser::id() const

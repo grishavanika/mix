@@ -8,8 +8,8 @@ namespace {
 
 enum class OperationType
 {
-	Pseudo,
-	Native
+	MIX,
+	MIXAL
 };
 
 struct OperationIdParam
@@ -23,7 +23,7 @@ std::ostream& operator<<(std::ostream& o, const OperationIdParam& param)
 {
 	o << "Expect " << param.str << " (" << static_cast<int>(param.id) << ") "
 		<< "operation to be "
-		<< ((param.type == OperationType::Native) ? "native" : "pseudo");
+		<< ((param.type == OperationType::MIX) ? "MIX" : "MIXAL");
 	return o;
 }
 
@@ -75,13 +75,13 @@ TEST_P(OperationParserTestParam, Has_Valid_Pseudo_Or_Native_Operation_Flags)
 
 	switch (param.type)
 	{
-	case OperationType::Native:
-		ASSERT_TRUE(parser_.is_native_operation());
-		ASSERT_FALSE(parser_.is_pseudo_operation());
+	case OperationType::MIX:
+		ASSERT_TRUE(parser_.is_mix_operation());
+		ASSERT_FALSE(parser_.is_mixal_operation());
 		break;
-	case OperationType::Pseudo:
-		ASSERT_TRUE(parser_.is_pseudo_operation());
-		ASSERT_FALSE(parser_.is_native_operation());
+	case OperationType::MIXAL:
+		ASSERT_TRUE(parser_.is_mixal_operation());
+		ASSERT_FALSE(parser_.is_mix_operation());
 		break;
 	}
 }
@@ -89,12 +89,12 @@ TEST_P(OperationParserTestParam, Has_Valid_Pseudo_Or_Native_Operation_Flags)
 INSTANTIATE_TEST_CASE_P(ValidOperationStrings,
 	OperationParserTestParam,
 	::testing::Values(
-		/*00*/OperationIdParam{OperationId::ADD, OperationType::Native, "ADD"},
-		/*01*/OperationIdParam{OperationId::MUL, OperationType::Native, "MUL"},
-		/*02*/OperationIdParam{OperationId::LDAN, OperationType::Native, "LDAN"},
-		/*03*/OperationIdParam{OperationId::IOC, OperationType::Native, "IOC"},
-		/*04*/OperationIdParam{OperationId::CON, OperationType::Pseudo, "CON"},
-		/*05*/OperationIdParam{OperationId::ORIG, OperationType::Pseudo, std::string_view{"ORIG xxxx", 4}}
+		/*00*/OperationIdParam{OperationId::ADD, OperationType::MIX, "ADD"},
+		/*01*/OperationIdParam{OperationId::MUL, OperationType::MIX, "MUL"},
+		/*02*/OperationIdParam{OperationId::LDAN, OperationType::MIX, "LDAN"},
+		/*03*/OperationIdParam{OperationId::IOC, OperationType::MIX, "IOC"},
+		/*04*/OperationIdParam{OperationId::CON, OperationType::MIXAL, "CON"},
+		/*05*/OperationIdParam{OperationId::ORIG, OperationType::MIXAL, std::string_view{"ORIG xxxx", 4}}
 		));
 
 

@@ -8,8 +8,8 @@ class MIXAL_PARSER_LIB_EXPORT OperationParser final :
 	public IParser
 {
 public:
-	bool is_pseudo_operation() const;
-	bool is_native_operation() const;
+	bool is_mix_operation() const;
+	bool is_mixal_operation() const;
 
 	OperationId id() const;
 
