@@ -1,6 +1,6 @@
 #pragma once
 #include <mixal/expression_parser.h>
-#include <mixal/word_field_parser.h>
+#include <mixal/field_parser.h>
 
 namespace mixal {
 
@@ -15,7 +15,7 @@ private:
 	virtual void do_clear() override;
 
 	std::size_t parse_expr_with_field(std::string_view str, std::size_t offset);
-	void add_token(ExpressionParser&& expr, WordFieldParser&& field);
+	void add_token(ExpressionParser&& expr, FieldParser&& field);
 
 private:
 	WValue value_;

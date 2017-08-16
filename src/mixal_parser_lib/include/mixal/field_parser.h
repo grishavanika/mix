@@ -4,7 +4,7 @@
 
 namespace mixal {
 
-class MIXAL_PARSER_LIB_EXPORT WordFieldParser final :
+class MIXAL_PARSER_LIB_EXPORT FieldParser final :
 	public IParser
 {
 public:

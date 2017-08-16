@@ -1,24 +1,23 @@
-#include <mixal/word_field_parser.h>
+#include <mixal/field_parser.h>
 #include <mixal/expression_parser.h>
 
 #include <core/string.h>
 
-#include <cassert>
-
 using namespace mixal;
 
-std::size_t WordFieldParser::do_parse_stream(std::string_view str, std::size_t offset)
+std::size_t FieldParser::do_parse_stream(std::string_view str, std::size_t offset)
 {
 	const auto first_char_pos = SkipLeftWhiteSpaces(str, offset);
 	if (first_char_pos == str.size())
 	{
-		// Empty `WordField` is valid
+		// Empty Field
 		return str.size();
 	}
 
 	if (str[first_char_pos] != '(')
 	{
-		return InvalidStreamPosition();
+		// Assume, we parsed "Empty Field"
+		return first_char_pos;
 	}
 
 	ExpressionParser expr_parser;
@@ -39,17 +38,17 @@ std::size_t WordFieldParser::do_parse_stream(std::string_view str, std::size_t o
 	return (first_char_after_expr + 1);
 }
 
-void WordFieldParser::do_clear()
+void FieldParser::do_clear()
 {
 	expression_ = std::nullopt;
 }
 
-bool WordFieldParser::empty() const
+bool FieldParser::empty() const
 {
 	return !expression_;
 }
 
-std::optional<Expression> WordFieldParser::expression()
+std::optional<Expression> FieldParser::expression()
 {
 	return expression_;
 }

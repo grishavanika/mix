@@ -40,7 +40,7 @@ std::size_t WValueParser::parse_expr_with_field(std::string_view str, std::size_
 		return InvalidStreamPosition();
 	}
 
-	WordFieldParser field_parser;
+	FieldParser field_parser;
 	auto field_end = field_parser.parse_stream(str, expr_end);
 	if (IsInvalidStreamPosition(field_end))
 	{
@@ -51,7 +51,7 @@ std::size_t WValueParser::parse_expr_with_field(std::string_view str, std::size_
 	return field_end;
 }
 
-void WValueParser::add_token(ExpressionParser&& expr, WordFieldParser&& field)
+void WValueParser::add_token(ExpressionParser&& expr, FieldParser&& field)
 {
 	WValueToken token;
 	token.expression = expr.expression();

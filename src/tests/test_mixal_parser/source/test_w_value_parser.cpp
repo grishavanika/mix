@@ -35,7 +35,7 @@ TEST_F(WValueParserTest, Field_Can_Be_Specified)
 	ExpressionParser expr_parser;
 	expr_parser.parse_stream("*-3");
 
-	WordFieldParser field_parser;
+	FieldParser field_parser;
 	field_parser.parse_stream("(1:3)");
 
 	ASSERT_EQ(expr_parser.expression(), token.expression);
