@@ -71,6 +71,13 @@ TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Only_Address_Specif
 	ASSERT_TRUE(parser_->is_mix_operation());
 }
 
+TEST_F(OperationAddressParserTest, Parses_MIX_Complex_Address_WithIndex_And_Field)
+{
+	parse(OperationId::STX, " =1000(1:5)=,*** (+1*K)     comment");
+	reminder_stream_is("     comment");
+	ASSERT_TRUE(parser_->is_mix_operation());
+}
+
 TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Index_And_Field_Specified)
 {
 	parse(OperationId::STX, " ,4 (1:4) comment");
