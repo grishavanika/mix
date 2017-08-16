@@ -48,7 +48,7 @@ bool FieldParser::empty() const
 	return !expression_;
 }
 
-std::optional<Expression> FieldParser::expression()
+std::optional<Expression> FieldParser::expression() const
 {
 	return expression_;
 }

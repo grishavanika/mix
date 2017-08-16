@@ -9,7 +9,7 @@ class MIXAL_PARSER_LIB_EXPORT FieldParser final :
 {
 public:
 	bool empty() const;
-	std::optional<Expression> expression();
+	std::optional<Expression> expression() const;
 
 private:
 	virtual std::size_t do_parse_stream(std::string_view str, std::size_t offset) override;
