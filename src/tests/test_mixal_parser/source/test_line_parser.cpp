@@ -106,3 +106,14 @@ TEST_F(LineParserTest, Splits_Label_Op_Address_And_Comment_Into_Separate_Parts_W
 	ASSERT_TRUE(parser_.comment());
 	ASSERT_EQ("read a block (70 chars)", *parser_.comment());
 }
+
+TEST_F(LineParserTest, When_Label_Name_Is_Valid_Operation_And_Line_Has_Valid_Operation_Then_Parses_Them_As_Label_And_Op)
+{
+	parse("IN OUT 1");
+	ASSERT_TRUE(parser_.label());
+	ASSERT_EQ("IN", parser_.label()->name());
+	
+	ASSERT_TRUE(parser_.operation());
+	ASSERT_EQ(OperationId::OUT, parser_.operation()->id());
+}
+

@@ -1,6 +1,7 @@
 #include <mixal/operation_address_parser.h>
 
 #include <cassert>
+#include <cctype>
 
 using namespace mixal;
 
@@ -11,15 +12,15 @@ const std::size_t k_ALF_op_length = 5;
 bool ALFStartsWithOneSpace(const std::string_view& str, std::size_t offset)
 {
 	return (str.size() > (offset + 2)) &&
-		(str[offset] == ' ') &&
-		(str[offset + 1] != ' ');
+		std::isspace(str[offset]) &&
+		!std::isspace(str[offset + 1]);
 }
 
 bool ALFStartsWithTwoSpaces(const std::string_view& str, std::size_t offset)
 {
 	return (str.size() > (offset + 3)) &&
-		(str[offset] == ' ') &&
-		(str[offset + 1] == ' ');
+		std::isspace(str[offset]) &&
+		std::isspace(str[offset + 1]);
 }
 
 bool IsValidALFText(const std::string_view& /*alf_text*/)

@@ -210,8 +210,15 @@ TEST_F(OperationAddressParserTest, Parses_MIXAL_ALF_Operation_With_One_Spaces_An
 	reminder_stream_is("   comment");
 }
 
-
 TEST_F(OperationAddressParserTest, Fails_To_Parse_Too_Short_ALF_String)
 {
 	parse_error(OperationId::ALF, "  AA");
+}
+
+TEST_F(OperationAddressParserTest, ALF_Space_Is_Any_White_Space)
+{
+	parse(OperationId::ALF, "\tFIRST");
+	
+	result_is(MIXAL()
+		.ALF_text_is("FIRST"));
 }
