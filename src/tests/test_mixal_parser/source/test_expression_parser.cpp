@@ -1,31 +1,11 @@
 #include <mixal/expression_parser.h>
 
 #include "parser_test_fixture.h"
+#include "expression_builders.h"
 
 using namespace mixal;
 
 namespace {
-
-ExpressionToken Token(
-	std::optional<UnaryOperation> unary_op,
-	BasicExpression basic_expr,
-	std::optional<BinaryOperation> binary_op)
-{
-	return {unary_op, basic_expr, binary_op};
-}
-
-ExpressionToken Token(
-	BasicExpression basic_expr)
-{
-	return Token({}, basic_expr, {});
-}
-
-ExpressionToken Token(
-	BasicExpression basic_expr,
-	std::optional<BinaryOperation> binary_op)
-{
-	return {{}, basic_expr, binary_op};
-}
 
 std::string MakeLongestSymbol()
 {
@@ -36,11 +16,10 @@ class ExpressionParserTest :
 	public ParserTest<ExpressionParser>
 {
 protected:
-	template<typename... T>
-	void tokens_are(T... tokens)
+	template<typename... Exprs>
+	void tokens_are(const ExpressionToken& expr0, const Exprs&... exprs)
 	{
-		std::vector<ExpressionToken> expected_tokens{tokens...};
-		ASSERT_EQ(expected_tokens, parser_.expression().tokens);
+		ASSERT_EQ(ExpressionBuilder::Build(expr0, exprs...), parser_.expression());
 	}
 };
 
@@ -70,7 +49,7 @@ TEST_F(ExpressionParserTest, Expression_Can_Contain_Only_Current_Address_Counter
 TEST_F(ExpressionParserTest, Expression_Can_Contain_Basic_Expression_With_Unary_Op_In_The_Beginning)
 {
 	parse(" -*");
-	tokens_are(Token("-", "*", {}));
+	tokens_are(UnaryToken("-", "*"));
 	reminder_stream_is("");
 }
 
@@ -82,7 +61,7 @@ TEST_F(ExpressionParserTest, Expression_With_Only_Unary_Op_Will_Fail)
 TEST_F(ExpressionParserTest, Differentiate_Current_Address_Symbol_From_Multiply_Binary_Operation)
 {
 	parse("***");
-	tokens_are(Token({}, "*", "*"), Token("*"));
+	tokens_are(BinaryToken("*", "*"), Token("*"));
 	reminder_stream_is("");
 }
 
@@ -100,8 +79,8 @@ TEST_F(ExpressionParserTest, Parses_All_Token_To_The_Vector_With_Left_To_Right_O
 
 	tokens_are(
 		Token("-", "1", "+"),
-		Token("5", "*"),
-		Token("20", "/"),
+		BinaryToken("5", "*"),
+		BinaryToken("20", "/"),
 		Token("6"));
 
 	reminder_stream_is("  ");
@@ -112,7 +91,7 @@ TEST_F(ExpressionParserTest, Parses_Mix_Field_Specification_As_Binary_Op)
 	parse("1:3");
 
 	tokens_are(
-		Token("1", ":"),
+		BinaryToken("1", ":"),
 		Token("3"));
 
 	reminder_stream_is("");
@@ -123,7 +102,7 @@ TEST_F(ExpressionParserTest, Parses_Special_MIXAL_Binary_Operations)
 	parse("1 // 3");
 
 	tokens_are(
-		Token("1", "//"),
+		BinaryToken("1", "//"),
 		Token("3"));
 	
 	reminder_stream_is("");

@@ -4,7 +4,7 @@
 
 namespace mixal {
 
-ExpressionToken Token(
+inline ExpressionToken Token(
 	std::optional<UnaryOperation> unary_op,
 	BasicExpression basic_expr,
 	std::optional<BinaryOperation> binary_op)
@@ -12,20 +12,20 @@ ExpressionToken Token(
 	return {unary_op, basic_expr, binary_op};
 }
 
-ExpressionToken Token(
+inline ExpressionToken Token(
 	BasicExpression basic_expr)
 {
 	return Token({}, basic_expr, {});
 }
 
-ExpressionToken BinaryToken(
+inline ExpressionToken BinaryToken(
 	BasicExpression basic_expr,
 	BinaryOperation binary_op)
 {
 	return Token({}, basic_expr, binary_op);
 }
 
-ExpressionToken UnaryToken(
+inline ExpressionToken UnaryToken(
 	UnaryOperation unary_op,
 	BasicExpression basic_expr)
 {
@@ -57,7 +57,7 @@ private:
 	Expression expr_;
 };
 
-ExpressionBuilder Expr()
+inline ExpressionBuilder Expr()
 {
 	return ExpressionBuilder{};
 }
@@ -95,7 +95,7 @@ private:
 	WValueToken token_;
 };
 
-WTokenBuilder WToken()
+inline WTokenBuilder WToken()
 {
 	return WTokenBuilder{};
 }
@@ -124,7 +124,7 @@ struct MIXALOpBuilder
 	}
 };
 
-MIXALOpBuilder MIXAL()
+inline MIXALOpBuilder MIXAL()
 {
 	return MIXALOpBuilder{};
 }
@@ -167,7 +167,7 @@ struct MIXOpBuilder
 
 };
 
-MIXOpBuilder MIX()
+inline MIXOpBuilder MIX()
 {
 	return MIXOpBuilder{};
 }

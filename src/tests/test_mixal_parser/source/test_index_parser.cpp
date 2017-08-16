@@ -1,6 +1,7 @@
 #include <mixal/index_parser.h>
 
 #include "parser_test_fixture.h"
+#include "expression_builders.h"
 
 using namespace mixal;
 
@@ -9,6 +10,13 @@ namespace {
 class IndexParserTest :
 	public ParserTest<IndexParser>
 {
+protected:
+	template<typename... Exprs>
+	void expression_is(const Exprs&... exprs)
+	{
+		ASSERT_TRUE(parser_.expression());
+		ASSERT_EQ(ExpressionBuilder::Build(exprs...), *parser_.expression());
+	}
 };
 
 } // namespace
@@ -27,11 +35,9 @@ TEST_F(IndexParserTest, Empty_String_After_Comma_Is_Not_Valid_Index)
 TEST_F(IndexParserTest, Parses_Expression_After_Comma)
 {
 	parse(" , *** ");
+
+	expression_is(BinaryToken("*", "*"), Token("*"));
+
 	reminder_stream_is(" ");
-
-	ASSERT_TRUE(parser_.expression());
-	ASSERT_EQ(2u, parser_.expression()->tokens.size());
-
-	ASSERT_FALSE(parser_.empty());
 }
 
