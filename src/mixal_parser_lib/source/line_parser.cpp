@@ -87,19 +87,19 @@ std::size_t LineParser::parse_address_str_with_comment(const std::string_view& s
 	return str.size();
 }
 
-const std::string_view* LineParser::comment() const
+ConstOptionalRef<std::string_view> LineParser::comment() const
 {
-	return comment_ ? &*comment_ : nullptr;
+	return comment_;
 }
 
-const LabelParser* LineParser::label() const
+ConstOptionalRef<LabelParser> LineParser::label() const
 {
-	return label_ ? &*label_: nullptr;
+	return label_;
 }
 
-const OperationParser* LineParser::operation() const
+ConstOptionalRef<OperationParser> LineParser::operation() const
 {
-	return operation_ ? &*operation_ : nullptr;
+	return operation_;
 }
 
 std::string_view LineParser::address_str() const

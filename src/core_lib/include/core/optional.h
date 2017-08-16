@@ -16,3 +16,7 @@ constexpr auto nullopt = experimental::nullopt;
 #else
 #include <optional>
 #endif
+
+template<typename T>
+using ConstOptionalRef = const std::optional<T>&;
+

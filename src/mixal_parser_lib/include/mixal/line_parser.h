@@ -10,9 +10,10 @@ class MIXAL_PARSER_LIB_EXPORT LineParser final :
 	public IParser
 {
 public:
-	const std::string_view* comment() const;
-	const LabelParser* label() const;
-	const OperationParser* operation() const;
+	ConstOptionalRef<std::string_view> comment() const;
+	ConstOptionalRef<LabelParser> label() const;
+	ConstOptionalRef<OperationParser> operation() const;
+
 	std::string_view address_str() const;
 
 	bool has_only_comment() const;

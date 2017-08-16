@@ -101,7 +101,7 @@ bool LabelParser::is_local_symbol() const
 	return !!local_symbol_id_;
 }
 
-std::optional<LocalSymbolId> LabelParser::local_symbol_id() const
+ConstOptionalRef<LocalSymbolId> LabelParser::local_symbol_id() const
 {
 	return local_symbol_id_;
 }

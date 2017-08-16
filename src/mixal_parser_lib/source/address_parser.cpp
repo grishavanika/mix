@@ -1,4 +1,6 @@
 #include <mixal/address_parser.h>
+#include <mixal/expression_parser.h>
+#include <mixal/literal_parser.h>
 #include <mixal/parsers_utils.h>
 
 #include <core/string.h>
@@ -36,7 +38,7 @@ std::size_t AddressParser::try_parse_expression(const std::string_view& str, std
 	const auto end = parser.parse_stream(str, offset);
 	if (!IsInvalidStreamPosition(end))
 	{
-		expression_parser_ = std::move(parser);
+		expression_ = parser.expression();
 	}
 	
 	return end;
@@ -48,7 +50,7 @@ std::size_t AddressParser::try_parse_literal(const std::string_view& str, std::s
 	const auto end = parser.parse_stream(str, offset);
 	if (!IsInvalidStreamPosition(end))
 	{
-		literal_parser_ = std::move(parser);
+		w_value_ = parser.value();
 	}
 
 	return end;
@@ -56,21 +58,21 @@ std::size_t AddressParser::try_parse_literal(const std::string_view& str, std::s
 
 void AddressParser::do_clear()
 {
-	expression_parser_ = std::nullopt;
-	literal_parser_ = std::nullopt;
+	expression_ = std::nullopt;
+	w_value_ = std::nullopt;
 }
 
-const Expression* AddressParser::expression() const
+ConstOptionalRef<Expression> AddressParser::expression() const
 {
-	return expression_parser_ ? &expression_parser_->expression() : nullptr;
+	return expression_;
 }
 
-const WValue* AddressParser::w_value() const
+ConstOptionalRef<WValue> AddressParser::w_value() const
 {
-	return literal_parser_ ? &literal_parser_->value() : nullptr;
+	return w_value_;
 }
 
 bool AddressParser::empty() const
 {
-	return !expression_parser_ && !literal_parser_;
+	return !expression_ && !w_value_;
 }

@@ -13,7 +13,7 @@ public:
 	bool empty() const;
 	std::string_view name() const;
 	bool is_local_symbol() const;
-	std::optional<LocalSymbolId> local_symbol_id() const;
+	ConstOptionalRef<LocalSymbolId> local_symbol_id() const;
 
 private:
 	virtual std::size_t do_parse_stream(std::string_view str, std::size_t offset) override;
