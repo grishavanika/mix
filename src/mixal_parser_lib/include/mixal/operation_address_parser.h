@@ -38,6 +38,12 @@ private:
 	virtual void do_clear() override;
 	virtual std::size_t do_parse_stream(std::string_view str, std::size_t offset) override;
 
+	std::size_t parse_as_mix(const std::string_view& str, std::size_t offset);
+	std::size_t parse_as_mixal(const std::string_view& str, std::size_t offset);
+
+	std::size_t parse_mixal_op_as_wvalue(const std::string_view& str, std::size_t offset);
+	std::size_t parse_mixal_alf_op(const std::string_view& str, std::size_t offset);
+
 private:
 	OperationId op_;
 	std::optional<MIXOpParser> mix_;
