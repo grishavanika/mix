@@ -141,3 +141,9 @@ TEST_F(ExpressionParserTest, Partial_Expressions_Are_Not_Valid)
 	// #TODO: errors reporting
 	parse_error("XXXX * (1:1)");
 }
+
+TEST_F(ExpressionParserTest, Local_Symbol_Is_Parsed_As_Symbol_Instead_Of_Number)
+{
+	parse("9F");
+	tokens_are(Token("9F"));
+}
