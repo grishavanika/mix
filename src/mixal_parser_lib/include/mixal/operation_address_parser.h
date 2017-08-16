@@ -1,5 +1,5 @@
 #pragma once
-#include <mixal/parser.h>
+#include <mixal/parser_base.h>
 #include <mixal/operation_id.h>
 #include <mixal/address_parser.h>
 #include <mixal/index_parser.h>
