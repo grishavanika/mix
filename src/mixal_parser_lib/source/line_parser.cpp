@@ -72,18 +72,24 @@ std::size_t LineParser::try_parse_line_with_label(const std::string_view& str, s
 
 std::size_t LineParser::parse_address_str_with_comment(const std::string_view& str, std::size_t offset)
 {
-	auto line = core::LeftTrim(str.substr(offset));
+	assert(operation_);
 
-	const auto comment_start = core::FindIf(line, &islower);
-
-	address_str_ = core::RightTrim(line.substr(0, comment_start));
-	
-	if (!IsInvalidStreamPosition(comment_start))
+	OperationAddressParser parser{operation_->id()};
+	const auto end = parser.parse_stream(str, offset);
+	if (IsInvalidStreamPosition(end))
 	{
-		comment_ = line.substr(comment_start);
+		return InvalidStreamPosition();
+	}
+	address_ = std::move(parser);
+
+	auto comment = core::LeftTrim(str.substr(end));
+	if (!comment.empty())
+	{
+		comment_ = std::move(comment);
+		return str.size();
 	}
 
-	return str.size();
+	return end;
 }
 
 ConstOptionalRef<std::string_view> LineParser::comment() const
@@ -103,7 +109,7 @@ ConstOptionalRef<OperationParser> LineParser::operation() const
 
 std::string_view LineParser::address_str() const
 {
-	return address_str_;
+	return address_ ? address_->str() : std::string_view{};
 }
 
 void LineParser::do_clear()
@@ -111,7 +117,7 @@ void LineParser::do_clear()
 	comment_ = std::nullopt;
 	label_ = std::nullopt;
 	operation_ = std::nullopt;
-	address_str_ = {};
+	address_ = std::nullopt;
 }
 
 bool LineParser::has_only_comment() const

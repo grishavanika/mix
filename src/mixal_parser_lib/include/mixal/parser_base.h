@@ -2,6 +2,8 @@
 #include <mixal/config.h>
 #include <mixal/parsers_utils.h>
 
+#include <core/string.h>
+
 namespace mixal {
 
 class MIXAL_PARSER_LIB_EXPORT ParserBase
@@ -46,7 +48,8 @@ inline std::size_t ParserBase::parse_stream(std::string_view str, std::size_t of
 	}
 
 	is_valid_ = true;
-	str_ = str.substr(offset, pos - offset);
+	// #TODO: think about this twice
+	str_ = core::LeftTrim(str.substr(offset, pos - offset));
 	return pos;
 }
 

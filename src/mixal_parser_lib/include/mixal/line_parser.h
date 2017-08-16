@@ -1,6 +1,8 @@
 #pragma once
 #include <mixal/label_parser.h>
 #include <mixal/operation_parser.h>
+#include <mixal/label_parser.h>
+#include <mixal/operation_address_parser.h>
 
 #include <core/optional.h>
 
@@ -13,6 +15,7 @@ public:
 	ConstOptionalRef<std::string_view> comment() const;
 	ConstOptionalRef<LabelParser> label() const;
 	ConstOptionalRef<OperationParser> operation() const;
+	ConstOptionalRef<OperationAddressParser> address() const;
 
 	std::string_view address_str() const;
 
@@ -31,7 +34,7 @@ private:
 	std::optional<std::string_view> comment_;
 	std::optional<LabelParser> label_;
 	std::optional<OperationParser> operation_;
-	std::string_view address_str_;
+	std::optional<OperationAddressParser> address_;
 };
 
 } // namespace mixal
