@@ -46,10 +46,10 @@ std::size_t LineParser::do_parse_stream(std::string_view str, std::size_t offset
 
 std::size_t LineParser::try_parse_line_without_label(const std::string_view& str, std::size_t offset)
 {
-	// Basically, because we do not separate LABEL and ADDRESS columns
+	// Basically, because we do not separate LABEL and OPERATION columns
 	// with single space, but with multiple spaces, there are
-	// more logic to determine what is LABEL and what is ADDRESS.
-	// We are trying to parse line like it starts with ADDRESS and if we failed
+	// more logic to determine what is LABEL and what is OPERATION.
+	// We are trying to parse line like it starts with OPERATION and if we failed
 	// then return and lets the caller tries to parse line that starts with LABEL
 
 	OperationParser op_parser_of_label;
