@@ -1,4 +1,4 @@
-#include <mixal_formatter/line_formatter.h>
+#include <mixal_format/line_formatter.h>
 #include <mixal_parse/line_parser.h>
 #include <mixal_parse/parsers_utils.h>
 
@@ -12,7 +12,7 @@
 
 using namespace mixal_parse;
 
-namespace mixal_formatter {
+namespace mixal_format {
 
 namespace {
 
@@ -89,5 +89,5 @@ std::string FormatLine(const std::string& line, const FormatOptions& options /*=
 	return BuildLine(line_parser, options);
 }
 
-} // namespace mixal_formatter
+} // namespace mixal_format
 

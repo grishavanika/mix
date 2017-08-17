@@ -1,13 +1,13 @@
 #pragma once
-#include <mixal_formatter/line_formatter.h>
+#include <mixal_format/line_formatter.h>
 
 #include <iosfwd>
 
-namespace mixal_formatter {
+namespace mixal_format {
 
-MIXAL_FORMATTER_LIB_EXPORT
+MIXAL_FORMAT_LIB_EXPORT
 void FormatStream(std::istream& in, std::ostream& out, const FormatOptions& options = {});
 
-} // namespace mixal_formatter
+} // namespace mixal_format
 
 

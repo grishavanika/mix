@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 include(GenerateExportHeader)
 
-set(lib_name mixal_formatter_lib)
+set(lib_name mixal_format_lib)
 
 file(GLOB_RECURSE ${lib_name}_src "source" "*.cpp")
 file(GLOB_RECURSE ${lib_name}_hds "include" "*.h")

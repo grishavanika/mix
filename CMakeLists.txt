@@ -96,18 +96,18 @@ add_subdirectory(src/core_lib)
 add_subdirectory(src/mix_lib)
 add_subdirectory(src/mixal_parse_lib)
 add_subdirectory(src/mixal_lib)
-add_subdirectory(src/tools/mixal_formatter_lib)
+add_subdirectory(src/tools/mixal_format_lib)
 set_target_properties(core_lib PROPERTIES FOLDER libs)
 set_target_properties(mix_lib PROPERTIES FOLDER libs)
 set_target_properties(mixal_lib PROPERTIES FOLDER libs)
 set_target_properties(mixal_parse_lib PROPERTIES FOLDER libs)
-set_target_properties(mixal_formatter_lib PROPERTIES FOLDER "libs/tools")
+set_target_properties(mixal_format_lib PROPERTIES FOLDER "libs/tools")
 
 # exe
 add_subdirectory(src/mixal)
-add_subdirectory(src/tools/mixal_formatter)
+add_subdirectory(src/tools/mixal_format)
 set_target_properties(mixal PROPERTIES FOLDER "app")
-set_target_properties(mixal_formatter PROPERTIES FOLDER "app/tools")
+set_target_properties(mixal_format PROPERTIES FOLDER "app/tools")
 
 # tests
 add_subdirectory(src/tests/test_core)

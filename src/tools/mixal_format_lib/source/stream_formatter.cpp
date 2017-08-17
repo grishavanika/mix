@@ -1,4 +1,4 @@
-#include <mixal_formatter/stream_formatter.h>
+#include <mixal_format/stream_formatter.h>
 
 #include <algorithm>
 #include <iterator>
@@ -7,7 +7,7 @@
 #include <cassert>
 #include <cctype>
 
-namespace mixal_formatter {
+namespace mixal_format {
 
 namespace {
 
@@ -37,4 +37,4 @@ void FormatStream(std::istream& in, std::ostream& out, const FormatOptions& opti
 	}
 }
 
-} // namespace mixal_formatter
+} // namespace mixal_format
