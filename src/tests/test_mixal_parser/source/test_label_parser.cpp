@@ -39,7 +39,7 @@ TEST_F(LabelParserTest, White_Spaces_Are_Stripped)
 	ASSERT_EQ("2H", parser_.name());
 }
 
-TEST_F(LabelParserTest, Too_Long_Labels_Will_Fail_To_Parse)
+TEST_F(LabelParserTest, Fails_To_Parse_Too_Long_Labels)
 {
 	std::string str(k_max_symbol_length + 1, 'X');
 	ASSERT_GT(str.size(), k_max_symbol_length);
@@ -47,7 +47,7 @@ TEST_F(LabelParserTest, Too_Long_Labels_Will_Fail_To_Parse)
 	parse_error(str);
 }
 
-TEST_F(LabelParserTest, Local_Symbol_ID_Is_Valid_For_Valid_Local_Symbol)
+TEST_F(LabelParserTest, Fetches_Local_Symbol_ID_For_Valid_Local_Symbol)
 {
 	parse("3H");
 	ASSERT_TRUE(parser_.is_local_symbol());
@@ -55,9 +55,10 @@ TEST_F(LabelParserTest, Local_Symbol_ID_Is_Valid_For_Valid_Local_Symbol)
 	ASSERT_EQ(3, *parser_.local_symbol_id());
 }
 
-TEST_F(LabelParserTest, Local_Symbol_With_Number_Instead_Of_One_Digit_Is_Error)
+TEST_F(LabelParserTest, Local_Symbol_With_Unsupported_Number_Is_Error)
 {
-	parse_error("23H");
+	ASSERT_GT(1024, k_max_local_symbol_id);
+	parse_error("1024H");
 }
 
 TEST_F(LabelParserTest, Backward_Local_Symbol_Is_Error)
@@ -70,7 +71,7 @@ TEST_F(LabelParserTest, Forward_Local_Symbol_Is_Error)
 	parse_error("9F");
 }
 
-TEST_F(LabelParserTest, Only_MIX_Chars_Are_Accepted)
+TEST_F(LabelParserTest, Only_Valid_MIX_Chars_Are_Accepted)
 {
 	parse_error("xx");
 }

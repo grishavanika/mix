@@ -68,7 +68,7 @@ TEST_P(OperationParserTestParam, Does_Not_Fail_For_Known_UpperCase_Operations)
 	ASSERT_EQ(param.id, parser_.id());
 }
 
-TEST_P(OperationParserTestParam, Has_Valid_Pseudo_Or_Native_Operation_Flags)
+TEST_P(OperationParserTestParam, Has_Valid_MIX_Or_MIXAL_Operations_Queries)
 {
 	const auto& param = GetParam();
 	parse(param.str);

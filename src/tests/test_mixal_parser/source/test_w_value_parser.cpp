@@ -57,7 +57,7 @@ TEST_F(WValueParserTest, Multiple_Expressions_Can_Be_Specified)
 	}
 }
 
-TEST_F(WValueParserTest, Parses_Only_Valid_Expr)
+TEST_F(WValueParserTest, Parses_Only_Valid_Expression_Stream_Part)
 {
 	parse("*-3,");
 	reminder_stream_is(",");

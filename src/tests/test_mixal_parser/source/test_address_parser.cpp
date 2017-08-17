@@ -21,7 +21,7 @@ protected:
 	}
 
 	template<typename... WBuilders>
-	void w_value_is(const WTokenBuilder& w_builder, const WBuilders&... builders)
+	void literal_is(const WTokenBuilder& w_builder, const WBuilders&... builders)
 	{
 		ASSERT_TRUE(parser_.w_value());
 		ASSERT_FALSE(parser_.expression());
@@ -36,12 +36,15 @@ TEST_F(AddressParserTest, Empty_String_Is_Valid_Address)
 {
 	parse("");
 	ASSERT_TRUE(parser_.empty());
+}
 
+TEST_F(AddressParserTest, White_Spaces_Are_Ignored)
+{
 	parse(" \t\t");
 	ASSERT_TRUE(parser_.empty());
 }
 
-TEST_F(AddressParserTest, Parses_Expression_If_Its_Expression)
+TEST_F(AddressParserTest, Parses_Expression)
 {
 	parse(" LABEL * 2 xxxxxx");
 
@@ -50,11 +53,11 @@ TEST_F(AddressParserTest, Parses_Expression_If_Its_Expression)
 	reminder_stream_is(" xxxxxx");
 }
 
-TEST_F(AddressParserTest, Parses_Literal_If_Its_Literal)
+TEST_F(AddressParserTest, Parses_Literal)
 {
 	parse(" =8= * 2");
 
-	w_value_is(WToken()
+	literal_is(WToken()
 		.expression_is(Token("8")));
 
 	reminder_stream_is(" * 2");

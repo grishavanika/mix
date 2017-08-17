@@ -25,54 +25,54 @@ protected:
 
 } // namespace
 
-TEST_F(ExpressionParserTest, Expression_Can_Contain_Only_Number)
+TEST_F(ExpressionParserTest, Parses_Number)
 {
 	parse(" 42  ");
 	tokens_are(Token("42"));
 	reminder_stream_is("  ");
 }
 
-TEST_F(ExpressionParserTest, Expression_Can_Contain_Only_Symbol)
+TEST_F(ExpressionParserTest, Parses_Symbol)
 {
-	parse("LABEL");
-	tokens_are(Token("LABEL"));
+	parse("LABEL01");
+	tokens_are(Token("LABEL01"));
 	reminder_stream_is("");
 }
 
-TEST_F(ExpressionParserTest, Expression_Can_Contain_Only_Current_Address_Counter)
+TEST_F(ExpressionParserTest, Current_Address_Counter_Is_Expression)
 {
 	parse(" *");
 	tokens_are(Token("*"));
 	reminder_stream_is("");
 }
 
-TEST_F(ExpressionParserTest, Expression_Can_Contain_Basic_Expression_With_Unary_Op_In_The_Beginning)
+TEST_F(ExpressionParserTest, Expression_Is_Unary_Operation_With_Basic_Expression_After_It)
 {
 	parse(" -*");
 	tokens_are(UnaryToken("-", "*"));
 	reminder_stream_is("");
 }
 
-TEST_F(ExpressionParserTest, Expression_With_Only_Unary_Op_Will_Fail)
+TEST_F(ExpressionParserTest, Fails_To_Parse_Expression_With_Only_Unary_Operation)
 {
 	parse_error("+");
 }
 
-TEST_F(ExpressionParserTest, Differentiate_Current_Address_Symbol_From_Multiply_Binary_Operation)
+TEST_F(ExpressionParserTest, Differentiate_Current_Address_Symbol_From_Binary_Multiply_Operation)
 {
 	parse("***");
 	tokens_are(BinaryToken("*", "*"), Token("*"));
 	reminder_stream_is("");
 }
 
-TEST_F(ExpressionParserTest, Full_Token_Is_Unary_Op_With_Basic_Expression_And_Binary_Op)
+TEST_F(ExpressionParserTest, Splits_Expression_Into_Tokens_That_Are_Unary_Operation_With_Basic_Expression_And_Binary_Operation)
 {
 	parse("+ * - 3");
 	tokens_are(Token("+", "*", "-"), Token("3"));
 	reminder_stream_is("");
 }
 
-TEST_F(ExpressionParserTest, Parses_All_Token_To_The_Vector_With_Left_To_Right_Order)
+TEST_F(ExpressionParserTest, Preserves_Tokens_Order_Left_To_Right)
 {
 	//         1 |2|   3|4|
 	parse("  -1 + 5*20 / 6  ");
@@ -86,7 +86,7 @@ TEST_F(ExpressionParserTest, Parses_All_Token_To_The_Vector_With_Left_To_Right_O
 	reminder_stream_is("  ");
 }
 
-TEST_F(ExpressionParserTest, Parses_Mix_Field_Specification_As_Binary_Op)
+TEST_F(ExpressionParserTest, Mix_Field_Specification_Is_Binary_Operation)
 {
 	parse("1:3");
 
@@ -97,7 +97,7 @@ TEST_F(ExpressionParserTest, Parses_Mix_Field_Specification_As_Binary_Op)
 	reminder_stream_is("");
 }
 
-TEST_F(ExpressionParserTest, Parses_Special_MIXAL_Binary_Operations)
+TEST_F(ExpressionParserTest, Differentiate_MIXAL_Binary_Double_Slash_Operation_From_Binary_Divide)
 {
 	parse("1 // 3");
 
@@ -108,7 +108,7 @@ TEST_F(ExpressionParserTest, Parses_Special_MIXAL_Binary_Operations)
 	reminder_stream_is("");
 }
 
-TEST_F(ExpressionParserTest, Parses_As_Much_As_Possible)
+TEST_F(ExpressionParserTest, Parses_As_Much_As_Possible_Of_Valid_Expression_When_It_Is_Too_Long)
 {
 	auto symbol = MakeLongestSymbol();
 	auto too_long_symbol = symbol + symbol;

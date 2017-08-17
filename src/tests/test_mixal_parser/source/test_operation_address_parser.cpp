@@ -74,7 +74,7 @@ protected:
 
 } // namespace
 
-TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Address_And_Index_And_Field_Specified)
+TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Non_Empy_Address_Index_Field)
 {
 	parse(OperationId::STX, " 0,4 (1:4) comment");
 	
@@ -88,7 +88,7 @@ TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Address_And_Index_A
 	reminder_stream_is(" comment");
 }
 
-TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Address_And_Index_Specified)
+TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Address_And_Index)
 {
 	parse(OperationId::STX, " XXXXX,4      comment");
 
@@ -100,7 +100,7 @@ TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Address_And_Index_S
 	reminder_stream_is("comment");
 }
 
-TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Only_Address_Specified)
+TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Only_Address)
 {
 	parse(OperationId::STX, " =1000,100=         comment");
 	
@@ -116,7 +116,7 @@ TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Only_Address_Specif
 	reminder_stream_is("comment");
 }
 
-TEST_F(OperationAddressParserTest, Parses_MIX_Complex_Address_WithIndex_And_Field)
+TEST_F(OperationAddressParserTest, Parses_Complex_Address_Index_Field_Expressions)
 {
 	parse(OperationId::STX, " =1000(1:5)=,*** (+1*K)     comment");
 
@@ -137,7 +137,7 @@ TEST_F(OperationAddressParserTest, Parses_MIX_Complex_Address_WithIndex_And_Fiel
 	reminder_stream_is("     comment");
 }
 
-TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Index_And_Field_Specified)
+TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Index_Field)
 {
 	parse(OperationId::STX, " ,4 (1:4) comment");
 	
@@ -150,7 +150,7 @@ TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Index_And_Field_Spe
 	reminder_stream_is(" comment");
 }
 
-TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Only_Field_Specified)
+TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Only_Field)
 {
 	parse(OperationId::STX, " (1:4)   comment");
 
@@ -162,7 +162,7 @@ TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Only_Field_Specifie
 	reminder_stream_is("   comment");
 }
 
-TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Only_Index_Specified)
+TEST_F(OperationAddressParserTest, Parses_MIX_Operation_With_Only_Index)
 {
 	parse(OperationId::STX, " ,4     comment");
 
@@ -210,7 +210,7 @@ TEST_F(OperationAddressParserTest, Parses_MIXAL_ALF_Operation_With_One_Spaces_An
 	reminder_stream_is("   comment");
 }
 
-TEST_F(OperationAddressParserTest, Fails_To_Parse_Too_Short_ALF_String)
+TEST_F(OperationAddressParserTest, ALF_String_Should_Be_5_Chars_Long)
 {
 	parse_error(OperationId::ALF, "  AA");
 }
@@ -232,9 +232,9 @@ TEST_F(OperationAddressParserTest, ALF_Can_Be_Enclosed_With_Spaces)
 		.ALF_text_is("KKKKK"));
 }
 
-TEST_F(OperationAddressParserTest, ALF_Can_Fails_To_Parse_Half_Opened_Quotes)
+TEST_F(OperationAddressParserTest, ALF_Fails_To_Parse_Half_Opened_Quotes)
 {
-	parse_error(OperationId::ALF, R"("KKKKK)");
+	parse_error(OperationId::ALF, "(\"KKKKK");
 }
 
 TEST_F(OperationAddressParserTest, ALF_Parses_String_With_Quotes_At_The_End_Of_String)

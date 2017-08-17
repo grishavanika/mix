@@ -25,7 +25,7 @@ TEST_F(FieldParserTest, Fails_If_Parentheses_Are_Openened_But_Not_Closed)
 	parse_error("(");
 }
 
-TEST_F(FieldParserTest, Parses_Empty_String_If_Parentheses_Are_Not_Opened)
+TEST_F(FieldParserTest, If_Parentheses_Are_Not_Opened_But_Closed_Parses_Empty_String)
 {
 	parse(")");
 	reminder_stream_is(")");
