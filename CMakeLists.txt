@@ -95,6 +95,7 @@ set_target_properties(gmock_main PROPERTIES FOLDER third_party)
 add_subdirectory(src/core_lib)
 add_subdirectory(src/mix_lib)
 add_subdirectory(src/mixal_parser_lib)
+add_subdirectory(src/mixal_lib)
 add_subdirectory(src/tools/mixal_formatter_lib)
 set_target_properties(core_lib PROPERTIES FOLDER libs)
 set_target_properties(mix_lib PROPERTIES FOLDER libs)
@@ -102,15 +103,19 @@ set_target_properties(mixal_parser_lib PROPERTIES FOLDER libs)
 set_target_properties(mixal_formatter_lib PROPERTIES FOLDER "libs/tools")
 
 # exe
+add_subdirectory(src/mixal)
 add_subdirectory(src/tools/mixal_formatter)
+set_target_properties(mixal PROPERTIES FOLDER "app")
 set_target_properties(mixal_formatter PROPERTIES FOLDER "app/tools")
 
 # tests
 add_subdirectory(src/tests/test_core)
 add_subdirectory(src/tests/test_mix)
+add_subdirectory(src/tests/test_mixal)
 add_subdirectory(src/tests/test_mixal_parser)
 set_target_properties(test_core PROPERTIES FOLDER tests)
 set_target_properties(test_mix PROPERTIES FOLDER tests)
+set_target_properties(test_mixal PROPERTIES FOLDER tests)
 set_target_properties(test_mixal_parser PROPERTIES FOLDER tests)
 
 enable_testing()
