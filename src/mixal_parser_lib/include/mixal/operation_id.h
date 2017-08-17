@@ -175,14 +175,23 @@ enum class OperationId
 	JXNZ	= 155,
 	JXNP	= 156,
 
+	FIX		= 157, // Don't know about these operations yet.
+	FLOT	= 158, // Adding them to be able to parse.
+	SLB		= 159, // #TODO: implement in VM
+	SRB		= 160,
+	JAE		= 161,
+	JAO		= 162,
+	JXE		= 163,
+	JXO		= 164,
+
 	MIXOpBegin		= NOP,
-	MIXOpEnd		= JXNP,
+	MIXOpEnd		= JXO,
 	
-	CON		= 157,
-	EQU		= 158,
-	ORIG	= 159,
-	END		= 160,
-	ALF		= 161,
+	CON		= 165,
+	EQU		= 166,
+	ORIG	= 167,
+	END		= 168,
+	ALF		= 169,
 
 	MIXALOpBegin	= CON,
 	MIXALOpEnd		= ALF,

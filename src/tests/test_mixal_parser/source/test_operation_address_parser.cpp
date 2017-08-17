@@ -245,4 +245,3 @@ TEST_F(OperationAddressParserTest, ALF_Parses_String_With_Quotes_At_The_End_Of_S
 	result_is(MIXAL()
 		.ALF_text_is("AAAAA"));
 }
-

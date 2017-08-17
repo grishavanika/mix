@@ -16,7 +16,7 @@ namespace mixal_formatter {
 
 namespace {
 
-const std::size_t k_address_str_width = 30;
+const std::size_t k_address_str_width = 20;
 const std::size_t k_inline_comment_offset = 5;
 const std::size_t k_op_offset = 3;
 
@@ -38,20 +38,26 @@ std::string BuildLine(const LineParser& line_parser, const FormatOptions& option
 	stream << ' ';
 
 	assert(line_parser.operation());
-
+	const auto op_id = line_parser.operation()->id();
+	
 	stream << std::setw(k_max_operation_str_length) << std::left
-		<< OperationIdToString(line_parser.operation()->id());
+		<< OperationIdToString(op_id);
 
 	stream << std::string(k_op_offset, ' ');
 
 	// #TODO: remove all spaces if specified
 
-	// #TODO: special handling of `ALF` command
-
 	assert(line_parser.address());
 
-	stream << std::setw(k_address_str_width) << std::left
-		<< line_parser.address()->str();
+	if (op_id != OperationId::ALF)
+	{
+		stream << std::setw(k_address_str_width) << std::left
+			<< line_parser.address()->str();
+	}
+	else
+	{
+		stream << '"' << *line_parser.address()->mixal()->alf_text << '"';
+	}
 
 	if (line_parser.has_inline_comment())
 	{
