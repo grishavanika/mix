@@ -1,5 +1,9 @@
 #include <mixal/translator.h>
 
-using namespace mixal_parse;
+using namespace mixal;
+
+Translator::Translator()
+{
+}
 
 

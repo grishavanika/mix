@@ -1,9 +1,17 @@
 #pragma once
+#include <mixal/config.h>
 
-namespace mixal_parse {
+namespace mixal {
 
+class MIXAL_LIB_EXPORT Translator
+{
+public:
+	Translator();
 
+private:
 
-} // namespace mixal_parse
+};
+
+} // namespace mixal
 
 
