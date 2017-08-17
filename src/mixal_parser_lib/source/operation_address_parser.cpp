@@ -123,6 +123,8 @@ std::size_t OperationAddressParser::try_parse_standard_alf(const std::string_vie
 		return InvalidStreamPosition();
 	}
 
+	// #TODO: do not expect string length to be 5.
+	// Simply read 5 chars or to the end of line if the length is less
 	if (str.size() < (offset + k_ALF_op_length))
 	{
 		return InvalidStreamPosition();
