@@ -1,5 +1,5 @@
 #include <mixal/translator.h>
 
-using namespace mixal;
+using namespace mixal_parse;
 
 

@@ -7,7 +7,7 @@ file(GLOB_RECURSE ${lib_name}_src "source" "*.cpp")
 file(GLOB_RECURSE ${lib_name}_hds "include" "*.h")
 
 add_library(${lib_name} ${lib_type} ${${lib_name}_src} ${${lib_name}_hds})
-target_link_libraries(${lib_name} PUBLIC mixal_parser_lib)
+target_link_libraries(${lib_name} PUBLIC mixal_parse_lib)
 
 target_include_directories(${lib_name} PUBLIC include)
 

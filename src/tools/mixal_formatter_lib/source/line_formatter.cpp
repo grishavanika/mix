@@ -1,6 +1,6 @@
 #include <mixal_formatter/line_formatter.h>
-#include <mixal/line_parser.h>
-#include <mixal/parsers_utils.h>
+#include <mixal_parse/line_parser.h>
+#include <mixal_parse/parsers_utils.h>
 
 #include <core/string.h>
 
@@ -10,7 +10,7 @@
 
 #include <cassert>
 
-using namespace mixal;
+using namespace mixal_parse;
 
 namespace mixal_formatter {
 
