@@ -222,3 +222,27 @@ TEST_F(OperationAddressParserTest, ALF_Space_Is_Any_White_Space)
 	result_is(MIXAL()
 		.ALF_text_is("FIRST"));
 }
+
+TEST_F(OperationAddressParserTest, ALF_Can_Be_Enclosed_With_Spaces)
+{
+	parse(OperationId::ALF, R"("KKKKK"comment goes here)");
+	reminder_stream_is("comment goes here");
+
+	result_is(MIXAL()
+		.ALF_text_is("KKKKK"));
+}
+
+TEST_F(OperationAddressParserTest, ALF_Can_Fails_To_Parse_Half_Opened_Quotes)
+{
+	parse_error(OperationId::ALF, R"("KKKKK)");
+}
+
+TEST_F(OperationAddressParserTest, ALF_Parses_String_With_Quotes_At_The_End_Of_String)
+{
+	parse(OperationId::ALF, R"("AAAAA")");
+	reminder_stream_is("");
+
+	result_is(MIXAL()
+		.ALF_text_is("AAAAA"));
+}
+

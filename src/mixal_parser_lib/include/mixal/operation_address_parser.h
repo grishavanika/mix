@@ -44,6 +44,10 @@ private:
 	std::size_t parse_mixal_op_as_wvalue(const std::string_view& str, std::size_t offset);
 	std::size_t parse_mixal_alf_op(const std::string_view& str, std::size_t offset);
 
+	std::size_t try_parse_alf_with_quotes(const std::string_view& str, std::size_t offset);
+	std::size_t try_parse_standard_alf(const std::string_view& str, std::size_t offset);
+	std::size_t set_alf_text(const std::string_view& str, std::size_t offset);
+
 private:
 	OperationId op_;
 	std::optional<MIXOpParser> mix_;

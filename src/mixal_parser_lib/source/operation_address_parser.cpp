@@ -99,6 +99,17 @@ std::size_t OperationAddressParser::parse_mixal_op_as_wvalue(const std::string_v
 
 std::size_t OperationAddressParser::parse_mixal_alf_op(const std::string_view& str, std::size_t offset)
 {
+	const auto quotes_end = try_parse_alf_with_quotes(str, offset);
+	if (!IsInvalidStreamPosition(quotes_end))
+	{
+		return quotes_end;
+	}
+
+	return try_parse_standard_alf(str, offset);
+}
+
+std::size_t OperationAddressParser::try_parse_standard_alf(const std::string_view& str, std::size_t offset)
+{
 	if (ALFStartsWithOneSpace(str, offset))
 	{
 		offset += 1;
@@ -107,12 +118,51 @@ std::size_t OperationAddressParser::parse_mixal_alf_op(const std::string_view& s
 	{
 		offset += 2;
 	}
+	else
+	{
+		return InvalidStreamPosition();
+	}
 
 	if (str.size() < (offset + k_ALF_op_length))
 	{
 		return InvalidStreamPosition();
 	}
 
+	return set_alf_text(str, offset);
+}
+
+std::size_t OperationAddressParser::try_parse_alf_with_quotes(const std::string_view& str, std::size_t offset)
+{
+	auto start = ExpectFirstNonWhiteSpaceChar('"', str, offset);
+	if (IsInvalidStreamPosition(start))
+	{
+		return InvalidStreamPosition();
+	}
+	// Skip `"`
+	++start;
+
+	const bool has_anough_length = (str.size() > (start + k_ALF_op_length));
+	if (!has_anough_length)
+	{
+		return InvalidStreamPosition();
+	}
+	const bool closes_quotes = (str[start + k_ALF_op_length] == '"');
+	if (!closes_quotes)
+	{
+		return InvalidStreamPosition();
+	}
+
+	const auto end = set_alf_text(str, start);
+	if (IsInvalidStreamPosition(end))
+	{
+		return InvalidStreamPosition();
+	}
+
+	return (end + 1);
+}
+
+std::size_t OperationAddressParser::set_alf_text(const std::string_view& str, std::size_t offset)
+{
 	MIXALOpParser mixal;
 	mixal.alf_text = str.substr(offset, k_ALF_op_length);
 	if (!IsValidALFText(*mixal.alf_text))
@@ -121,7 +171,6 @@ std::size_t OperationAddressParser::parse_mixal_alf_op(const std::string_view& s
 	}
 
 	mixal_ = std::move(mixal);
-
 	return (offset + k_ALF_op_length);
 }
 
