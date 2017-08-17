@@ -25,8 +25,12 @@ private:
 	virtual void do_clear() override;
 
 	std::size_t parse_address_str_with_comment(const std::string_view& str, std::size_t offset);
-	std::size_t try_parse_line_without_label(const std::string_view& str, std::size_t offset);
 	std::size_t try_parse_line_with_label(const std::string_view& str, std::size_t offset);
+
+	std::size_t try_parse_line_without_label(
+		const std::string_view& str,
+		std::size_t offset,
+		bool fallback_to_label_parse = true);
 
 private:
 	std::optional<std::string_view> comment_;

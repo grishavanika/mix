@@ -44,7 +44,10 @@ std::size_t LineParser::do_parse_stream(std::string_view str, std::size_t offset
 	return pos;
 }
 
-std::size_t LineParser::try_parse_line_without_label(const std::string_view& str, std::size_t offset)
+std::size_t LineParser::try_parse_line_without_label(
+	const std::string_view& str,
+	std::size_t offset,
+	bool fallback_to_label_parse /*= true*/)
 {
 	// Basically, because we do not separate LABEL and OPERATION columns
 	// with single space, but with multiple spaces, there are
@@ -59,17 +62,28 @@ std::size_t LineParser::try_parse_line_without_label(const std::string_view& str
 		return InvalidStreamPosition();
 	}
 
-	// Ok, LINE starts with valid OPERATION, but it can be the name
-	// of the LABEL (syntax does not disallow such behavior).
-	// We are trying to parse next token as OPERATION also
-	// and if we are successful then choose the way where
-	// first OPERATION is the LABEL, return to the caller
-	// and lets parse line that starts with LABEL
-	OperationParser op_parser;
-	const auto end = op_parser.parse_stream(str, op_end);
-	if (!IsInvalidStreamPosition(end))
+	if (fallback_to_label_parse)
 	{
-		return InvalidStreamPosition();
+		// Ok, LINE starts with valid OPERATION, but it can be the name
+		// of the LABEL (syntax does not disallow such behavior).
+		// We are trying to parse next token as OPERATION also.
+		// 
+		// If it is OPERATION (e.g., we have next LINE: "OPERATION OPERATION"),
+		// then choose the way where first OPERATION is LABEL and
+		// return to the caller to parse line that starts with LABEL
+		// 
+		// (Small note: do this only if line has something after our
+		// 2nd OPERATION, i.e., we have next line: "OPERATION OPERATION ADDRESS stuff")
+		OperationParser op_parser;
+		const auto end = op_parser.parse_stream(str, op_end);
+		if (!IsInvalidStreamPosition(end))
+		{
+			const bool has_non_empty_address_column = !core::Trim(str.substr(end)).empty();
+			if (has_non_empty_address_column)
+			{
+				return InvalidStreamPosition();
+			}
+		}
 	}
 
 	operation_ = std::move(op_parser_of_label);
@@ -86,7 +100,7 @@ std::size_t LineParser::try_parse_line_with_label(const std::string_view& str, s
 	}
 	
 	label_ = std::move(label_parser);
-	return try_parse_line_without_label(str, label_end);
+	return try_parse_line_without_label(str, label_end, false/*do not go to label parsing*/);
 }
 
 std::size_t LineParser::parse_address_str_with_comment(const std::string_view& str, std::size_t offset)
