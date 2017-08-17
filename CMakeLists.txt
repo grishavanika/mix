@@ -99,6 +99,7 @@ add_subdirectory(src/mixal_lib)
 add_subdirectory(src/tools/mixal_formatter_lib)
 set_target_properties(core_lib PROPERTIES FOLDER libs)
 set_target_properties(mix_lib PROPERTIES FOLDER libs)
+set_target_properties(mixal_lib PROPERTIES FOLDER libs)
 set_target_properties(mixal_parser_lib PROPERTIES FOLDER libs)
 set_target_properties(mixal_formatter_lib PROPERTIES FOLDER "libs/tools")
 
@@ -122,6 +123,7 @@ enable_testing()
 add_test(NAME core COMMAND test_core)
 add_test(NAME mix COMMAND test_mix)
 add_test(NAME mixal_parser COMMAND test_mixal_parser)
+add_test(NAME mixal COMMAND test_mixal)
 
 # Note: to use it with clang you need to install latest one
 # from http://llvm.org/builds/ (5.0.0 for the moment)
