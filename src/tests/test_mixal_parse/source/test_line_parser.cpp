@@ -9,6 +9,41 @@ namespace {
 class LineParserTest :
 	public ParserTest<LineParser>
 {
+
+protected:
+	void has_comment(std::string_view comment)
+	{
+		ASSERT_TRUE(parser_.comment());
+		ASSERT_EQ(comment, *parser_.comment());
+	}
+
+	void has_no_comment()
+	{
+		ASSERT_FALSE(parser_.comment());
+	}
+
+	void has_operation(OperationId id)
+	{
+		ASSERT_TRUE(parser_.operation());
+		ASSERT_EQ(id, parser_.operation()->id());
+	}
+
+	void has_address_str(std::string_view str)
+	{
+		ASSERT_TRUE(parser_.address());
+		ASSERT_EQ(str, parser_.address()->str());
+	}
+
+	void has_no_label()
+	{
+		ASSERT_FALSE(parser_.label_parser());
+	}
+
+	void has_label(std::string_view name)
+	{
+		ASSERT_TRUE(parser_.label_parser());
+		ASSERT_EQ(name, parser_.label_parser()->label().name());
+	}
 };
 
 } // namespace
@@ -16,42 +51,37 @@ class LineParserTest :
 TEST_F(LineParserTest, Parses_Line_With_Comment_Leaving_Comment_Unchanged)
 {
 	parse("* comment   ");
-	ASSERT_TRUE(parser_.comment());
-	ASSERT_EQ("* comment   ", *parser_.comment());
+	has_comment("* comment   ");
 }
 
 TEST_F(LineParserTest, Ignores_Line_Left_White_Spaces_For_Comment_Line)
 {
 	parse("       * comment   ");
-	ASSERT_TRUE(parser_.comment());
-	ASSERT_EQ("* comment   ", *parser_.comment());
+	has_comment("* comment   ");
 }
 
 TEST_F(LineParserTest, Parses_Line_With_Single_Operation)
 {
 	parse("STA");
-	ASSERT_TRUE(parser_.operation());
-	ASSERT_EQ(OperationId::STA, parser_.operation()->id());
-	ASSERT_TRUE(parser_.address());
-	ASSERT_FALSE(parser_.comment());
+	has_operation(OperationId::STA);
+	has_address_str("");
+	has_no_comment();
 }
 
 TEST_F(LineParserTest, Line_With_Single_Operation_Can_Contain_WhiteSpaces)
 {
 	{
 		parse("  LDA");
-		ASSERT_TRUE(parser_.operation());
-		ASSERT_EQ(OperationId::LDA, parser_.operation()->id());
-		ASSERT_TRUE(parser_.address());
-		ASSERT_FALSE(parser_.comment());
+		has_operation(OperationId::LDA);
+		has_address_str("");
+		has_no_comment();
 	}
 
 	{
 		parse("  LD2N     ");
-		ASSERT_TRUE(parser_.operation());
-		ASSERT_EQ(OperationId::LD2N, parser_.operation()->id());
-		ASSERT_TRUE(parser_.address());
-		ASSERT_FALSE(parser_.comment());
+		has_operation(OperationId::LD2N);
+		has_address_str("");
+		has_no_comment();
 	}
 }
 
@@ -63,69 +93,44 @@ TEST_F(LineParserTest, Line_Can_Not_Contain_Only_Label)
 TEST_F(LineParserTest, Address_Column_Can_Be_Empty)
 {
 	parse("LABEL  JNE");
-
-	ASSERT_TRUE(parser_.label());
-	ASSERT_TRUE(parser_.operation());
-	ASSERT_EQ(OperationId::JNE, parser_.operation()->id());
-	ASSERT_TRUE(parser_.address());
-	ASSERT_FALSE(parser_.comment());
-
-	parse("8H  INC1   ");
-	ASSERT_TRUE(parser_.label());
-	ASSERT_TRUE(parser_.operation());
-	ASSERT_EQ(OperationId::INC1, parser_.operation()->id());
-	ASSERT_TRUE(parser_.address());
-	ASSERT_FALSE(parser_.comment());
+	has_address_str("");
 }
 
 TEST_F(LineParserTest, Can_Contain_In_Line_Comment_That_Starts_With_Invalid_MIXAL_Code)
 {
 	parse("ADD some comment  ");
 
-	ASSERT_FALSE(parser_.label());
-	ASSERT_TRUE(parser_.operation());
-	ASSERT_EQ(OperationId::ADD, parser_.operation()->id());
-	ASSERT_TRUE(parser_.address());
-	ASSERT_TRUE(parser_.comment());
-	ASSERT_EQ("some comment  ", *parser_.comment());
+	has_no_label();
+	has_operation(OperationId::ADD);
+	has_address_str("");
+	has_comment("some comment  ");
 }
 
 TEST_F(LineParserTest, Splits_Label_Op_Address_And_Comment_Into_Separate_Parts_With_No_WhiteSpaces)
 {
 	parse("START   IN      BUF (TERM)   read a block (70 chars)");
 
-	ASSERT_TRUE(parser_.label());
-	ASSERT_EQ("START", parser_.label()->name());
-
-	ASSERT_TRUE(parser_.operation());
-	ASSERT_EQ(OperationId::IN, parser_.operation()->id());
-
-	ASSERT_TRUE(parser_.address());
-	ASSERT_EQ("BUF (TERM)", parser_.address()->str());
-	
-	ASSERT_TRUE(parser_.comment());
-	ASSERT_EQ("read a block (70 chars)", *parser_.comment());
+	has_label("START");
+	has_operation(OperationId::IN);
+	has_address_str("BUF (TERM)");
+	has_comment("read a block (70 chars)");
 }
 
 TEST_F(LineParserTest, When_Label_Name_Is_Valid_Operation_And_Line_Has_Valid_Operation_With_Non_Empty_ADDRESS_Part_Then_Parses_Them_As_Label_And_Operation)
 {
 	parse("IN OUT 1");
-	ASSERT_TRUE(parser_.label());
-	ASSERT_EQ("IN", parser_.label()->name());
-	
-	ASSERT_TRUE(parser_.operation());
-	ASSERT_EQ(OperationId::OUT, parser_.operation()->id());
+
+	has_label("IN");
+	has_operation(OperationId::OUT);
+	has_address_str("1");
 }
 
 TEST_F(LineParserTest, When_Label_Name_Is_Valid_Operation_And_Line_Has_Valid_Operation_With_EMPTY_ADDRESS_Part_Then_Parses_As_Operation_And_Address)
 {
 	parse("OUT IN");
-	ASSERT_FALSE(parser_.label());
 
-	ASSERT_TRUE(parser_.operation());
-	ASSERT_EQ(OperationId::OUT, parser_.operation()->id());
-
-	ASSERT_TRUE(parser_.address());
-	ASSERT_EQ("IN", parser_.address()->str());
+	has_no_label();
+	has_operation(OperationId::OUT);
+	has_address_str("IN");
 }
 

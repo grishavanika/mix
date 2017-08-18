@@ -19,6 +19,8 @@ extern const char k_current_address_marker;
 MIXAL_PARSE_LIB_EXPORT
 extern const LocalSymbolId k_max_local_symbol_id;
 MIXAL_PARSE_LIB_EXPORT
+extern const LocalSymbolId k_invalid_local_symbol_id;
+MIXAL_PARSE_LIB_EXPORT
 extern const UnaryOperation k_unary_operations[];
 MIXAL_PARSE_LIB_EXPORT
 extern const BinaryOperation k_binary_operations[];

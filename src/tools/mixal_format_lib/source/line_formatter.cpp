@@ -20,6 +20,15 @@ const std::size_t k_address_str_width = 20;
 const std::size_t k_inline_comment_offset = 5;
 const std::size_t k_op_offset = 3;
 
+std::string_view LabelString(const LineParser& line_parser)
+{
+	if (line_parser.label_parser())
+	{
+		return line_parser.label_parser()->label().name();
+	}
+	return {};
+}
+
 std::string BuildLine(const LineParser& line_parser, const FormatOptions& options)
 {
 	(void)options;
@@ -33,7 +42,7 @@ std::string BuildLine(const LineParser& line_parser, const FormatOptions& option
 	}
 
 	stream << std::setw(k_max_symbol_length) << std::left
-		<< (line_parser.label() ? line_parser.label()->name() : "");
+		<< LabelString(line_parser);
 
 	stream << ' ';
 

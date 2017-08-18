@@ -1,7 +1,6 @@
 #pragma once
 #include <mixal_parse/label_parser.h>
 #include <mixal_parse/operation_parser.h>
-#include <mixal_parse/label_parser.h>
 #include <mixal_parse/operation_address_parser.h>
 
 #include <core/optional.h>
@@ -13,7 +12,7 @@ class MIXAL_PARSE_LIB_EXPORT LineParser final :
 {
 public:
 	ConstOptionalRef<std::string_view> comment() const;
-	ConstOptionalRef<LabelParser> label() const;
+	ConstOptionalRef<LabelParser> label_parser() const;
 	ConstOptionalRef<OperationParser> operation() const;
 	ConstOptionalRef<OperationAddressParser> address() const;
 

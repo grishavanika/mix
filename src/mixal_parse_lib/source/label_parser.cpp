@@ -32,17 +32,20 @@ LocalSymbolId ParseLocalSymbol(const std::string_view& str)
 
 	std::stringstream in;
 	in << str.substr(0, str.size() - 1);
-	LocalSymbolId n = 0;
+	LocalSymbolId n = k_invalid_local_symbol_id;
 	in >> n;
 	assert(in);
 
 	return n;
 }
 
-bool IsValidLabelLocalSymbol(const std::string_view& str)
+bool IsAllowedLabelLocalSymbol(const std::string_view& str)
 {
-	assert(IsLocalSymbol(str));
-	return (str.back() == k_local_symbol_label_suffix);
+	if (IsLocalSymbol(str))
+	{
+		return (str.back() == k_local_symbol_label_suffix);
+	}
+	return false;
 }
 
 } // namespace
@@ -64,55 +67,43 @@ std::size_t LabelParser::do_parse_stream(std::string_view str, std::size_t offse
 		}
 	}
 
-	name_ = str.substr(first_non_space, index - first_non_space);
+	const auto name = str.substr(first_non_space, index - first_non_space);
 
-	if (!IsSymbol(name_))
+	if (!IsSymbol(name))
 	{
 		return InvalidStreamPosition();
 	}
 
-	if (IsLocalSymbol(name_) &&
-		!parse_local_symbol())
+	LocalSymbolId local_id = k_invalid_local_symbol_id;
+	if (IsLocalSymbol(name))
 	{
-		return InvalidStreamPosition();
+		local_id = parse_local_symbol(name);
+		if (!IsValidLocalSymbolId(local_id))
+		{
+			return InvalidStreamPosition();
+		}
 	}
 
+	label_ = Label{Symbol{name}, local_id};
 	return index;
 }
 
-bool LabelParser::parse_local_symbol()
+LocalSymbolId LabelParser::parse_local_symbol(const std::string_view& str)
 {
-	if (!IsValidLabelLocalSymbol(name_))
+	if (!IsAllowedLabelLocalSymbol(str))
 	{
-		return false;
+		return k_invalid_local_symbol_id;
 	}
 
-	local_symbol_id_ = ParseLocalSymbol(name_);
-	return IsValidLocalSymbolId(*local_symbol_id_);
-}
-
-std::string_view LabelParser::name() const
-{
-	return name_;
-}
-
-bool LabelParser::is_local_symbol() const
-{
-	return !!local_symbol_id_;
-}
-
-ConstOptionalRef<LocalSymbolId> LabelParser::local_symbol_id() const
-{
-	return local_symbol_id_;
-}
-
-bool LabelParser::empty() const
-{
-	return name_.empty();
+	return ParseLocalSymbol(str);
 }
 
 void LabelParser::do_clear()
 {
-	local_symbol_id_ = std::nullopt;
-	name_ = {};
+	label_ = {};
+}
+
+const Label& LabelParser::label() const
+{
+	return label_;
 }

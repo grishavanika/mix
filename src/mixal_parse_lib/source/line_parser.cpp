@@ -130,7 +130,7 @@ ConstOptionalRef<std::string_view> LineParser::comment() const
 	return comment_;
 }
 
-ConstOptionalRef<LabelParser> LineParser::label() const
+ConstOptionalRef<LabelParser> LineParser::label_parser() const
 {
 	return label_;
 }

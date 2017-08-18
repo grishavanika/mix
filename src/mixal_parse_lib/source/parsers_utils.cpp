@@ -11,6 +11,7 @@ extern const std::size_t k_max_symbol_length = 10;
 extern const std::size_t k_max_operation_str_length = 4;
 extern const char k_current_address_marker = '*';
 extern const LocalSymbolId k_max_local_symbol_id = 9;
+extern const LocalSymbolId k_invalid_local_symbol_id = -1;
 
 extern const UnaryOperation k_unary_operations[] =
 {
