@@ -24,8 +24,8 @@ protected:
 
 	void has_operation(OperationId id)
 	{
-		ASSERT_TRUE(parser_.operation());
-		ASSERT_EQ(id, parser_.operation()->id());
+		ASSERT_TRUE(parser_.operation_parser());
+		ASSERT_EQ(id, parser_.operation_parser()->operation().id());
 	}
 
 	void has_address_str(std::string_view str)

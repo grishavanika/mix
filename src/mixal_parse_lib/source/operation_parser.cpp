@@ -30,8 +30,8 @@ std::size_t OperationParser::do_parse_stream(std::string_view str, std::size_t o
 	}
 	const auto first_space = FirstWhiteSpace(str, first_non_space);
 
-	id_ = OperationIdFromString(str.substr(first_non_space, first_space - first_non_space));
-	if (id_ == OperationId::Unknown)
+	op_ = OperationIdFromString(str.substr(first_non_space, first_space - first_non_space));
+	if (!op_.is_valid())
 	{
 		return InvalidStreamPosition();
 	}
@@ -39,22 +39,13 @@ std::size_t OperationParser::do_parse_stream(std::string_view str, std::size_t o
 	return first_space;
 }
 
-bool OperationParser::is_mix_operation() const
-{
-	return IsMIXOperation(id_);
-}
-
-bool OperationParser::is_mixal_operation() const
-{
-	return IsMIXALOperation(id_);
-}
-
-OperationId OperationParser::id() const
-{
-	return id_;
-}
-
 void OperationParser::do_clear()
 {
-	id_ = OperationId::Unknown;
+	op_ = {};
 }
+
+Operation OperationParser::operation() const
+{
+	return op_;
+}
+

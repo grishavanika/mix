@@ -46,8 +46,8 @@ std::string BuildLine(const LineParser& line_parser, const FormatOptions& option
 
 	stream << ' ';
 
-	assert(line_parser.operation());
-	const auto op_id = line_parser.operation()->id();
+	assert(line_parser.operation_parser());
+	const auto op_id = line_parser.operation_parser()->operation().id();
 	
 	stream << std::setw(k_max_operation_str_length) << std::left
 		<< OperationIdToString(op_id);

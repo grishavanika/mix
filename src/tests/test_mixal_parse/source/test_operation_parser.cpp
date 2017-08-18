@@ -44,10 +44,10 @@ TEST_F(OperationParserTest, Ignores_WhiteSpaces)
 {
 	parse("   ADD");
 	reminder_stream_is("");
-	ASSERT_EQ(OperationId::ADD, parser_.id());
+	ASSERT_EQ(OperationId::ADD, parser_.operation().id());
 
 	parse("SUB   ");
-	ASSERT_EQ(OperationId::SUB, parser_.id());
+	ASSERT_EQ(OperationId::SUB, parser_.operation().id());
 	reminder_stream_is("   ");
 }
 
@@ -65,7 +65,7 @@ TEST_P(OperationParserTestParam, Does_Not_Fail_For_Known_UpperCase_Operations)
 {
 	const auto& param = GetParam();
 	parse(param.str);
-	ASSERT_EQ(param.id, parser_.id());
+	ASSERT_EQ(param.id, parser_.operation().id());
 }
 
 TEST_P(OperationParserTestParam, Has_Valid_MIX_Or_MIXAL_Operations_Queries)
@@ -76,12 +76,12 @@ TEST_P(OperationParserTestParam, Has_Valid_MIX_Or_MIXAL_Operations_Queries)
 	switch (param.type)
 	{
 	case OperationType::MIX:
-		ASSERT_TRUE(parser_.is_mix_operation());
-		ASSERT_FALSE(parser_.is_mixal_operation());
+		ASSERT_TRUE(parser_.operation().is_mix());
+		ASSERT_FALSE(parser_.operation().is_mixal());
 		break;
 	case OperationType::MIXAL:
-		ASSERT_TRUE(parser_.is_mixal_operation());
-		ASSERT_FALSE(parser_.is_mix_operation());
+		ASSERT_TRUE(parser_.operation().is_mixal());
+		ASSERT_FALSE(parser_.operation().is_mix());
 		break;
 	}
 }

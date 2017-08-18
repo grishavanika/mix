@@ -86,7 +86,7 @@ std::size_t LineParser::try_parse_line_without_label(
 		}
 	}
 
-	operation_ = std::move(op_parser_of_label);
+	operation_parser_ = std::move(op_parser_of_label);
 	return parse_address_str_with_comment(str, op_end);
 }
 
@@ -99,15 +99,15 @@ std::size_t LineParser::try_parse_line_with_label(const std::string_view& str, s
 		return InvalidStreamPosition();
 	}
 	
-	label_ = std::move(label_parser);
+	label_parser_ = std::move(label_parser);
 	return try_parse_line_without_label(str, label_end, false/*do not go to label parsing*/);
 }
 
 std::size_t LineParser::parse_address_str_with_comment(const std::string_view& str, std::size_t offset)
 {
-	assert(operation_);
+	assert(operation_parser_);
 
-	OperationAddressParser parser{operation_->id()};
+	OperationAddressParser parser{operation_parser_->operation().id()};
 	const auto end = parser.parse_stream(str, offset);
 	if (IsInvalidStreamPosition(end))
 	{
@@ -132,12 +132,12 @@ ConstOptionalRef<std::string_view> LineParser::comment() const
 
 ConstOptionalRef<LabelParser> LineParser::label_parser() const
 {
-	return label_;
+	return label_parser_;
 }
 
-ConstOptionalRef<OperationParser> LineParser::operation() const
+ConstOptionalRef<OperationParser> LineParser::operation_parser() const
 {
-	return operation_;
+	return operation_parser_;
 }
 
 ConstOptionalRef<OperationAddressParser> LineParser::address() const
@@ -148,8 +148,8 @@ ConstOptionalRef<OperationAddressParser> LineParser::address() const
 void LineParser::do_clear()
 {
 	comment_ = std::nullopt;
-	label_ = std::nullopt;
-	operation_ = std::nullopt;
+	label_parser_ = std::nullopt;
+	operation_parser_ = std::nullopt;
 	address_ = std::nullopt;
 }
 

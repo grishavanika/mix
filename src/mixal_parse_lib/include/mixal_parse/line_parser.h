@@ -13,7 +13,7 @@ class MIXAL_PARSE_LIB_EXPORT LineParser final :
 public:
 	ConstOptionalRef<std::string_view> comment() const;
 	ConstOptionalRef<LabelParser> label_parser() const;
-	ConstOptionalRef<OperationParser> operation() const;
+	ConstOptionalRef<OperationParser> operation_parser() const;
 	ConstOptionalRef<OperationAddressParser> address() const;
 
 	bool has_only_comment() const;
@@ -33,8 +33,8 @@ private:
 
 private:
 	std::optional<std::string_view> comment_;
-	std::optional<LabelParser> label_;
-	std::optional<OperationParser> operation_;
+	std::optional<LabelParser> label_parser_;
+	std::optional<OperationParser> operation_parser_;
 	std::optional<OperationAddressParser> address_;
 };
 

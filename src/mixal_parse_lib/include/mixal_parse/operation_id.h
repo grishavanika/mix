@@ -5,6 +5,20 @@
 
 namespace mixal_parse {
 
+enum class OperationId;
+
+MIXAL_PARSE_LIB_EXPORT
+std::string_view OperationIdToString(OperationId id);
+
+MIXAL_PARSE_LIB_EXPORT
+OperationId OperationIdFromString(std::string_view str);
+
+MIXAL_PARSE_LIB_EXPORT
+bool IsMIXOperation(OperationId id);
+
+MIXAL_PARSE_LIB_EXPORT
+bool IsMIXALOperation(OperationId id);
+
 enum class OperationId
 {
 	Unknown	= -1,
@@ -198,18 +212,6 @@ enum class OperationId
 
 	Count
 };
-
-MIXAL_PARSE_LIB_EXPORT
-std::string_view OperationIdToString(OperationId id);
-
-MIXAL_PARSE_LIB_EXPORT
-OperationId OperationIdFromString(std::string_view str);
-
-MIXAL_PARSE_LIB_EXPORT
-bool IsMIXOperation(OperationId id);
-
-MIXAL_PARSE_LIB_EXPORT
-bool IsMIXALOperation(OperationId id);
 
 } // namespace mixal_parse
 
