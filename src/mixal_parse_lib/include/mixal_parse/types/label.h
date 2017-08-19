@@ -8,7 +8,6 @@ class MIXAL_PARSE_LIB_EXPORT Label
 public:
 	Label();
 	Label(const Symbol& symbol);
-	Label(const Symbol& symbol, LocalSymbolId id);
 
 	bool empty() const;
 	std::string_view name() const;
@@ -17,7 +16,6 @@ public:
 
 private:
 	Symbol symbol_;
-	LocalSymbolId id_;
 };
 
 } // namespace mixal_parse
@@ -32,13 +30,7 @@ inline Label::Label()
 }
 
 inline Label::Label(const Symbol& symbol)
-	: Label{symbol, k_invalid_local_symbol_id}
-{
-}
-
-inline Label::Label(const Symbol& symbol, LocalSymbolId id)
 	: symbol_{symbol}
-	, id_{id}
 {
 }
 
@@ -54,12 +46,12 @@ inline std::string_view Label::name() const
 
 inline LocalSymbolId Label::local_id() const
 {
-	return id_;
+	return symbol_.local_id();
 }
 
 inline bool Label::is_local_symbol() const
 {
-	return IsValidLocalSymbolId(id_);
+	return symbol_.is_local();
 }
 
 } // namespace mixal_parse

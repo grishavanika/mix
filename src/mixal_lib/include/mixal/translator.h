@@ -2,12 +2,17 @@
 #include <mixal/config.h>
 #include <mixal/types.h>
 
+#include <map>
+
 namespace mixal {
 
 class MIXAL_LIB_EXPORT Translator
 {
 public:
-	Translator(int current_address = 0);
+	using DefinedSymbols = std::map<Symbol, Word>;
+
+public:
+	Translator(const DefinedSymbols& symbols = {}, int current_address = 0);
 
 	Word evaluate(const Text& text) const;
 	Word evaluate(const Symbol& symbol) const;
@@ -29,8 +34,12 @@ public:
 	void set_current_address(int address);
 	int current_address() const;
 
+	void define_symbol(const Symbol& symbol, const Word& value);
+	const Word& defined_symbol(const Symbol& symbol) const;
+
 private:
 	int current_address_;
+	DefinedSymbols defined_symbols_;
 };
 
 } // namespace mixal

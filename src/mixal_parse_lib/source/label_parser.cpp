@@ -84,7 +84,7 @@ std::size_t LabelParser::do_parse_stream(std::string_view str, std::size_t offse
 		}
 	}
 
-	label_ = Label{Symbol{name}, local_id};
+	label_ = Label{Symbol{name, Symbol::Kind::Here, local_id}};
 	return index;
 }
 

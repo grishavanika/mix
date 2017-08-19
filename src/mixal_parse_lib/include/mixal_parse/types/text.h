@@ -8,6 +8,7 @@ namespace mixal_parse {
 class MIXAL_PARSE_LIB_EXPORT Text
 {
 public:
+	// Note: there is no validation of `str` to be correct MIX string
 	Text(const std::string_view& str);
 	Text(const char* str);
 
