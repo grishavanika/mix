@@ -9,7 +9,7 @@ class MIXAL_LIB_EXPORT Translator
 public:
 	Translator(int current_address = 0);
 
-	Word evaluate(const ALFText& str) const;
+	Word evaluate(const Text& text) const;
 	Word evaluate(const Symbol& symbol) const;
 	Word evaluate(const Number& n) const;
 	Word evaluate(const Expression& expr) const;
@@ -23,7 +23,7 @@ public:
 	void translate_EQU(const WValue& value, const Label& label = {});
 	void translate_ORIG(const WValue& address, const Label& label = {});
 	void translate_CON(const WValue& address, const Label& label = {});
-	void translate_ALF(const ALFText& str, const Label& label = {});
+	void translate_ALF(const Text& text, const Label& label = {});
 	void translate_END(const WValue& address, const Label& label = {});
 
 	void set_current_address(int address);

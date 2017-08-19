@@ -1,6 +1,6 @@
 #pragma once
 #include <mixal_parse/parser_base.h>
-#include <mixal_parse/operation.h>
+#include <mixal_parse/types/operation.h>
 
 namespace mixal_parse {
 

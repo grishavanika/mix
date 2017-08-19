@@ -1,6 +1,6 @@
 #pragma once
 #include <mixal_parse/parser_base.h>
-#include <mixal_parse/expression.h>
+#include <mixal_parse/types/expression.h>
 
 #include <core/optional.h>
 

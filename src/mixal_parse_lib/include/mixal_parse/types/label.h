@@ -1,5 +1,5 @@
 #pragma once
-#include <mixal_parse/symbol.h>
+#include <mixal_parse/types/symbol.h>
 
 namespace mixal_parse {
 
