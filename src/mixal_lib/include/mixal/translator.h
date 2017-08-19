@@ -16,7 +16,7 @@ public:
 	Word evaluate(const WValue& wvalue) const;
 
 	FutureWord translate_MIX(
-		OperationId command,
+		Operation command,
 		const APart& A, const IPart& I, const FPart& F,
 		const Label& label = {});
 
@@ -27,7 +27,7 @@ public:
 	void translate_END(const WValue& address, const Label& label = {});
 
 	void set_current_address(int address);
-	int current_address(int address) const;
+	int current_address() const;
 
 private:
 	int current_address_;
