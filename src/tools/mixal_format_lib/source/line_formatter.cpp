@@ -65,7 +65,7 @@ std::string BuildLine(const LineParser& line_parser, const FormatOptions& option
 	}
 	else
 	{
-		stream << '"' << *line_parser.address()->mixal()->alf_text << '"';
+		stream << '"' << line_parser.address()->mixal()->alf_text->data() << '"';
 	}
 
 	if (line_parser.has_inline_comment())

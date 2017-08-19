@@ -9,6 +9,7 @@ namespace mixal_parse {
 struct ExpressionToken
 {
 	std::optional<UnaryOperation> unary_op;
+	// #TODO: `BasicExpression` class that is Number | Symbol | *
 	BasicExpression basic_expr;
 	std::optional<BinaryOperation> binary_op;
 };

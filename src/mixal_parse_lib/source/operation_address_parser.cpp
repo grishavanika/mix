@@ -23,7 +23,7 @@ bool ALFStartsWithTwoSpaces(const std::string_view& str, std::size_t offset)
 		std::isspace(str[offset + 1]);
 }
 
-bool IsValidALFText(const std::string_view& /*alf_text*/)
+bool IsValidALFText(const Text& /*alf_text*/)
 {
 	// #TODO: implement validation
 	return true;

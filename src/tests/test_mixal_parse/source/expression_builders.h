@@ -1,6 +1,7 @@
 #pragma once
 #include <mixal_parse/parsers_utils.h>
 #include <mixal_parse/expression.h>
+#include <mixal_parse/types/text.h>
 
 namespace mixal_parse {
 
@@ -103,9 +104,9 @@ inline WTokenBuilder WToken()
 struct MIXALOpBuilder
 {
 	std::optional<WValue> w_value;
-	std::optional<std::string_view> alf_text;
+	std::optional<Text> alf_text;
 
-	MIXALOpBuilder& ALF_text_is(const std::string_view& text)
+	MIXALOpBuilder& ALF_text_is(const Text& text)
 	{
 		assert(!alf_text);
 		alf_text = text;

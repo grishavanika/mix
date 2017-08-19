@@ -5,6 +5,7 @@
 #include <mixal_parse/index_parser.h>
 #include <mixal_parse/field_parser.h>
 #include <mixal_parse/w_value_parser.h>
+#include <mixal_parse/types/text.h>
 
 namespace mixal_parse {
 
@@ -18,7 +19,7 @@ struct MIXOpParser
 struct MIXALOpParser
 {
 	std::optional<WValueParser> w_value_parser;
-	std::optional<std::string_view> alf_text;
+	std::optional<Text> alf_text;
 };
 
 // Operation-dependent parsing of MIXAL ADDRESS column
