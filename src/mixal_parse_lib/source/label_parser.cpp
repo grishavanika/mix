@@ -2,50 +2,16 @@
 
 #include <core/string.h>
 
-#include <sstream>
-
-#include <cassert>
 #include <cctype>
 
 using namespace mixal_parse;
 
 namespace {
 
-const char k_local_symbol_label_suffix = 'H';
-const std::string_view k_local_symbols = "BHF";
-
-bool IsLocalSymbol(const std::string_view& str)
+bool IsAllowedLabelLocalSymbol(const Symbol& s)
 {
-	assert(!str.empty());
-
-	if (k_local_symbols.find(str.back()) != std::string_view::npos)
-	{
-		return IsNumber(str.substr(0, str.size() - 1));
-	}
-
-	return false;
-}
-
-LocalSymbolId ParseLocalSymbol(const std::string_view& str)
-{
-	assert(IsLocalSymbol(str));
-
-	std::stringstream in;
-	in << str.substr(0, str.size() - 1);
-	LocalSymbolId n = k_invalid_local_symbol_id;
-	in >> n;
-	assert(in);
-
-	return n;
-}
-
-bool IsAllowedLabelLocalSymbol(const std::string_view& str)
-{
-	if (IsLocalSymbol(str))
-	{
-		return (str.back() == k_local_symbol_label_suffix);
-	}
-	return false;
+	return (s.kind() == LocalSymbolKind::Here) ||
+		(s.kind() == LocalSymbolKind::Usual);
 }
 
 } // namespace
@@ -74,28 +40,15 @@ std::size_t LabelParser::do_parse_stream(std::string_view str, std::size_t offse
 		return InvalidStreamPosition();
 	}
 
-	LocalSymbolId local_id = k_invalid_local_symbol_id;
-	if (IsLocalSymbol(name))
+	const auto symbol = Symbol::FromString(name);
+	if (!symbol.is_valid() ||
+		!IsAllowedLabelLocalSymbol(symbol))
 	{
-		local_id = parse_local_symbol(name);
-		if (!IsValidLocalSymbolId(local_id))
-		{
-			return InvalidStreamPosition();
-		}
+		return InvalidStreamPosition();
 	}
 
-	label_ = Label{Symbol{name, Symbol::Kind::Here, local_id}};
+	label_ = symbol;
 	return index;
-}
-
-LocalSymbolId LabelParser::parse_local_symbol(const std::string_view& str)
-{
-	if (!IsAllowedLabelLocalSymbol(str))
-	{
-		return k_invalid_local_symbol_id;
-	}
-
-	return ParseLocalSymbol(str);
 }
 
 void LabelParser::do_clear()

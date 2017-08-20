@@ -115,7 +115,7 @@ TEST_F(ExpressionParserTest, Parses_As_Much_As_Possible_Of_Valid_Expression_When
 	
 	parse(too_long_symbol);
 
-	tokens_are(Token(symbol));
+	tokens_are(Token(std::string_view{symbol}));
 
 	reminder_stream_is(symbol);
 }

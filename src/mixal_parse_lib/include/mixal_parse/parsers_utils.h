@@ -7,8 +7,17 @@ namespace mixal_parse {
 
 using UnaryOperation = std::string_view;
 using BinaryOperation = std::string_view;
-using BasicExpression = std::string_view;
+
 using LocalSymbolId = int;
+
+enum class LocalSymbolKind
+{
+	Unknown		= -1,
+	Usual		= 0,
+	Here		= 'H',
+	Forward		= 'F',
+	Backward	= 'B',
+};
 
 MIXAL_PARSE_LIB_EXPORT
 extern const std::size_t k_max_symbol_length;
@@ -75,6 +84,15 @@ bool IsCompletedBasicExpression(const std::string_view& str);
 
 MIXAL_PARSE_LIB_EXPORT
 bool IsValidLocalSymbolId(LocalSymbolId id);
+
+MIXAL_PARSE_LIB_EXPORT
+bool IsLocalSymbol(const std::string_view& str);
+
+MIXAL_PARSE_LIB_EXPORT
+LocalSymbolKind ParseLocalSymbolKind(const std::string_view& str);
+
+MIXAL_PARSE_LIB_EXPORT
+LocalSymbolId ParseLocalSymbolId(const std::string_view& str);
 
 // Both functions return position of first non-space character or `str.size()` otherwice
 MIXAL_PARSE_LIB_EXPORT

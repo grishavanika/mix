@@ -14,7 +14,7 @@ namespace
 
 bool IsValid(const ExpressionToken& token)
 {
-	return !token.basic_expr.empty();
+	return token.basic_expr.is_valid();
 }
 
 bool IsValid(const Expression& expr)

@@ -14,8 +14,6 @@ private:
 	virtual std::size_t do_parse_stream(std::string_view str, std::size_t offset) override;
 	virtual void do_clear() override;
 
-	LocalSymbolId parse_local_symbol(const std::string_view& str);
-
 private:
 	Label label_;
 };

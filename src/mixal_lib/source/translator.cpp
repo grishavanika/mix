@@ -121,6 +121,7 @@ void Translator::define_symbol(const Symbol& symbol, const Word& value)
 
 const Word& Translator::defined_symbol(const Symbol& symbol) const
 {
+	// #TODO: `Kind::Here` CAN NOT be queried
 	assert(!symbol.is_local());
 
 	auto it = defined_symbols_.find(symbol);
@@ -131,3 +132,5 @@ const Word& Translator::defined_symbol(const Symbol& symbol) const
 
 	return it->second;
 }
+
+

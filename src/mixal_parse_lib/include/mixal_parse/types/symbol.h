@@ -6,31 +6,24 @@ namespace mixal_parse {
 class MIXAL_PARSE_LIB_EXPORT Symbol
 {
 public:
-	enum class Kind
-	{
-		Usual,
-		Here,
-		Forward,
-		Backward,
-	};
-
-public:
 	Symbol();
 	Symbol(const std::string_view& name,
-		Kind kind = Kind::Usual,
+		LocalSymbolKind kind = LocalSymbolKind::Usual,
 		LocalSymbolId id = k_invalid_local_symbol_id);
+	
+	static Symbol FromString(const std::string_view& str);
 
 	bool is_valid() const;
 	std::string_view name() const;
 
-	Kind kind() const;
+	LocalSymbolKind kind() const;
 	bool is_local() const;
 
 	LocalSymbolId local_id() const;
 
 private:
 	std::string_view name_;
-	Kind kind_;
+	LocalSymbolKind kind_;
 	LocalSymbolId id_;
 };
 
@@ -49,7 +42,7 @@ inline Symbol::Symbol()
 }
 
 inline Symbol::Symbol(const std::string_view& name,
-	Kind kind /*= Kind::Usual*/,
+	LocalSymbolKind kind /*= LocalSymbolKind::Usual*/,
 	LocalSymbolId id /*= k_invalid_local_symbol_id*/)
 		: name_{name}
 		, kind_{kind}
@@ -67,19 +60,42 @@ inline std::string_view Symbol::name() const
 	return name_;
 }
 
-inline Symbol::Kind Symbol::kind() const
+inline LocalSymbolKind Symbol::kind() const
 {
 	return kind_;
 }
 
 inline bool Symbol::is_local() const
 {
-	return (kind_ != Kind::Usual);
+	return (kind_ != LocalSymbolKind::Usual);
 }
 
 inline LocalSymbolId Symbol::local_id() const
 {
 	return id_;
+}
+
+inline /*static*/ Symbol Symbol::FromString(const std::string_view& str)
+{
+	if (!IsSymbol(str))
+	{
+		return Symbol{};
+	}
+
+	if (!IsLocalSymbol(str))
+	{
+		return Symbol{str};
+	}
+
+	const auto kind = ParseLocalSymbolKind(str);
+	const auto id = ParseLocalSymbolId(str);
+	if ((kind == LocalSymbolKind::Unknown) ||
+		!IsValidLocalSymbolId(id))
+	{
+		return Symbol{};
+	}
+
+	return Symbol{str, kind, id};
 }
 
 inline bool operator==(const Symbol& lhs, const Symbol& rhs)

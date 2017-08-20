@@ -1,5 +1,6 @@
 #include <mixal_parse/parsers_utils.h>
 
+#include <sstream>
 #include <algorithm>
 
 #include <cctype>
@@ -24,6 +25,8 @@ extern const BinaryOperation k_binary_operations[] =
 };
 
 namespace {
+
+const std::string_view k_local_symbols = "BHF";
 
 bool IsCurrentAddressChar(char ch)
 {
@@ -226,6 +229,56 @@ std::size_t ExpectFirstNonWhiteSpaceChar(char ch, const std::string_view& str, s
 bool IsValidLocalSymbolId(LocalSymbolId id)
 {
 	return (id >= 0) && (id <= k_max_local_symbol_id);
+}
+
+bool IsLocalSymbol(const std::string_view& str)
+{
+	if (str.empty())
+	{
+		return false;
+	}
+
+	if (k_local_symbols.find(str.back()) != std::string_view::npos)
+	{
+		return IsNumber(str.substr(0, str.size() - 1));
+	}
+
+	return false;
+}
+
+LocalSymbolKind ParseLocalSymbolKind(const std::string_view& str)
+{
+	if (!IsLocalSymbol(str))
+	{
+		return LocalSymbolKind::Unknown;
+	}
+
+	switch (str.back())
+	{
+	case 'H': return LocalSymbolKind::Here;
+	case 'F': return LocalSymbolKind::Forward;
+	case 'B': return LocalSymbolKind::Backward;
+	}
+
+	return LocalSymbolKind::Unknown;
+}
+
+LocalSymbolId ParseLocalSymbolId(const std::string_view& str)
+{
+	if (!IsLocalSymbol(str))
+	{
+		return k_invalid_local_symbol_id;
+	}
+
+	LocalSymbolId n = k_invalid_local_symbol_id;
+
+	// #TODO: C++17: `std::from_chars()`
+	std::stringstream in;
+	in << str.substr(0, str.size() - 1);
+	in >> n;
+
+	assert(in);
+	return n;
 }
 
 std::size_t InvalidStreamPosition()
