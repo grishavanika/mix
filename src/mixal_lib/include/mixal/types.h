@@ -8,6 +8,9 @@ namespace mixal {
 using Word				= mix::Word;
 
 using Expression		= mixal_parse::Expression;
+using ExpressionToken	= mixal_parse::ExpressionToken;
+using UnaryOperation	= mixal_parse::UnaryOperation;
+using BinaryOperation	= mixal_parse::BinaryOperation;
 using WValue			= mixal_parse::WValue;
 using OperationId		= mixal_parse::OperationId;
 using Text				= mixal_parse::Text;

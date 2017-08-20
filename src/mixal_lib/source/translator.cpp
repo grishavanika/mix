@@ -5,6 +5,109 @@
 
 using namespace mixal;
 
+namespace {
+
+template<typename Handler>
+struct NamedOperation
+{
+	const std::string_view op;
+	const Handler handler;
+};
+
+using UnaryOperationHandler = Word (*)(Word value);
+using BinaryOperationHandler = Word (*)(Word lhs, Word rhs);
+
+Word UnaryOperation_Minus(Word value)
+{
+	value.set_sign(mix::Sign::Negative);
+	return value;
+}
+
+Word UnaryOperation_Plus(Word value)
+{
+	value.set_sign(mix::Sign::Positive);
+	return value;
+}
+
+Word BinaryOperation_Plus(Word /*lhs*/, Word /*rhs*/)
+{
+	return Word{};
+}
+
+Word BinaryOperation_Minus(Word /*lhs*/, Word /*rhs*/)
+{
+	return Word{};
+}
+
+Word BinaryOperation_Multiply(Word /*lhs*/, Word /*rhs*/)
+{
+	return Word{};
+}
+
+Word BinaryOperation_Divide(Word /*lhs*/, Word /*rhs*/)
+{
+	return Word{};
+}
+
+Word BinaryOperation_Mod(Word /*lhs*/, Word /*rhs*/)
+{
+	return Word{};
+}
+
+Word BinaryOperation_Field(Word /*lhs*/, Word /*rhs*/)
+{
+	return Word{};
+}
+
+const NamedOperation<UnaryOperationHandler> k_unary_operations[] =
+{
+	{"-", &UnaryOperation_Minus},
+	{"+", &UnaryOperation_Plus},
+};
+
+const NamedOperation<BinaryOperationHandler> k_binary_operations[] =
+{
+	{"-", &BinaryOperation_Minus},
+	{"+", &BinaryOperation_Plus},
+	{"*", &BinaryOperation_Multiply},
+	{"/", &BinaryOperation_Divide},
+	{"//", &BinaryOperation_Mod},
+	{":", &BinaryOperation_Field},
+};
+
+Word CalculateOptionalUnaryOperation(const std::optional<UnaryOperation>& op, Word value)
+{
+	if (!op)
+	{
+		return value;
+	}
+
+	for (auto op_handler : k_unary_operations)
+	{
+		if (op_handler.op == *op)
+		{
+			return op_handler.handler(std::move(value));
+		}
+	}
+
+	throw UnknownUnaryOperation{*op};
+}
+
+Word CalculateBinaryOperation(const BinaryOperation& op, Word lhs, Word rhs)
+{
+	for (auto op_handler : k_binary_operations)
+	{
+		if (op_handler.op == op)
+		{
+			return op_handler.handler(std::move(lhs), std::move(rhs));
+		}
+	}
+
+	throw UnknownBinaryOperation{op};
+}
+
+} // namespace
+
 Translator::Translator(const DefinedSymbols& symbols /*= {}*/, int current_address /*= 0*/)
 	: current_address_{current_address}
 	, defined_symbols_{symbols}
@@ -60,9 +163,30 @@ Word Translator::evaluate(const WValue& /*wvalue*/) const
 	return Word{};
 }
 
-Word Translator::evaluate(const Expression& /*expr*/) const
+Word Translator::evaluate(const Expression& expr) const
 {
-	return Word{};
+	assert(!expr.tokens.empty());
+
+	auto left_token = expr.tokens[0];
+	auto value = CalculateOptionalUnaryOperation(
+		left_token.unary_op, evaluate(left_token.basic_expr));
+
+	for (std::size_t i = 1, count = expr.tokens.size(); i < count; ++i)
+	{
+		auto right_token = expr.tokens[i];
+
+		assert(left_token.binary_op);
+		assert(!right_token.unary_op);
+
+		value = CalculateBinaryOperation(
+			*left_token.binary_op, std::move(value), evaluate(right_token.basic_expr));
+
+		left_token = right_token;
+	}
+
+	assert(!left_token.binary_op);
+
+	return value;
 }
 
 Word Translator::evaluate(const Number& n) const

@@ -52,5 +52,26 @@ public:
 	}
 };
 
+class UnknownUnaryOperation :
+	public MixalError
+{
+public:
+	UnknownUnaryOperation(const UnaryOperation& /*op*/)
+		: MixalError{"UnknownUnaryOperation"}
+	{
+	}
+};
+
+class UnknownBinaryOperation :
+	public MixalError
+{
+public:
+	UnknownBinaryOperation(const BinaryOperation& /*op*/)
+		: MixalError{"UnknownBinaryOperation"}
+	{
+	}
+};
+
+
 } // namespace mixal
 
