@@ -35,6 +35,26 @@ Word Translator::evaluate(const Text& text) const
 	return Word{std::move(bytes)};
 }
 
+Word Translator::evaluate(const BasicExpression& expr) const
+{
+	if (expr.is_current_address())
+	{
+		return Word{current_address_};
+	}
+	else if (expr.is_number())
+	{
+		return evaluate(expr.as_number());
+	}
+	else if (expr.is_symbol())
+	{
+		return evaluate(expr.as_symbol());
+	}
+
+	// #TODO: add UNREACHABLE() or similar macro
+	assert(false);
+	return Word{};
+}
+
 Word Translator::evaluate(const WValue& /*wvalue*/) const
 {
 	return Word{};

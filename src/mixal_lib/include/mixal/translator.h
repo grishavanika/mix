@@ -17,6 +17,7 @@ public:
 	Word evaluate(const Text& text) const;
 	Word evaluate(const Symbol& symbol) const;
 	Word evaluate(const Number& n) const;
+	Word evaluate(const BasicExpression& expr) const;
 	Word evaluate(const Expression& expr) const;
 	Word evaluate(const WValue& wvalue) const;
 

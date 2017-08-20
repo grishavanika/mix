@@ -5,16 +5,17 @@
 
 namespace mixal {
 
-using Word			= mix::Word;
+using Word				= mix::Word;
 
-using Expression	= mixal_parse::Expression;
-using WValue		= mixal_parse::WValue;
-using OperationId	= mixal_parse::OperationId;
-using Text			= mixal_parse::Text;
-using Label			= mixal_parse::Label;
-using Symbol		= mixal_parse::Symbol;
-using Number		= mixal_parse::Number;
-using Operation		= mixal_parse::Operation;
+using Expression		= mixal_parse::Expression;
+using WValue			= mixal_parse::WValue;
+using OperationId		= mixal_parse::OperationId;
+using Text				= mixal_parse::Text;
+using Label				= mixal_parse::Label;
+using Symbol			= mixal_parse::Symbol;
+using Number			= mixal_parse::Number;
+using Operation			= mixal_parse::Operation;
+using BasicExpression	= mixal_parse::BasicExpression;
 
 class FutureWord
 {
