@@ -5,10 +5,13 @@
 
 #include <mix/exceptions.h>
 #include <mix/char_table.h>
+#include <mix/computer.h>
 
 #include <core/utils.h>
 
 #include <gtest/gtest.h>
+
+#include "commands_factory.h"
 
 using namespace mixal;
 using namespace mixal_parse;
@@ -115,4 +118,160 @@ TEST_F(ExpressionEvaluateTest, Too_Big_Binary_Plus_Result_Throws_TooBigWorldValu
 	}, mix::TooBigWorldValue);
 }
 
+TEST_F(ExpressionEvaluateTest, Binary_Plus_Result_Is_The_Same_As_Knuth_Specification)
+{
+	mix::Computer computer;
+	const int AA = 100;
+	const int BB = 1000;
+	const int CC = 2000;
+
+	const mix::Command k_add_code[] =
+	{
+		mix::MakeLDA(AA),
+		mix::MakeADD(BB),
+		mix::MakeSTA(CC),
+	};
+	computer.set_memory(AA, -1);
+	computer.set_memory(BB, 5);
+
+	for (const auto& command : k_add_code)
+	{
+		computer.execute(command);
+	}
+
+	expression_is(computer.memory(CC), "-1 + 5");
+}
+
+TEST_F(ExpressionEvaluateTest, Binary_Minus_Result_Is_The_Same_As_Knuth_Specification)
+{
+	mix::Computer computer;
+	const int AA = 100;
+	const int BB = 1000;
+	const int CC = 2000;
+
+	const mix::Command k_sub_code[] =
+	{
+		mix::MakeLDA(AA),
+		mix::MakeSUB(BB),
+		mix::MakeSTA(CC),
+	};
+	computer.set_memory(AA, 100);
+	computer.set_memory(BB, 3);
+
+	for (const auto& command : k_sub_code)
+	{
+		computer.execute(command);
+	}
+
+	translator_.set_current_address(100);
+	expression_is(computer.memory(CC), "* - 3");
+}
+
+TEST_F(ExpressionEvaluateTest, Binary_Multiply_Result_Is_The_Same_As_Knuth_Specification)
+{
+	mix::Computer computer;
+	const int AA = 100;
+	const int BB = 1000;
+	const int CC = 2000;
+
+	const mix::Command k_mul_code[] =
+	{
+		mix::MakeLDA(AA),
+		mix::MakeMUL(BB),
+		mix::MakeSTX(CC),
+	};
+	computer.set_memory(AA, 10);
+	computer.set_memory(BB, 10);
+
+	for (const auto& command : k_mul_code)
+	{
+		computer.execute(command);
+	}
+
+	translator_.set_current_address(10);
+	expression_is(computer.memory(CC), "***");
+}
+
+TEST_F(ExpressionEvaluateTest, Binary_Divide_Result_Is_The_Same_As_Knuth_Specification)
+{
+	mix::Computer computer;
+	const int AA = 100;
+	const int BB = 1000;
+	const int CC = 2000;
+
+	const mix::Command k_mul_code[] =
+	{
+		mix::MakeLDA(AA),
+		mix::MakeSRAX(5),
+		mix::MakeDIV(BB),
+		mix::MakeSTA(CC),
+	};
+	computer.set_memory(AA, -42);
+	computer.set_memory(BB, 3);
+
+	for (const auto& command : k_mul_code)
+	{
+		computer.execute(command);
+	}
+
+	expression_is(computer.memory(CC), "-42 / 3");
+}
+
+TEST_F(ExpressionEvaluateTest, Binary_DoubleDivide_Result_Is_The_Same_As_Knuth_Specification)
+{
+	mix::Computer computer;
+	const int AA = 100;
+	const int BB = 1000;
+	const int CC = 2000;
+
+	const mix::Command k_mul_code[] =
+	{
+		mix::MakeLDA(AA),
+		mix::MakeENTX(0),
+		mix::MakeDIV(BB),
+		mix::MakeSTA(CC),
+	};
+	computer.set_memory(AA, 1);
+	computer.set_memory(BB, 3);
+
+	for (const auto& command : k_mul_code)
+	{
+		computer.execute(command);
+	}
+
+	expression_is(computer.memory(CC), "1 // 3");
+}
+
+TEST_F(ExpressionEvaluateTest, Binary_Field_Result_Is_The_Same_As_Knuth_Specification)
+{
+	mix::Computer computer;
+	const int AA = 100;
+	const int BB = 1000;
+	const int CC = 2000;
+	const int KK = 700;
+
+	const mix::Command k_mul_code[] =
+	{
+		mix::MakeLDA(AA),
+		mix::MakeMUL(KK),
+		mix::MakeSLAX(5),
+		mix::MakeADD(BB),
+		mix::MakeSTA(CC),
+	};
+	computer.set_memory(AA, 1);
+	computer.set_memory(BB, 3);
+	computer.set_memory(KK, 8);
+
+	for (const auto& command : k_mul_code)
+	{
+		computer.execute(command);
+	}
+
+	expression_is(computer.memory(CC), "1 : 3");
+}
+
+TEST_F(ExpressionEvaluateTest, Operations_Are_Evaluated_From_Left_To_Right_Without_Priorities)
+{
+	expression_is(13, "-1 + 5 * 20 / 6");
+}
 
