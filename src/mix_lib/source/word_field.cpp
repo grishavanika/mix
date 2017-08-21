@@ -50,6 +50,17 @@ std::size_t WordField::right_byte_index() const
 	return right_;
 }
 
+std::size_t WordField::left() const
+{
+	return left_;
+}
+
+std::size_t WordField::right() const
+{
+	return right_;
+}
+
+
 std::size_t WordField::bytes_count() const
 {
 	assert(right_ >= left_);

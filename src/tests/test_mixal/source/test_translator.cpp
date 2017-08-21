@@ -2,6 +2,7 @@
 #include <mixal/exceptions.h>
 
 #include <mixal_parse/expression_parser.h>
+#include <mixal_parse/w_value_parser.h>
 
 #include <mix/exceptions.h>
 #include <mix/char_table.h>
@@ -31,6 +32,16 @@ protected:
 			<< "Failed to parse `" << expr_str << "` expression";
 		
 		ASSERT_EQ(value, translator_.evaluate(parser.expression()));
+	}
+
+	void wvalue_is(Word value, const char* expr_str)
+	{
+		WValueParser parser;
+		const auto pos = parser.parse_stream(expr_str);
+		ASSERT_FALSE(IsInvalidStreamPosition(pos))
+			<< "Failed to parse `" << expr_str << "` W-value";
+
+		ASSERT_EQ(value, translator_.evaluate(parser.value()));
 	}
 
 protected:
@@ -311,4 +322,35 @@ TEST_F(ExpressionEvaluateTest, Division_By_Zero_Throws_DivisionByZero)
 		expression_is({}, "1 // Y");
 	}, DivisionByZero);
 }
+
+TEST_F(ExpressionEvaluateTest, WValue_With_Single_Expression_Is_The_Same_Expression)
+{
+	wvalue_is(1, "1");
+}
+
+TEST_F(ExpressionEvaluateTest, WValue_With_Comma_Accumulates_Value_With_Field_To_Final_Value)
+{
+	Word result;
+	result.set_value(-1000, WordField{0, 2});
+	result.set_value(1, WordField{3, 5}, false/*do not touch sign*/);
+
+	wvalue_is(result, "1,-1000(0:2)");
+}
+
+TEST_F(ExpressionEvaluateTest, WValue_Lates_Field_With_Maximum_Value_Overwrites_Previous_Result)
+{
+	wvalue_is(1, "-1000(0:2),1");
+}
+
+TEST_F(ExpressionEvaluateTest, WValue_With_Too_Big_Field_For_Single_Word_Throws_InvalidWValueField)
+{
+	ASSERT_THROW({
+		wvalue_is({}, "1 (1:42)");
+	}, InvalidWValueField);
+
+	ASSERT_THROW({
+		wvalue_is({}, "1 (6:7)");
+	}, InvalidWValueField);
+}
+
 

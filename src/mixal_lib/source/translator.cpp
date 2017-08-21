@@ -11,17 +11,6 @@ using namespace mixal;
 
 namespace {
 
-bool IsZero(const Word& value)
-{
-	return (value.abs_value() == 0);
-}
-
-bool IsNegativeZero(const Word& value)
-{
-	return (value.sign() == mix::Sign::Negative) &&
-		IsZero(value);
-}
-
 template<typename Handler>
 struct NamedOperation
 {
@@ -47,7 +36,7 @@ Word BinaryOperation_Plus(Word lhs, Word rhs)
 {
 	using namespace mix;
 
-	if (IsNegativeZero(lhs) && IsZero(rhs))
+	if (Word::IsNegativeZero(lhs) && Word::IsZero(rhs))
 	{
 		// -0 +  0	== -0
 		// -0 + -0	== -0
@@ -61,7 +50,7 @@ Word BinaryOperation_Minus(Word lhs, Word rhs)
 {
 	using namespace mix;
 
-	if (IsNegativeZero(lhs) && IsZero(rhs))
+	if (Word::IsNegativeZero(lhs) && Word::IsZero(rhs))
 	{
 		// -0 -  0	== -0
 		// -0 - -0	== -0
@@ -78,7 +67,7 @@ Word BinaryOperation_Multiply(Word lhs, Word rhs)
 
 Word BinaryOperation_Divide(Word lhs, Word rhs)
 {
-	if (IsZero(rhs))
+	if (Word::IsZero(rhs))
 	{
 		throw DivisionByZero{};
 	}
@@ -90,7 +79,7 @@ Word BinaryOperation_DoubleDivide(Word lhs, Word rhs)
 {
 	using namespace mix;
 
-	if (IsZero(rhs))
+	if (Word::IsZero(rhs))
 	{
 		throw DivisionByZero{};
 	}
@@ -215,9 +204,42 @@ Word Translator::evaluate(const BasicExpression& expr) const
 	return {};
 }
 
-Word Translator::evaluate(const WValue& /*wvalue*/) const
+Word Translator::evaluate(const WValue& wvalue) const
 {
-	return {};
+	assert(!wvalue.tokens.empty());
+
+	Word value;
+	for (const auto& token : wvalue.tokens)
+	{
+		const auto part = evaluate(token.expression);
+		const auto field = evaluate_wvalue_field(token.field);
+		
+		// Note: part of `CommandProcessor::do_store()` implementation
+		const bool take_value_sign = field.includes_sign();
+		value.set_value(
+			part.value(field.shift_bytes_right(), take_value_sign),
+			field,
+			false/*do not overwrite sign*/);
+	}
+
+	return value;
+}
+
+WordField Translator::evaluate_wvalue_field(const std::optional<Expression>& field_expr) const
+{
+	WordField field{0, Word::k_bytes_count};
+	if (field_expr)
+	{
+		const auto value = evaluate(*field_expr).value();
+		field = WordField::FromByte(int{value});
+	}
+
+	if ((field.left() > Word::k_bytes_count) ||
+		(field.right() > Word::k_bytes_count))
+	{
+		throw InvalidWValueField{};
+	}
+	return field;
 }
 
 Word Translator::evaluate(const Expression& expr) const

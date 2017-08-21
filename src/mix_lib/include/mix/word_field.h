@@ -24,6 +24,9 @@ public:
 
 	std::size_t bytes_count() const;
 
+	std::size_t left() const;
+	std::size_t right() const;
+
 	WordField shift_bytes_right() const;
 
 private:

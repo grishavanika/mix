@@ -51,6 +51,8 @@ public:
 
 	static WordField MaxField();
 	static WordField MaxFieldWithoutSign();
+	static bool IsZero(const Word& value);
+	static bool IsNegativeZero(const Word& value);
 
 private:
 	void set_value(std::size_t value, Sign sign, const WordField& field, bool owerwrite_sign);

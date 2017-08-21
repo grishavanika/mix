@@ -32,6 +32,17 @@ int SignToInt(Sign sign)
 	return WordField{1, k_bytes_count};
 }
 
+/*static*/ bool Word::IsZero(const Word& value)
+{
+	return (value.abs_value() == 0);
+}
+
+/*static*/ bool Word::IsNegativeZero(const Word& value)
+{
+	return (value.sign() == mix::Sign::Negative) &&
+		IsZero(value);
+}
+
 Word::Word()
 	: bytes_()
 	, sign_{Sign::Positive}

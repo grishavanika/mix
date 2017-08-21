@@ -83,5 +83,15 @@ public:
 	}
 };
 
+class InvalidWValueField :
+	public MixalException
+{
+public:
+	InvalidWValueField()
+		: MixalException{"invalid W-value field"}
+	{
+	}
+};
+
 } // namespace mixal
 

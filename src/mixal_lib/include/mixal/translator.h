@@ -39,6 +39,9 @@ public:
 	const Word& defined_symbol(const Symbol& symbol) const;
 
 private:
+	WordField evaluate_wvalue_field(const std::optional<Expression>& field_expr) const;
+
+private:
 	int current_address_;
 	DefinedSymbols defined_symbols_;
 };
