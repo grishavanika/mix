@@ -484,7 +484,7 @@ void CommandProcessor::enta_group(const Command& command)
 		ra = do_enter_negative(value, command);
 		break;
 	default:
-		throw std::logic_error{"ENTA* command has unknown field"};
+		throw UnknownCommandField{};
 	}
 
 	mix_.set_ra(std::move(ra));
@@ -509,7 +509,7 @@ void CommandProcessor::entx_group(const Command& command)
 		rx = do_enter_negative(value, command);
 		break;
 	default:
-		throw std::logic_error{"ENTX* command has unknown field"};
+		throw UnknownCommandField{};
 	}
 
 	mix_.set_rx(std::move(rx));
@@ -536,7 +536,7 @@ void CommandProcessor::enti_group(std::size_t index, const Command& command)
 		result = do_enter_negative(value, command);
 		break;
 	default:
-		throw std::logic_error{"ENTI* command has unknown field"};
+		throw UnknownCommandField{};
 	}
 
 	mix_.set_ri(index, IndexRegister{result});
@@ -676,7 +676,7 @@ void CommandProcessor::jmp_flags_group(const Command& command)
 			(comparison_flag == ComparisonIndicator::Equal));
 		break;
 	default:
-		throw std::logic_error{"JMP* (flags) command has unknown field"};
+		throw UnknownCommandField{};
 	};
 
 	if (do_jump)
@@ -710,7 +710,7 @@ void CommandProcessor::do_jump(const Register& r, const Command& command)
 		do_jump = (value <= 0);
 		break;
 	default:
-		throw std::logic_error{"JMP* (values) command has unknown field"};
+		throw UnknownCommandField{};
 	}
 
 	if (do_jump)
@@ -786,7 +786,7 @@ void CommandProcessor::shift_group(const Command& command)
 		rax_shift(-shift, true/*cyclic*/);
 		break;
 	default:
-		throw std::logic_error{"SHIFT commands has unknown field"};
+		throw UnknownCommandField{};
 	}
 }
 
@@ -843,7 +843,7 @@ void CommandProcessor::convert_or_halt_group(const Command& command)
 		mix_.halt();
 		break;
 	default:
-		throw std::logic_error{"NUM/CHAR/HLT commands has unknown field"};
+		throw UnknownCommandField{};
 	}
 }
 

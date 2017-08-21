@@ -1,7 +1,8 @@
 #pragma once
+#include <mix/exceptions.h>
+
 #include <core/type_utils.h>
 
-#include <stdexcept>
 #include <ostream>
 
 #include <climits>
@@ -53,7 +54,7 @@ public:
 	{
 		if (!CanHoldValue(value))
 		{
-			throw std::overflow_error{"Byte overflow"};
+			throw ByteOverflow{};
 		}
 		value_ = static_cast<NarrowType>(value);
 	}
@@ -107,10 +108,6 @@ inline std::ostream& operator<<(std::ostream& o, const Byte& b)
 	o << +b.value();
 	return o;
 }
-
-// #TODO: std::numeric_limits<> specialization
-
-
 
 } // namespace mix
 

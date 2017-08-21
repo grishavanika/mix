@@ -5,79 +5,80 @@
 
 namespace mixal {
 
-class MixalError :
+class MixalException :
 	public std::logic_error
 {
 public:
-	using std::logic_error::logic_error;
+	using Base = std::logic_error;
+	using Base::Base;
 };
 
 class TooBigWordValueError :
-	public MixalError
+	public MixalException
 {
 public:
 	TooBigWordValueError(const Number& /*n*/)
-		: MixalError{"TooBigWordValueError"}
+		: MixalException{"too big word value"}
 	{
 	}
 };
 
 class InvalidALFText :
-	public MixalError
+	public MixalException
 {
 public:
 	InvalidALFText(const Text& /*text*/)
-		: MixalError{"InvalidALFText"}
+		: MixalException{"invalid ALF text"}
 	{
 	}
 };
 
-class SymbolAlreadyDefinedError :
-	public MixalError
+class DuplicateSymbolDefinitionError :
+	public MixalException
 {
 public:
-	SymbolAlreadyDefinedError(const Symbol& /*symbol*/, const Word& /*value*/)
-		: MixalError{"SymbolAlreadyDefinedError"}
+	DuplicateSymbolDefinitionError(const Symbol& /*symbol*/, const Word& /*value*/)
+		: MixalException{"duplicate symbol definition"}
 	{
 	}
 };
 
-class SymbolIsNotDefinedError :
-	public MixalError
+class UndefinedSymbolError :
+	public MixalException
 {
 public:
-	SymbolIsNotDefinedError(const Symbol& /*symbol*/)
-		: MixalError{"SymbolIsNotDefinedError"}
+	UndefinedSymbolError(const Symbol& /*symbol*/)
+		: MixalException{"undefined symbol"}
 	{
 	}
 };
 
 class UnknownUnaryOperation :
-	public MixalError
+	public MixalException
 {
 public:
 	UnknownUnaryOperation(const UnaryOperation& /*op*/)
-		: MixalError{"UnknownUnaryOperation"}
+		: MixalException{"unknown unary operation"}
 	{
 	}
 };
 
 class UnknownBinaryOperation :
-	public MixalError
+	public MixalException
 {
 public:
 	UnknownBinaryOperation(const BinaryOperation& /*op*/)
-		: MixalError{"UnknownBinaryOperation"}
+		: MixalException{"unknown binary operation"}
 	{
 	}
 };
 
 class DivisionByZero :
-	public MixalError
+	public MixalException
 {
 public:
 	DivisionByZero()
-		: MixalError{"DivisionByZero"}
+		: MixalException{"division by zero"}
 	{
 	}
 };

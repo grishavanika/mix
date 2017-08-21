@@ -1,4 +1,5 @@
 #include <mix/word.h>
+#include <mix/exceptions.h>
 
 using namespace mix;
 
@@ -73,7 +74,7 @@ const Byte& Word::byte(std::size_t index) const
 {
 	if ((index == 0) || (index > bytes_.size()))
 	{
-		throw std::out_of_range{"Invalid byte's index for Word"};
+		throw InvalidWordByteIndex{index};
 	}
 	return bytes_[index - 1];
 }
@@ -89,17 +90,13 @@ void Word::set_value(WordValue value, const WordField& field, bool owerwrite_sig
 	const auto field_bytes = field.bytes_count();
 	if (field_bytes > k_bytes_count)
 	{
-		throw std::logic_error{
-			"Too big `Field` was specified. "
-			"Impossible to set to `Word`"};
+		throw TooBigWorldField{};
 	}
 
 	const auto field_bits = field_bytes * Byte::k_bits_count;
 	if (field_bits >= (sizeof(int) * CHAR_BIT))
 	{
-		throw std::logic_error{
-			"Too big `Field` was specified. "
-			"Impossible to set from `int`"};
+		throw TooBigWorldField{};
 	}
 
 	const std::size_t abs_value = static_cast<std::size_t>(std::abs(value));
@@ -109,9 +106,7 @@ void Word::set_value(WordValue value, const WordField& field, bool owerwrite_sig
 	if (!field.has_only_sign() &&
 		(max_int_for_field < abs_value))
 	{
-		throw std::logic_error{
-			"Too big `int` was specified. "
-			"Impossible to set to given `Field`"};
+		throw TooBigWorldValue{};
 	}
 
 	set_value(abs_value, value.sign(), field, field.includes_sign() || owerwrite_sign);

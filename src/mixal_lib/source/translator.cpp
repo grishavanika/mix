@@ -316,7 +316,7 @@ void Translator::define_symbol(const Symbol& symbol, const Word& value)
 	const bool inserted = it.second;
 	if (!inserted)
 	{
-		throw SymbolAlreadyDefinedError{symbol, value};
+		throw DuplicateSymbolDefinitionError{symbol, value};
 	}
 }
 
@@ -328,7 +328,7 @@ const Word& Translator::defined_symbol(const Symbol& symbol) const
 	auto it = defined_symbols_.find(symbol);
 	if (it == defined_symbols_.end())
 	{
-		throw SymbolIsNotDefinedError{symbol};
+		throw UndefinedSymbolError{symbol};
 	}
 
 	return it->second;

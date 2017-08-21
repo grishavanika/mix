@@ -65,7 +65,7 @@ void Computer::set_memory(int address, const Word& value)
 {
 	if ((address < 0) || (static_cast<std::size_t>(address) >= memory_.size()))
 	{
-		throw std::out_of_range{"Invalid memory address"};
+		throw InvalidMemoryAddressIndex{address};
 	}
 
 	memory_[static_cast<std::size_t>(address)] = value;
@@ -76,7 +76,7 @@ const Word& Computer::memory(int address) const
 {
 	if ((address < 0) || (address >= static_cast<int>(memory_.size())))
 	{
-		throw std::out_of_range{"Invalid Memory address"};
+		throw InvalidMemoryAddressIndex{address};
 	}
 
 	return memory_[static_cast<std::size_t>(address)];
@@ -86,7 +86,7 @@ const IndexRegister& Computer::ri(std::size_t index) const
 {
 	if ((index == 0) || (index > rindexes_.size()))
 	{
-		throw std::out_of_range{"Invalid IndexRegister"};
+		throw InvalidIndexRegister{index};
 	}
 	
 	return rindexes_[index - 1];
@@ -119,7 +119,7 @@ void Computer::set_ri(std::size_t index, const IndexRegister& ri)
 {
 	if ((index == 0) || (index > rindexes_.size()))
 	{
-		throw std::out_of_range{"Invalid IndexRegister"};
+		throw InvalidIndexRegister{index};
 	}
 
 	rindexes_[index - 1] = ri;
