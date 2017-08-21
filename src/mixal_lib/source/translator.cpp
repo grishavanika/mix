@@ -1,158 +1,11 @@
 #include <mixal/translator.h>
 #include <mixal/exceptions.h>
+#include <mixal/operations_calculator.h>
 
 #include <mix/char_table.h>
 #include <mix/word_field.h>
 
 using namespace mixal;
-
-////////////////////////////////////////////////////////////////////////////////
-// #TODO: handle more cleanly overflow/underflow
-
-namespace {
-
-template<typename Handler>
-struct NamedOperation
-{
-	const std::string_view op;
-	const Handler handler;
-};
-
-using UnaryOperationHandler = Word (*)(Word value);
-using BinaryOperationHandler = Word (*)(Word lhs, Word rhs);
-
-Word UnaryOperation_Minus(Word value)
-{
-	value.set_sign(mix::Sign::Negative);
-	return value;
-}
-
-Word UnaryOperation_Plus(Word value)
-{
-	return value;
-}
-
-Word BinaryOperation_Plus(Word lhs, Word rhs)
-{
-	using namespace mix;
-
-	if (Word::IsNegativeZero(lhs) && Word::IsZero(rhs))
-	{
-		// -0 +  0	== -0
-		// -0 + -0	== -0
-		// Note: 0 + -0	== 0
-		return WordValue{Sign::Negative, 0};
-	}
-	return lhs.value() + rhs.value();
-}
-
-Word BinaryOperation_Minus(Word lhs, Word rhs)
-{
-	using namespace mix;
-
-	if (Word::IsNegativeZero(lhs) && Word::IsZero(rhs))
-	{
-		// -0 -  0	== -0
-		// -0 - -0	== -0
-		// Note: 0 - -0	== 0
-		return WordValue{Sign::Negative, 0};
-	}
-	return lhs.value() - rhs.value();
-}
-
-Word BinaryOperation_Multiply(Word lhs, Word rhs)
-{
-	return lhs.value() * rhs.value();
-}
-
-Word BinaryOperation_Divide(Word lhs, Word rhs)
-{
-	if (Word::IsZero(rhs))
-	{
-		throw DivisionByZero{};
-	}
-
-	return lhs.value() / rhs.value();
-}
-
-Word BinaryOperation_DoubleDivide(Word lhs, Word rhs)
-{
-	using namespace mix;
-
-	if (Word::IsZero(rhs))
-	{
-		throw DivisionByZero{};
-	}
-
-	std::uint64_t v = lhs.abs_value();
-	v <<= Word::k_bits_count;
-	const auto abs_result = v / rhs.abs_value();
-	const auto sign = (lhs.sign() == rhs.sign()) ? Sign::Positive : Sign::Negative;
-	
-	return WordValue{sign, static_cast<int>(abs_result)};
-}
-
-Word BinaryOperation_Field(Word lhs, Word rhs)
-{
-	// Note: in theory, we can use `mix::WordField` to do calculations below
-	// (to avoid duplications), but since values can be negative - this will not
-	// work (because `WordField` works with non-negative values only)
-	return 8 * lhs.value() + rhs.value();
-}
-
-const NamedOperation<UnaryOperationHandler> k_unary_operations[] =
-{
-	{"-", &UnaryOperation_Minus},
-	{"+", &UnaryOperation_Plus},
-};
-
-const NamedOperation<BinaryOperationHandler> k_binary_operations[] =
-{
-	{"-", &BinaryOperation_Minus},
-	{"+", &BinaryOperation_Plus},
-	{"*", &BinaryOperation_Multiply},
-	{"/", &BinaryOperation_Divide},
-	{"//", &BinaryOperation_DoubleDivide},
-	{":", &BinaryOperation_Field},
-};
-
-Word CalculateUnaryOperation(const UnaryOperation& op, Word value)
-{
-	for (auto op_handler : k_unary_operations)
-	{
-		if (op_handler.op == op)
-		{
-			return op_handler.handler(std::move(value));
-		}
-	}
-
-	throw UnknownUnaryOperation{op};
-}
-
-Word CalculateBinaryOperation(const BinaryOperation& op, Word lhs, Word rhs)
-{
-	for (auto op_handler : k_binary_operations)
-	{
-		if (op_handler.op == op)
-		{
-			return op_handler.handler(std::move(lhs), std::move(rhs));
-		}
-	}
-
-	throw UnknownBinaryOperation{op};
-}
-
-Word CalculateOptionalUnaryOperation(const std::optional<UnaryOperation>& op, Word value)
-{
-	if (!op)
-	{
-		return value;
-	}
-
-	return CalculateUnaryOperation(*op, std::move(value));
-}
-
-} // namespace
 
 Translator::Translator(const DefinedSymbols& symbols /*= {}*/, int current_address /*= 0*/)
 	: current_address_{current_address}
@@ -165,23 +18,28 @@ Word Translator::evaluate(const Text& text) const
 	const auto& data = text.data();
 	if (data.size() != Word::k_bytes_count)
 	{
-		throw InvalidALFText{text};
+		throw InvalidALFText{};
 	}
 
 	Word::BytesArray bytes;
 	std::transform(data.cbegin(), data.cend(), bytes.begin(),
 		[&](char ch)
 	{
-		bool converted = false;
-		const auto char_byte = mix::CharToByte(ch, &converted);
-		if (!converted)
-		{
-			throw InvalidALFText{text};
-		}
-		return char_byte;
+		return process_ALF_text_char(ch);
 	});
 
 	return bytes;
+}
+
+Byte Translator::process_ALF_text_char(char ch) const
+{
+	bool converted = false;
+	const auto char_byte = mix::CharToByte(ch, &converted);
+	if (!converted)
+	{
+		throw InvalidALFText{};
+	}
+	return char_byte;
 }
 
 Word Translator::evaluate(const BasicExpression& expr) const
@@ -211,18 +69,23 @@ Word Translator::evaluate(const WValue& wvalue) const
 	Word value;
 	for (const auto& token : wvalue.tokens)
 	{
-		const auto part = evaluate(token.expression);
-		const auto field = evaluate_wvalue_field(token.field);
-		
-		// Note: part of `CommandProcessor::do_store()` implementation
-		const bool take_value_sign = field.includes_sign();
-		value.set_value(
-			part.value(field.shift_bytes_right(), take_value_sign),
-			field,
-			false/*do not overwrite sign*/);
+		process_wvalue_token(token, value);
 	}
 
 	return value;
+}
+
+void Translator::process_wvalue_token(const WValueToken& token, Word& dest) const
+{
+	const auto part = evaluate(token.expression);
+	const auto field = evaluate_wvalue_field(token.field);
+
+	// Note: part of `CommandProcessor::do_store()` implementation
+	const bool take_value_sign = field.includes_sign();
+	dest.set_value(
+		part.value(field.shift_bytes_right(), take_value_sign),
+		field,
+		false/*do not overwrite sign*/);
 }
 
 WordField Translator::evaluate_wvalue_field(const std::optional<Expression>& field_expr) const
@@ -286,38 +149,6 @@ Word Translator::evaluate(const Symbol& symbol) const
 	return defined_symbol(symbol);
 }
 
-FutureWord Translator::translate_MIX(
-	Operation /*command*/,
-	const APart& /*A*/, const IPart& /*I*/, const FPart& /*F*/,
-	const Label& /*label*/ /*= {}*/)
-{
-	return {};
-}
-
-void Translator::translate_EQU(const WValue& /*value*/, const Label& /*label*/ /*= {}*/)
-{
-}
-
-void Translator::translate_ORIG(const WValue& /*value*/, const Label& /*label*/ /*= {}*/)
-{
-
-}
-
-void Translator::translate_CON(const WValue& /*value*/, const Label& /*label*/ /*= {}*/)
-{
-
-}
-
-void Translator::translate_ALF(const Text& /*text*/, const Label& /*label*/ /*= {}*/)
-{
-
-}
-
-void Translator::translate_END(const WValue& /*value*/, const Label& /*label*/ /*= {}*/)
-{
-
-}
-
 void Translator::set_current_address(int address)
 {
 	assert(address >= 0);
@@ -357,3 +188,34 @@ const Word& Translator::defined_symbol(const Symbol& symbol) const
 }
 
 
+void Translator::translate_EQU(const WValue& /*value*/, const Label& /*label*/ /*= {}*/)
+{
+}
+
+void Translator::translate_ORIG(const WValue& /*value*/, const Label& /*label*/ /*= {}*/)
+{
+
+}
+
+void Translator::translate_CON(const WValue& /*value*/, const Label& /*label*/ /*= {}*/)
+{
+
+}
+
+void Translator::translate_ALF(const Text& /*text*/, const Label& /*label*/ /*= {}*/)
+{
+
+}
+
+void Translator::translate_END(const WValue& /*value*/, const Label& /*label*/ /*= {}*/)
+{
+
+}
+
+FutureWord Translator::translate_MIX(
+	Operation /*command*/,
+	const APart& /*A*/, const IPart& /*I*/, const FPart& /*F*/,
+	const Label& /*label*/ /*= {}*/)
+{
+	return {};
+}

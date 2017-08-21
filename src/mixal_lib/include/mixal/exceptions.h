@@ -27,7 +27,7 @@ class InvalidALFText :
 	public MixalException
 {
 public:
-	InvalidALFText(const Text& /*text*/)
+	InvalidALFText()
 		: MixalException{"invalid ALF text"}
 	{
 	}

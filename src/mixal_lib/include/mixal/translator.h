@@ -40,6 +40,9 @@ public:
 
 private:
 	WordField evaluate_wvalue_field(const std::optional<Expression>& field_expr) const;
+	
+	void process_wvalue_token(const WValueToken& token, Word& dest) const;
+	Byte process_ALF_text_char(char ch) const;
 
 private:
 	int current_address_;
