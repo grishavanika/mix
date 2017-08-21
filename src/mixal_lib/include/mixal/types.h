@@ -16,7 +16,6 @@ using Expression		= mixal_parse::Expression;
 using UnaryOperation	= mixal_parse::UnaryOperation;
 using BinaryOperation	= mixal_parse::BinaryOperation;
 using WValue			= mixal_parse::WValue;
-using WValueToken		= mixal_parse::WValueToken;
 using OperationId		= mixal_parse::OperationId;
 using Text				= mixal_parse::Text;
 using Label				= mixal_parse::Label;

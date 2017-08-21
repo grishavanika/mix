@@ -79,7 +79,7 @@ struct WTokenBuilder
 		return *this;
 	}
 
-	WValueToken build() const
+	WValue::Token build() const
 	{
 		return token_;
 	}
@@ -88,12 +88,12 @@ struct WTokenBuilder
 	static WValue Build(const Builders&... builders)
 	{
 		WValue value;
-		(void)std::initializer_list<int>{((void)value.tokens.push_back(builders.build()), 0)...};
+		(void)std::initializer_list<int>{((void)value.add_token(builders.build()), 0)...};
 		return value;
 	}
 
 private:
-	WValueToken token_;
+	WValue::Token token_;
 };
 
 inline WTokenBuilder WToken()
@@ -120,7 +120,7 @@ struct MIXALOpBuilder
 			w_value = WValue{};
 		}
 
-		w_value->tokens.push_back(token_builder.build());
+		w_value->add_token(token_builder.build());
 		return *this;
 	}
 };

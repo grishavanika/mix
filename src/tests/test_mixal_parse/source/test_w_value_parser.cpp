@@ -16,8 +16,8 @@ class WValueParserTest :
 TEST_F(WValueParserTest, When_No_Field_Specified_Behaves_Like_Usual_Expression)
 {
 	parse("*-3");
-	ASSERT_EQ(1u, parser_.value().tokens.size());
-	const auto& token = parser_.value().tokens[0];
+	ASSERT_EQ(1u, parser_.value().tokens().size());
+	const auto& token = parser_.value().tokens()[0];
 
 	ExpressionParser expr_parser;
 	expr_parser.parse_stream("*-3");
@@ -29,8 +29,8 @@ TEST_F(WValueParserTest, When_No_Field_Specified_Behaves_Like_Usual_Expression)
 TEST_F(WValueParserTest, Field_Can_Be_Specified)
 {
 	parse("* - 3 (1:3)");
-	ASSERT_EQ(1u, parser_.value().tokens.size());
-	const auto& token = parser_.value().tokens[0];
+	ASSERT_EQ(1u, parser_.value().tokens().size());
+	const auto& token = parser_.value().tokens()[0];
 
 	ExpressionParser expr_parser;
 	expr_parser.parse_stream("*-3");
@@ -46,12 +46,12 @@ TEST_F(WValueParserTest, Field_Can_Be_Specified)
 TEST_F(WValueParserTest, Multiple_Expressions_Can_Be_Specified)
 {
 	parse("*-3, *-3, *-3, *-3, *-3, *-3");
-	ASSERT_EQ(6u, parser_.value().tokens.size());
+	ASSERT_EQ(6u, parser_.value().tokens().size());
 
 	ExpressionParser expr_parser;
 	expr_parser.parse_stream("*-3");
 
-	for (const auto& token : parser_.value().tokens)
+	for (const auto& token : parser_.value().tokens())
 	{
 		ASSERT_EQ(expr_parser.expression(), token.expression);
 	}

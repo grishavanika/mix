@@ -26,7 +26,7 @@ std::size_t WValueParser::do_parse_stream(std::string_view str, std::size_t offs
 		}
 	}
 
-	return value_.tokens.empty()
+	return !value_.is_valid()
 		? InvalidStreamPosition()
 		: last_parsed_expr_pos;
 }
@@ -53,11 +53,11 @@ std::size_t WValueParser::parse_expr_with_field(std::string_view str, std::size_
 
 void WValueParser::add_token(ExpressionParser&& expr, FieldParser&& field)
 {
-	WValueToken token;
+	WValue::Token token;
 	token.expression = expr.expression();
 	token.field = field.expression();
 
-	value_.tokens.push_back(std::move(token));
+	value_.add_token(std::move(token));
 }
 
 const WValue& WValueParser::value() const

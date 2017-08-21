@@ -64,10 +64,10 @@ Word Translator::evaluate(const BasicExpression& expr) const
 
 Word Translator::evaluate(const WValue& wvalue) const
 {
-	assert(!wvalue.tokens.empty());
+	assert(wvalue.is_valid());
 
 	Word value;
-	for (const auto& token : wvalue.tokens)
+	for (const auto& token : wvalue.tokens())
 	{
 		process_wvalue_token(token, value);
 	}
@@ -75,7 +75,7 @@ Word Translator::evaluate(const WValue& wvalue) const
 	return value;
 }
 
-void Translator::process_wvalue_token(const WValueToken& token, Word& dest) const
+void Translator::process_wvalue_token(const WValue::Token& token, Word& dest) const
 {
 	const auto part = evaluate(token.expression);
 	const auto field = evaluate_wvalue_field(token.field);
@@ -114,7 +114,7 @@ Word Translator::evaluate(const Expression& expr) const
 	auto value = CalculateOptionalUnaryOperation(
 		left_token.unary_op, evaluate(left_token.basic_expr));
 
-	for (std::size_t i = 1, count = tokens().size(); i < count; ++i)
+	for (std::size_t i = 1, count = tokens.size(); i < count; ++i)
 	{
 		auto right_token = tokens[i];
 		value = CalculateBinaryOperation(

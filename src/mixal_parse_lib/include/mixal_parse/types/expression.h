@@ -5,6 +5,8 @@
 
 #include <vector>
 
+#include <cassert>
+
 namespace mixal_parse {
 
 class Expression
@@ -27,15 +29,23 @@ private:
 	std::vector<Token> tokens_;
 };
 
-struct WValueToken
+class WValue
 {
-	Expression expression;
-	std::optional<Expression> field;
-};
+public:
+	struct Token
+	{
+		Expression expression;
+		std::optional<Expression> field;
+	};
+	
+	const std::vector<Token>& tokens() const;
 
-struct WValue
-{
-	std::vector<WValueToken> tokens;
+	void add_token(Token&& token);
+
+	bool is_valid() const;
+
+private:
+	std::vector<Token> tokens_;
 };
 
 inline const std::vector<Expression::Token>& Expression::tokens() const
@@ -63,6 +73,23 @@ inline bool Expression::is_valid() const
 		!tokens_.back().binary_op;
 }
 
+inline const std::vector<WValue::Token>& WValue::tokens() const
+{
+	return tokens_;
+}
+
+inline void WValue::add_token(Token&& token)
+{
+	assert(token.expression.is_valid());
+	assert(!token.field || token.field->is_valid());
+	tokens_.push_back(std::move(token));
+}
+
+inline bool WValue::is_valid() const
+{
+	return !tokens_.empty();
+}
+
 inline bool operator==(const Expression::Token& lhs, const Expression::Token& rhs)
 {
 	return (lhs.unary_op == rhs.unary_op) &&
@@ -75,7 +102,7 @@ inline bool operator==(const Expression& lhs, const Expression& rhs)
 	return (lhs.tokens() == rhs.tokens());
 }
 
-inline bool operator==(const WValueToken& lhs, const WValueToken& rhs)
+inline bool operator==(const WValue::Token& lhs, const WValue::Token& rhs)
 {
 	return (lhs.expression == rhs.expression) &&
 		(lhs.field == rhs.field);
@@ -83,7 +110,7 @@ inline bool operator==(const WValueToken& lhs, const WValueToken& rhs)
 
 inline bool operator==(const WValue& lhs, const WValue& rhs)
 {
-	return (lhs.tokens == rhs.tokens);
+	return (lhs.tokens() == rhs.tokens());
 }
 
 } // namespace mixal_parse
