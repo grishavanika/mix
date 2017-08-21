@@ -224,8 +224,9 @@ void CommandProcessor::do_store(const Register& r, const Command& command)
 	const auto& source_field = command.word_field();
 
 	auto word = mix_.memory(address);
+	const bool take_value_sign = source_field.includes_sign();
 	word.set_value(
-		r.value(source_field.shift_bytes_right()),
+		r.value(source_field.shift_bytes_right(), take_value_sign),
 		source_field,
 		false/*do not overwrite sign*/);
 	
