@@ -12,15 +12,9 @@ using namespace mixal_parse;
 namespace
 {
 
-bool IsValid(const ExpressionToken& token)
+bool IsValid(const Expression::Token& token)
 {
 	return token.basic_expr.is_valid();
-}
-
-bool IsValid(const Expression& expr)
-{
-	return !expr.tokens.empty() &&
-		!expr.tokens.back().binary_op;
 }
 
 class InvalidExpression :
@@ -54,7 +48,7 @@ std::size_t ExpressionParser::do_parse_stream(std::string_view str, std::size_t 
 		finish_current_token();
 	}
 
-	return IsValid(expression_)
+	return expression_.is_valid()
 		? last_parsed_token_pos_
 		: InvalidStreamPosition();
 }
@@ -69,7 +63,7 @@ void ExpressionParser::do_clear()
 	expression_ = {};
 	parse_str_ = {};
 	parse_pos_ = 0;
-	current_token_ = ExpressionToken{};
+	current_token_ = Expression::Token{};
 	last_parsed_token_pos_ = 0;
 }
 
@@ -164,6 +158,6 @@ void ExpressionParser::throw_error(const char* details) const
 void ExpressionParser::finish_current_token()
 {
 	assert(IsValid(current_token_));
-	expression_.tokens.push_back(std::move(current_token_));
-	current_token_ = ExpressionToken{};
+	expression_.add_token(std::move(current_token_));
+	current_token_ = Expression::Token{};
 }

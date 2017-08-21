@@ -5,7 +5,7 @@
 
 namespace mixal_parse {
 
-inline ExpressionToken Token(
+inline Expression::Token Token(
 	std::optional<UnaryOperation> unary_op,
 	BasicExpression basic_expr,
 	std::optional<BinaryOperation> binary_op)
@@ -13,20 +13,20 @@ inline ExpressionToken Token(
 	return {unary_op, basic_expr, binary_op};
 }
 
-inline ExpressionToken Token(
+inline Expression::Token Token(
 	BasicExpression basic_expr)
 {
 	return Token({}, basic_expr, {});
 }
 
-inline ExpressionToken BinaryToken(
+inline Expression::Token BinaryToken(
 	BasicExpression basic_expr,
 	BinaryOperation binary_op)
 {
 	return Token({}, basic_expr, binary_op);
 }
 
-inline ExpressionToken UnaryToken(
+inline Expression::Token UnaryToken(
 	UnaryOperation unary_op,
 	BasicExpression basic_expr)
 {
@@ -40,9 +40,9 @@ struct ExpressionBuilder
 		return expr_;
 	}
 
-	ExpressionBuilder& add(ExpressionToken token)
+	ExpressionBuilder& add(Expression::Token token)
 	{
-		expr_.tokens.push_back(std::move(token));
+		expr_.add_token(std::move(token));
 		return *this;
 	}
 
@@ -139,7 +139,7 @@ struct MIXOpBuilder
 	std::optional<WValue> address_w_value;
 
 	template<typename... Exprs>
-	MIXOpBuilder& address_is(const ExpressionToken& expr0, const Exprs&... exprs)
+	MIXOpBuilder& address_is(const Expression::Token& expr0, const Exprs&... exprs)
 	{
 		address_expr = ExpressionBuilder::Build(expr0, exprs...);
 		return *this;

@@ -13,7 +13,6 @@ using WordValue			= mix::WordValue;
 using WordField			= mix::WordField;
 
 using Expression		= mixal_parse::Expression;
-using ExpressionToken	= mixal_parse::ExpressionToken;
 using UnaryOperation	= mixal_parse::UnaryOperation;
 using BinaryOperation	= mixal_parse::BinaryOperation;
 using WValue			= mixal_parse::WValue;

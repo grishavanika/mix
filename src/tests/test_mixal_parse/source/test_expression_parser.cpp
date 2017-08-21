@@ -17,7 +17,7 @@ class ExpressionParserTest :
 {
 protected:
 	template<typename... Exprs>
-	void tokens_are(const ExpressionToken& expr0, const Exprs&... exprs)
+	void tokens_are(const Expression::Token& expr0, const Exprs&... exprs)
 	{
 		ASSERT_EQ(ExpressionBuilder::Build(expr0, exprs...), parser_.expression());
 	}

@@ -12,7 +12,7 @@ class AddressParserTest :
 {
 protected:
 	template<typename... Exprs>
-	void expression_is(const ExpressionToken& expr0, const Exprs&... exprs)
+	void expression_is(const Expression::Token& expr0, const Exprs&... exprs)
 	{
 		ASSERT_TRUE(parser_.expression());
 		ASSERT_FALSE(parser_.w_value());

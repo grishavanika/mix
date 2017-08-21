@@ -107,26 +107,21 @@ WordField Translator::evaluate_wvalue_field(const std::optional<Expression>& fie
 
 Word Translator::evaluate(const Expression& expr) const
 {
-	assert(!expr.tokens.empty());
+	assert(expr.is_valid());
+	const auto& tokens = expr.tokens();
 
-	auto left_token = expr.tokens[0];
+	auto left_token = tokens[0];
 	auto value = CalculateOptionalUnaryOperation(
 		left_token.unary_op, evaluate(left_token.basic_expr));
 
-	for (std::size_t i = 1, count = expr.tokens.size(); i < count; ++i)
+	for (std::size_t i = 1, count = tokens().size(); i < count; ++i)
 	{
-		auto right_token = expr.tokens[i];
-
-		assert(left_token.binary_op);
-		assert(!right_token.unary_op);
-
+		auto right_token = tokens[i];
 		value = CalculateBinaryOperation(
 			*left_token.binary_op, std::move(value), evaluate(right_token.basic_expr));
 
 		left_token = right_token;
 	}
-
-	assert(!left_token.binary_op);
 
 	return value;
 }
@@ -219,3 +214,5 @@ FutureWord Translator::translate_MIX(
 {
 	return {};
 }
+
+

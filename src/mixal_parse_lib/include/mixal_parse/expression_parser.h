@@ -37,7 +37,7 @@ private:
 	std::string_view parse_str_;
 	std::size_t parse_pos_;
 	std::size_t last_parsed_token_pos_;
-	ExpressionToken current_token_;
+	Expression::Token current_token_;
 };
 
 } // namespace mixal_parse
