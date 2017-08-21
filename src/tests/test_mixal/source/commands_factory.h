@@ -3,6 +3,10 @@
 
 #include <cassert>
 
+////////////////////////////////////////////////////////////////////////////////
+// NOTE: this header is a copy of \src\tests\test_mix\source\commands_factory.h.
+// #TODO: think how to combine shared code between tests of different libs
+
 namespace mix {
 
 inline Command MakeADD(int address, const WordField& field = Word::MaxField(), std::size_t index_register = 0)
