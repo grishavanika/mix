@@ -23,7 +23,7 @@ inline std::valarray<Byte> ToBytes(const Register& r)
 
 inline std::valarray<Byte> ToBytes(const Register& r1, const Register& r2)
 {
-	std::valarray<Byte> result{2 * Word::k_bytes_count};
+	std::valarray<Byte> result(std::size_t{2 * Word::k_bytes_count});
 
 	std::copy(begin(r1.bytes()), end(r1.bytes()), begin(result));
 	std::copy(begin(r2.bytes()), end(r2.bytes()), begin(result) + Word::k_bytes_count);
@@ -52,7 +52,7 @@ inline std::pair<Register, Register> ToRegisters(Sign sign1, Sign sign2, const s
 	for (std::size_t i = 1; i <= 5; ++i)
 	{
 		r1.set_byte(i, bytes[i - 1]);
-		r2.set_byte(i + 5, bytes[i + 5 - 1]);
+		r2.set_byte(i, bytes[i + 5 - 1]);
 	}
 	return std::make_pair(std::move(r1), std::move(r2));
 }
