@@ -69,7 +69,7 @@ TEST(TranslatorTest, Throws_TooBigWordValueError_When_Number_Can_Not_Be_Hold_By_
 TEST(TranslatorTest, Evaluates_Text_To_Word_Bytes_That_Corresponds_To_MIX_Char_Table)
 {
 	Translator t;
-	Word expected_word{Word::BytesArray{0, 8, 24, 15, 4}};
+	Word expected_word{Word::BytesArray{{0, 8, 24, 15, 4}}};
 	ASSERT_EQ(' ', ByteToChar(0));
 	ASSERT_EQ('H', ByteToChar(8));
 	ASSERT_EQ('U', ByteToChar(24));

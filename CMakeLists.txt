@@ -69,7 +69,7 @@ if (clang_on_msvc)
 
 	# investigate why this happens with Clang toolset
 	add_definitions(-D_HAS_CXX17=1)
-	include_directories(SYSTEM "C:/Programs/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.10.25017/include")
+	include_directories(SYSTEM "C:/Programs/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.11.25503/include")
 endif()
 
 if (MSVC)

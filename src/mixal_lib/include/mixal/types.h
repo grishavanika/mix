@@ -26,22 +26,22 @@ using BasicExpression	= mixal_parse::BasicExpression;
 
 class FutureWord
 {
-	int address;
+	//int address;
 };
 
 class APart
 {
-	bool is_defaulted() const;
+	//bool is_defaulted() const;
 };
 
 class IPart
 {
-	bool is_defaulted() const;
+	//bool is_defaulted() const;
 };
 
 class FPart
 {
-	bool is_defaulted() const;
+	//bool is_defaulted() const;
 };
 
 } // namespace mixal
