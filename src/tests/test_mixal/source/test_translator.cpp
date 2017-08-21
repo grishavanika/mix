@@ -3,6 +3,7 @@
 
 #include <mixal_parse/expression_parser.h>
 
+#include <mix/exceptions.h>
 #include <mix/char_table.h>
 
 #include <core/utils.h>
@@ -99,17 +100,19 @@ TEST_F(ExpressionEvaluateTest, Unary_Minus_Negates_Number)
 
 TEST_F(ExpressionEvaluateTest, Unary_Plus_Does_Nothing)
 {
-	translator_.define_symbol({"X"}, -7);
+	translator_.define_symbol("X", -7);
 
 	expression_is(-7, "+X");
 }
 
-TEST_F(ExpressionEvaluateTest, DISABLED_Plus_Overflow_Is_Handled)
+TEST_F(ExpressionEvaluateTest, Too_Big_Binary_Plus_Result_Throws_TooBigWorldValue)
 {
-	translator_.define_symbol({"X"}, int{Word::k_max_abs_value});
-	translator_.define_symbol({"Y"}, 1);
+	translator_.define_symbol("X", int{Word::k_max_abs_value});
+	translator_.define_symbol("Y", 1);
 
-	expression_is({}, "X + Y");
+	ASSERT_THROW({
+		expression_is({}, "X + Y");
+	}, mix::TooBigWorldValue);
 }
 
 

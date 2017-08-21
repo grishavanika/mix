@@ -7,6 +7,11 @@ class MIXAL_PARSE_LIB_EXPORT Symbol
 {
 public:
 	Symbol();
+
+	Symbol(const char* name,
+		LocalSymbolKind kind = LocalSymbolKind::Usual,
+		LocalSymbolId id = k_invalid_local_symbol_id);
+
 	Symbol(const std::string_view& name,
 		LocalSymbolKind kind = LocalSymbolKind::Usual,
 		LocalSymbolId id = k_invalid_local_symbol_id);
@@ -37,7 +42,14 @@ bool operator<(const Symbol& lhs, const Symbol& rhs);
 namespace mixal_parse {
 
 inline Symbol::Symbol()
-	: Symbol{{}}
+	: Symbol{std::string_view{}}
+{
+}
+
+inline Symbol::Symbol(const char* name,
+	LocalSymbolKind kind /*= LocalSymbolKind::Usual*/,
+	LocalSymbolId id /*= k_invalid_local_symbol_id*/)
+		: Symbol{std::string_view{name}, kind, id}
 {
 }
 

@@ -33,14 +33,14 @@ TEST(Byte, Construction_FromNumbers_OutOfRange_Throws_OverflowError)
 		const int too_big_number = Byte::k_max_value + 42;
 		Byte byte{too_big_number};
 	}
-	, std::overflow_error);
+	, MixException);
 
 	ASSERT_THROW(
 	{
 		const int too_small_number = Byte::k_min_value - 42;
 		Byte byte{too_small_number};
 	}
-	, std::overflow_error);
+	, MixException);
 }
 
 TEST(Byte, CanHold_Values_InRange)
@@ -95,7 +95,7 @@ TEST(Byte, SetValues_OutOfRange_Throws_OverflowError)
 	{
 		byte.set(Byte::k_max_value + 42);
 	}
-	, std::overflow_error);
+	, ByteOverflow);
 	
 	ASSERT_EQ(byte.value(), 1);
 
@@ -103,7 +103,7 @@ TEST(Byte, SetValues_OutOfRange_Throws_OverflowError)
 	{
 		byte.set(Byte::k_min_value - 42);
 	}
-	, std::overflow_error);
+	, ByteOverflow);
 
 	ASSERT_EQ(byte.value(), 1);
 }
