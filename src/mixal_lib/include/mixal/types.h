@@ -6,6 +6,7 @@
 namespace mixal {
 
 using Word				= mix::Word;
+using WordValue			= mix::WordValue;
 
 using Expression		= mixal_parse::Expression;
 using ExpressionToken	= mixal_parse::ExpressionToken;

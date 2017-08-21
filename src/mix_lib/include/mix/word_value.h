@@ -29,6 +29,15 @@ private:
 	Sign sign_;
 };
 
+MIX_LIB_EXPORT
+bool operator==(const WordValue& lhs, const WordValue& rhs);
+
+MIX_LIB_EXPORT
+bool operator==(const WordValue& lhs, WordValue::Type rhs);
+
+MIX_LIB_EXPORT
+bool operator==(WordValue::Type lhs, const WordValue& rhs);
+
 } // namespace mix
 
 

@@ -24,9 +24,10 @@ public:
 
 	using BytesArray = std::array<Byte, k_bytes_count>;
 
-	explicit Word();
-	explicit Word(WordValue value, const WordField& field = MaxField(), bool owerwrite_sign = true);
-	explicit Word(BytesArray&& bytes, Sign sign = Sign::Positive);
+	Word();
+	Word(WordValue::Type value);
+	Word(WordValue value, const WordField& field = MaxField(), bool owerwrite_sign = true);
+	Word(BytesArray&& bytes, Sign sign = Sign::Positive);
 
 	Sign sign() const;
 	int sign_value() const;

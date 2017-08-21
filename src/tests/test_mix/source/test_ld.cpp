@@ -20,7 +20,7 @@ struct LDParam
 std::ostream& operator<<(std::ostream& o, const LDParam& param)
 {
 	o << "Memory address: " << param.address
-		<< " with content: " << param.value << " " << param.field;
+		<< " with content: " << param.value.value() << " " << param.field;
 	return o;
 }
 

@@ -43,3 +43,22 @@ WordValue WordValue::reverse_sign() const
 	return WordValue{sign, value};
 }
 
+namespace mix {
+
+bool operator==(const WordValue& lhs, const WordValue& rhs)
+{
+	return (lhs.value() == rhs.value()) &&
+		(lhs.sign() == rhs.sign());
+}
+
+bool operator==(const WordValue& lhs, WordValue::Type rhs)
+{
+	return (lhs.value() == rhs);
+}
+
+bool operator==(WordValue::Type lhs, const WordValue& rhs)
+{
+	return (lhs == rhs.value());
+}
+
+} // namespace mix

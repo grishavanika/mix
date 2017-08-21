@@ -13,7 +13,7 @@ TEST(IOInput, Reads_Device_Block_Size_Cells_To_Memory_From_Device)
 	auto device_mock = std::make_unique<DeviceMock>();
 	EXPECT_CALL(*device_mock, ready()).WillOnce(Return(true));
 	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(2));
-	EXPECT_CALL(*device_mock, read_next(0)).WillRepeatedly(Return(Word{42}));
+	EXPECT_CALL(*device_mock, read_next(0)).WillRepeatedly(Return(42));
 	EXPECT_CALL(*device_mock, write_next(_, _)).Times(0);
 
 	NiceMock<ComputerListenerMock> listener;
@@ -26,12 +26,12 @@ TEST(IOInput, Reads_Device_Block_Size_Cells_To_Memory_From_Device)
 
 	Computer mix{&listener};
 	mix.replace_device(k_device_id, std::move(device_mock));
-	mix.set_rx(Register{7}); // Should be ignored
+	mix.set_rx(7); // Should be ignored
 
 	mix.execute(MakeIN(1000, k_device_id));
 
-	ASSERT_EQ(Word{42}, mix.memory(1000));
-	ASSERT_EQ(Word{42}, mix.memory(1001));
+	ASSERT_EQ(42, mix.memory(1000));
+	ASSERT_EQ(42, mix.memory(1001));
 }
 
 TEST(IOInput, Waits_While_Device_Is_Busy)
@@ -45,7 +45,7 @@ TEST(IOInput, Waits_While_Device_Is_Busy)
 		.WillOnce(Return(true));
 
 	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(1));
-	EXPECT_CALL(*device_mock, read_next(0)).WillOnce(Return(Word{42}));
+	EXPECT_CALL(*device_mock, read_next(0)).WillOnce(Return(42));
 	EXPECT_CALL(*device_mock, write_next(_, _)).Times(0);
 
 	NiceMock<ComputerListenerMock> listener;
@@ -69,7 +69,7 @@ TEST(IOInput, Takes_Into_Account_Device_Block_ID_From_RX_For_Drum_Devices)
 	auto device_mock = std::make_unique<DeviceMock>();
 	EXPECT_CALL(*device_mock, ready()).WillOnce(Return(true));
 	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(1));
-	EXPECT_CALL(*device_mock, read_next(k_drum_block_id)).WillRepeatedly(Return(Word{42}));
+	EXPECT_CALL(*device_mock, read_next(k_drum_block_id)).WillRepeatedly(Return(42));
 	EXPECT_CALL(*device_mock, write_next(_, _)).Times(0);
 
 	NiceMock<ComputerListenerMock> listener;
@@ -77,11 +77,11 @@ TEST(IOInput, Takes_Into_Account_Device_Block_ID_From_RX_For_Drum_Devices)
 
 	Computer mix{&listener};
 	mix.replace_device(k_device_id, std::move(device_mock));
-	mix.set_rx(Register{k_drum_block_id});
+	mix.set_rx(k_drum_block_id);
 
 	mix.execute(MakeIN(1000, k_device_id));
 
-	ASSERT_EQ(Word{42}, mix.memory(1000));
+	ASSERT_EQ(42, mix.memory(1000));
 }
 
 TEST(IOJRED, Does_Nothing_If_Device_Is_Busy)
@@ -173,11 +173,11 @@ TEST(IOOutput, Writes_Device_Block_Size_Cells_From_Memory_To_Device)
 
 	Computer mix{&listener};
 	mix.replace_device(k_device_id, std::move(device_mock));
-	mix.set_rx(Register{7}); // Should be ignored
+	mix.set_rx(7); // Should be ignored
 
-	mix.set_memory(1000, Word{42});
-	mix.set_memory(1001, Word{42});
-	mix.set_memory(1002, Word{42});
+	mix.set_memory(1000, 42);
+	mix.set_memory(1001, 42);
+	mix.set_memory(1002, 42);
 
 	mix.execute(MakeOUT(1000, k_device_id));
 }
@@ -229,8 +229,8 @@ TEST(IOOutput, Waits_While_Device_Is_Busy)
 
 	Computer mix{&listener};
 	mix.replace_device(k_device_id, std::move(device_mock));
-	mix.set_rx(Register{k_drum_block_id});
-	mix.set_memory(1000, Word{42});
+	mix.set_rx(k_drum_block_id);
+	mix.set_memory(1000, 42);
 
 	mix.execute(MakeOUT(1000, k_device_id));
 }

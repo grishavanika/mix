@@ -52,9 +52,9 @@ Word BinaryOperation_Plus(Word lhs, Word rhs)
 		// -0 +  0	== -0
 		// -0 + -0	== -0
 		// Note: 0 + -0	== 0
-		return Word{WordValue{Sign::Negative, 0}};
+		return WordValue{Sign::Negative, 0};
 	}
-	return Word{lhs.value() + rhs.value()};
+	return lhs.value() + rhs.value();
 }
 
 Word BinaryOperation_Minus(Word lhs, Word rhs)
@@ -66,14 +66,14 @@ Word BinaryOperation_Minus(Word lhs, Word rhs)
 		// -0 -  0	== -0
 		// -0 - -0	== -0
 		// Note: 0 - -0	== 0
-		return Word{WordValue{Sign::Negative, 0}};
+		return WordValue{Sign::Negative, 0};
 	}
-	return Word{lhs.value() - rhs.value()};
+	return lhs.value() - rhs.value();
 }
 
 Word BinaryOperation_Multiply(Word lhs, Word rhs)
 {
-	return Word{lhs.value() * rhs.value()};
+	return lhs.value() * rhs.value();
 }
 
 Word BinaryOperation_Divide(Word lhs, Word rhs)
@@ -83,7 +83,7 @@ Word BinaryOperation_Divide(Word lhs, Word rhs)
 		throw DivisionByZero{};
 	}
 
-	return Word{lhs.value() / rhs.value()};
+	return lhs.value() / rhs.value();
 }
 
 Word BinaryOperation_DoubleDivide(Word lhs, Word rhs)
@@ -100,7 +100,7 @@ Word BinaryOperation_DoubleDivide(Word lhs, Word rhs)
 	const auto abs_result = v / rhs.abs_value();
 	const auto sign = (lhs.sign() == rhs.sign()) ? Sign::Positive : Sign::Negative;
 	
-	return Word{WordValue{sign, static_cast<int>(abs_result)}};
+	return WordValue{sign, static_cast<int>(abs_result)};
 }
 
 Word BinaryOperation_Field(Word lhs, Word rhs)
@@ -108,7 +108,7 @@ Word BinaryOperation_Field(Word lhs, Word rhs)
 	// Note: in theory, we can use `mix::WordField` to do calculations below
 	// (to avoid duplications), but since values can be negative - this will not
 	// work (because `WordField` works with non-negative values only)
-	return Word{8 * lhs.value() + rhs.value()};
+	return 8 * lhs.value() + rhs.value();
 }
 
 const NamedOperation<UnaryOperationHandler> k_unary_operations[] =
@@ -192,14 +192,14 @@ Word Translator::evaluate(const Text& text) const
 		return char_byte;
 	});
 
-	return Word{std::move(bytes)};
+	return bytes;
 }
 
 Word Translator::evaluate(const BasicExpression& expr) const
 {
 	if (expr.is_current_address())
 	{
-		return Word{current_address_};
+		return current_address_;
 	}
 	else if (expr.is_number())
 	{
@@ -212,12 +212,12 @@ Word Translator::evaluate(const BasicExpression& expr) const
 
 	// #TODO: add UNREACHABLE() or similar macro
 	assert(false);
-	return Word{};
+	return {};
 }
 
 Word Translator::evaluate(const WValue& /*wvalue*/) const
 {
-	return Word{};
+	return {};
 }
 
 Word Translator::evaluate(const Expression& expr) const
@@ -254,7 +254,7 @@ Word Translator::evaluate(const Number& n) const
 		throw TooBigWordValueError{n};
 	}
 
-	return Word{static_cast<int>(v)};
+	return static_cast<int>(v);
 }
 
 Word Translator::evaluate(const Symbol& symbol) const

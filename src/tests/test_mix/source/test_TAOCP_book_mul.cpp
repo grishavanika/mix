@@ -86,7 +86,7 @@ TEST(MUL_TAOCP_Book_Test, Multiply_RA_With_Cell_Takes_Into_Account_Field)
 	mix.execute(MakeMUL(1000, WordField{1, 1}));
 
 	ASSERT_EQ(WordValue(Sign::Negative, 0), mix.ra().value());
-	ASSERT_EQ(-224, mix.rx().value());
+	ASSERT_EQ(WordValue{-224}, mix.rx().value());
 }
 
 TEST(MUL_TAOCP_Book_Test, Multiply_RA_With_Cell_Stores_Most_Significant_Part_In_RA)
