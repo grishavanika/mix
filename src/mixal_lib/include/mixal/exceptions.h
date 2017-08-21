@@ -72,6 +72,15 @@ public:
 	}
 };
 
+class DivisionByZero :
+	public MixalError
+{
+public:
+	DivisionByZero()
+		: MixalError{"DivisionByZero"}
+	{
+	}
+};
 
 } // namespace mixal
 

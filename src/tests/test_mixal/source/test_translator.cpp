@@ -1,6 +1,8 @@
 #include <mixal/translator.h>
 #include <mixal/exceptions.h>
 
+#include <mixal_parse/expression_parser.h>
+
 #include <mix/char_table.h>
 
 #include <core/utils.h>
@@ -8,6 +10,29 @@
 #include <gtest/gtest.h>
 
 using namespace mixal;
+using namespace mixal_parse;
+
+namespace {
+
+class ExpressionEvaluateTest :
+	public ::testing::Test
+{
+protected:
+	void expression_is(Word value, const char* expr_str)
+	{
+		ExpressionParser parser;
+		const auto pos = parser.parse_stream(expr_str);
+		ASSERT_FALSE(IsInvalidStreamPosition(pos))
+			<< "Failed to parse `" << expr_str << "` expression";
+		
+		ASSERT_EQ(value, translator_.evaluate(parser.expression()));
+	}
+
+protected:
+	Translator translator_;
+};
+
+} // namespace
 
 TEST(TranslatorTest, Evaluates_Number_To_Word_With_Same_Integer_Value)
 {
@@ -61,3 +86,30 @@ TEST(TranslatorTest, Throws_InvalidALFText_For_Text_With_Invalid_MIX_Char)
 		t.evaluate(Text{R"(""""")"});
 	}, InvalidALFText);
 }
+
+TEST_F(ExpressionEvaluateTest, Number_Expression_Evaluates_To_Number)
+{
+	expression_is(Word{42}, "42");
+}
+
+TEST_F(ExpressionEvaluateTest, Unary_Minus_Negates_Number)
+{
+	expression_is(Word{-42}, "-42");
+}
+
+TEST_F(ExpressionEvaluateTest, Unary_Plus_Does_Nothing)
+{
+	translator_.define_symbol({"X"}, Word{-7});
+
+	expression_is(Word{-7}, "+X");
+}
+
+TEST_F(ExpressionEvaluateTest, Plus_Overflow_Is_Handled)
+{
+	translator_.define_symbol({"X"}, Word{int{Word::k_max_abs_value}});
+	translator_.define_symbol({"Y"}, Word{1});
+
+	expression_is(Word{}, "X + Y");
+}
+
+
