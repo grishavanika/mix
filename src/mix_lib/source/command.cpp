@@ -1,5 +1,8 @@
 #include <mix/command.h>
 
+#include <iostream>
+#include <iomanip>
+
 using namespace mix;
 
 namespace {
@@ -87,3 +90,20 @@ void Command::change_address(WordValue address)
 	address_ = address;
 	word_.set_value(address_, k_address_field);
 }
+
+namespace mix {
+
+std::ostream& operator<<(std::ostream& out, const Command& command)
+{
+	out << "|" << command.sign();
+	out << "|" << std::setw(4) << std::right << command.address();
+	out << "|" << command.address_index();
+	out << "|" << command.field();
+	out << "|" << std::setw(2) << std::right << command.id();
+	out << "|";
+
+	return out;
+}
+
+} // namespace mix
+

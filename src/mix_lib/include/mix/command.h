@@ -4,6 +4,8 @@
 #include <mix/word_field.h>
 #include <mix/registers.h>
 
+#include <iosfwd>
+
 namespace mix {
 
 class MIX_LIB_EXPORT Command
@@ -42,6 +44,9 @@ private:
 	WordField field_;
 	WordValue address_;
 };
+
+MIX_LIB_EXPORT
+std::ostream& operator<<(std::ostream& out, const Command& command);
 
 } // namespace mix
 
