@@ -14,6 +14,8 @@ public:
 	LocalSymbolId local_id() const;
 	bool is_local_symbol() const;
 
+	const Symbol& symbol() const;
+
 private:
 	Symbol symbol_;
 };
@@ -52,6 +54,11 @@ inline LocalSymbolId Label::local_id() const
 inline bool Label::is_local_symbol() const
 {
 	return symbol_.is_local();
+}
+
+inline const Symbol& Label::symbol() const
+{
+	return symbol_;
 }
 
 } // namespace mixal_parse

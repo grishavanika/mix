@@ -24,6 +24,12 @@ using Number			= mixal_parse::Number;
 using Operation			= mixal_parse::Operation;
 using BasicExpression	= mixal_parse::BasicExpression;
 
+struct AddressedWord
+{
+	int address{0};
+	Word value{};
+};
+
 class FutureWord
 {
 	//int address;

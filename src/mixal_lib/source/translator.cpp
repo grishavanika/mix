@@ -171,6 +171,7 @@ void Translator::define_symbol(const Symbol& symbol, const Word& value)
 const Word& Translator::defined_symbol(const Symbol& symbol) const
 {
 	// #TODO: `Kind::Here` CAN NOT be queried
+	// #TODO: handle local symbols somehow
 	assert(!symbol.is_local());
 
 	auto it = defined_symbols_.find(symbol);
@@ -182,24 +183,44 @@ const Word& Translator::defined_symbol(const Symbol& symbol) const
 	return it->second;
 }
 
-
-void Translator::translate_EQU(const WValue& /*value*/, const Label& /*label*/ /*= {}*/)
+void Translator::define_label_if_valid(const Label& label, const Word& value)
 {
+	if (label.empty())
+	{
+		return;
+	}
+
+	define_symbol(label.symbol(), value);
 }
 
-void Translator::translate_ORIG(const WValue& /*value*/, const Label& /*label*/ /*= {}*/)
+void Translator::translate_EQU(const WValue& value, const Label& label /*= {}*/)
 {
-
+	define_label_if_valid(label, evaluate(value));
 }
 
-void Translator::translate_CON(const WValue& /*value*/, const Label& /*label*/ /*= {}*/)
+void Translator::translate_ORIG(const WValue& value, const Label& label /*= {}*/)
 {
-
+	const auto address = evaluate(value);
+	define_label_if_valid(label, address);
+	set_current_address(address.value());
 }
 
-void Translator::translate_ALF(const Text& /*text*/, const Label& /*label*/ /*= {}*/)
+AddressedWord Translator::translate_CON(const WValue& wvalue, const Label& label /*= {}*/)
 {
+	define_label_if_valid(label, current_address_);
 
+	AddressedWord result{current_address_, evaluate(wvalue)};
+	increase_current_address();
+	return result;
+}
+
+AddressedWord Translator::translate_ALF(const Text& text, const Label& label /*= {}*/)
+{
+	define_label_if_valid(label, current_address_);
+
+	AddressedWord result{current_address_, evaluate(text)};
+	increase_current_address();
+	return result;
 }
 
 void Translator::translate_END(const WValue& /*value*/, const Label& /*label*/ /*= {}*/)
@@ -215,4 +236,8 @@ FutureWord Translator::translate_MIX(
 	return {};
 }
 
+void Translator::increase_current_address()
+{
+	++current_address_;
+}
 

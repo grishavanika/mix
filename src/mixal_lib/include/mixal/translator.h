@@ -28,8 +28,8 @@ public:
 
 	void translate_EQU(const WValue& value, const Label& label = {});
 	void translate_ORIG(const WValue& address, const Label& label = {});
-	void translate_CON(const WValue& address, const Label& label = {});
-	void translate_ALF(const Text& text, const Label& label = {});
+	AddressedWord translate_CON(const WValue& address, const Label& label = {});
+	AddressedWord translate_ALF(const Text& text, const Label& label = {});
 	void translate_END(const WValue& address, const Label& label = {});
 
 	void set_current_address(int address);
@@ -43,6 +43,10 @@ private:
 	
 	void process_wvalue_token(const WValue::Token& token, Word& dest) const;
 	Byte process_ALF_text_char(char ch) const;
+
+	void define_label_if_valid(const Label& label, const Word& value);
+
+	void increase_current_address();
 
 private:
 	int current_address_;
