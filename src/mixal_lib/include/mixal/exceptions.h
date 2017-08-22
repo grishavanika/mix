@@ -113,5 +113,16 @@ public:
 	}
 };
 
+class InvalidOperationId :
+	public MixalException
+{
+public:
+	InvalidOperationId(OperationId /*id*/)
+		: MixalException{"invalid operation id"}
+	{
+	}
+};
+
+
 } // namespace mixal
 
