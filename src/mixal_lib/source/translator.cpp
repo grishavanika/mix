@@ -5,12 +5,20 @@
 #include <mix/char_table.h>
 #include <mix/word_field.h>
 
+#include <functional>
+#include <algorithm>
+
 using namespace mixal;
 
-Translator::Translator(const DefinedSymbols& symbols /*= {}*/, int current_address /*= 0*/)
-	: current_address_{current_address}
-	, defined_symbols_{symbols}
+Translator::Translator(
+	const DefinedSymbols& symbols /*= {}*/,
+	const DefinedLocalSymbols& local_symbols /*= {}*/,
+	int current_address /*= 0*/)
+		: current_address_{current_address}
+		, defined_symbols_{symbols}
+		, defined_local_symbols_{local_symbols}
 {
+	prepare_local_addresses(defined_local_symbols_);
 }
 
 Word Translator::evaluate(const Text& text) const
@@ -139,9 +147,7 @@ Word Translator::evaluate(const Number& n) const
 
 Word Translator::evaluate(const Symbol& symbol) const
 {
-	assert(!symbol.is_local());
-
-	return defined_symbol(symbol);
+	return query_defined_symbol(symbol);
 }
 
 void Translator::set_current_address(int address)
@@ -157,9 +163,18 @@ int Translator::current_address() const
 
 void Translator::define_symbol(const Symbol& symbol, const Word& value)
 {
-	// #TODO: only `Kind::Here` Symbols can be defined
-	assert(!symbol.is_local());
+	if (symbol.is_local())
+	{
+		define_local_symbol(symbol, value.value());
+	}
+	else
+	{
+		define_usual_symbol(symbol, value);
+	}
+}
 
+void Translator::define_usual_symbol(const Symbol& symbol, const Word& value)
+{
 	const auto it = defined_symbols_.insert(std::make_pair(symbol, value));
 	const bool inserted = it.second;
 	if (!inserted)
@@ -168,12 +183,45 @@ void Translator::define_symbol(const Symbol& symbol, const Word& value)
 	}
 }
 
-const Word& Translator::defined_symbol(const Symbol& symbol) const
+void Translator::define_local_symbol(const Symbol& symbol, int address)
 {
-	// #TODO: `Kind::Here` CAN NOT be queried
-	// #TODO: handle local symbols somehow
-	assert(!symbol.is_local());
+	if (symbol.kind() != LocalSymbolKind::Here)
+	{
+		throw InvalidLocalSymbolDefinition{symbol};
+	}
+	const auto id = symbol.local_id();
+	auto& addresses = defined_local_symbols_[id];
+	addresses.push_back(address);
+	prepare_local_addresses(addresses);
+}
 
+void Translator::prepare_local_addresses(Addresses& addresses) const
+{
+	sort(addresses.begin(), addresses.end(), std::greater<>{});
+}
+
+void Translator::prepare_local_addresses(DefinedLocalSymbols& local_symbols) const
+{
+	for (auto& addresses : local_symbols)
+	{
+		prepare_local_addresses(addresses.second);
+	}
+}
+
+Word Translator::query_defined_symbol(const Symbol& symbol, int near_address /*= -1*/) const
+{
+	if (symbol.is_local())
+	{
+		return query_local_symbol(symbol, near_address);
+	}
+	else
+	{
+		return query_usual_symbol(symbol);
+	}
+}
+
+Word Translator::query_usual_symbol(const Symbol& symbol) const
+{
 	auto it = defined_symbols_.find(symbol);
 	if (it == defined_symbols_.end())
 	{
@@ -181,6 +229,65 @@ const Word& Translator::defined_symbol(const Symbol& symbol) const
 	}
 
 	return it->second;
+}
+
+Word Translator::query_local_symbol(const Symbol& symbol, int near_address) const
+{
+	if (symbol.kind() != LocalSymbolKind::Backward)
+	{
+		throw InvalidLocalSymbolReference{symbol};
+	}
+
+	auto value = find_local_symbol(symbol, near_address);
+	if (!value)
+	{
+		throw InvalidLocalSymbolReference{symbol};
+	}
+
+	return *value;
+}
+
+const int* Translator::find_local_symbol(const Symbol& symbol, int near_address) const
+{
+	const auto addresses_it = defined_local_symbols_.find(symbol.local_id());
+	if (addresses_it == defined_local_symbols_.end())
+	{
+		return nullptr;
+	}
+
+	const auto& addresses = addresses_it->second;
+	auto address_it = lower_bound(
+		addresses.cbegin(), addresses.cend(),
+		near_address, std::greater<>{});
+
+	return (address_it != addresses.cend()) ? &*address_it : nullptr;
+}
+
+bool Translator::is_defined_symbol(const Symbol& symbol, int near_address /*= -1*/) const
+{
+	if (symbol.is_local())
+	{
+		return is_defined_local_symbol(symbol, near_address);
+	}
+	else
+	{
+		return is_defined_usual_symbol(symbol);
+	}
+}
+
+bool Translator::is_defined_usual_symbol(const Symbol& symbol) const
+{
+	return (defined_symbols_.find(symbol) != defined_symbols_.end());
+}
+
+bool Translator::is_defined_local_symbol(const Symbol& symbol, int near_address) const
+{
+	if (symbol.kind() != LocalSymbolKind::Backward)
+	{
+		return false;
+	}
+
+	return (find_local_symbol(symbol, near_address) != nullptr);
 }
 
 void Translator::define_label_if_valid(const Label& label, const Word& value)

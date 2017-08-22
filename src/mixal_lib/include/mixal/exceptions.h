@@ -43,6 +43,26 @@ public:
 	}
 };
 
+class InvalidLocalSymbolDefinition :
+	public MixalException
+{
+public:
+	InvalidLocalSymbolDefinition(const Symbol& /*symbol*/)
+		: MixalException{"invalid local symbol definition"}
+	{
+	}
+};
+
+class InvalidLocalSymbolReference :
+	public MixalException
+{
+public:
+	InvalidLocalSymbolReference(const Symbol& /*symbol*/)
+		: MixalException{"invalid local symbol reference"}
+	{
+	}
+};
+
 class UndefinedSymbolError :
 	public MixalException
 {

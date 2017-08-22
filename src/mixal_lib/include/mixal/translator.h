@@ -3,16 +3,22 @@
 #include <mixal/types.h>
 
 #include <map>
+#include <vector>
 
 namespace mixal {
 
 class MIXAL_LIB_EXPORT Translator
 {
 public:
-	using DefinedSymbols = std::map<Symbol, Word>;
+	using DefinedSymbols		= std::map<Symbol, Word>;
+	using Addresses				= std::vector<int/*addresses*/>;
+	using DefinedLocalSymbols	= std::map<LocalSymbolId, Addresses>;
 
 public:
-	Translator(const DefinedSymbols& symbols = {}, int current_address = 0);
+	Translator(
+		const DefinedSymbols& symbols = {},
+		const DefinedLocalSymbols& local_symbols = {},
+		int current_address = 0);
 
 	Word evaluate(const Text& text) const;
 	Word evaluate(const Symbol& symbol) const;
@@ -36,7 +42,9 @@ public:
 	int current_address() const;
 
 	void define_symbol(const Symbol& symbol, const Word& value);
-	const Word& defined_symbol(const Symbol& symbol) const;
+	Word query_defined_symbol(const Symbol& symbol, int near_address = -1) const;
+
+	bool is_defined_symbol(const Symbol& symbol, int near_address = -1) const;
 
 private:
 	WordField evaluate_wvalue_field(const std::optional<Expression>& field_expr) const;
@@ -45,12 +53,26 @@ private:
 	Byte process_ALF_text_char(char ch) const;
 
 	void define_label_if_valid(const Label& label, const Word& value);
+	void define_usual_symbol(const Symbol& symbol, const Word& value);
+	void define_local_symbol(const Symbol& symbol, int address);
+
+	Word query_usual_symbol(const Symbol& symbol) const;
+	Word query_local_symbol(const Symbol& symbol, int near_address) const;
+
+	const int* find_local_symbol(const Symbol& symbol, int near_address) const;
+
+	bool is_defined_usual_symbol(const Symbol& symbol) const;
+	bool is_defined_local_symbol(const Symbol& symbol, int near_address) const;
 
 	void increase_current_address();
+
+	void prepare_local_addresses(Addresses& addresses) const;
+	void prepare_local_addresses(DefinedLocalSymbols& local_symbols) const;
 
 private:
 	int current_address_;
 	DefinedSymbols defined_symbols_;
+	DefinedLocalSymbols defined_local_symbols_;
 };
 
 } // namespace mixal
