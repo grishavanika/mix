@@ -7,6 +7,8 @@
 
 namespace mixal {
 
+struct OperationInfo;
+
 class MIXAL_LIB_EXPORT Translator
 {
 public:
@@ -73,10 +75,22 @@ private:
 
 	std::vector<Symbol> query_address_forward_references(const Address& address) const;
 
+	Byte index_to_byte(const Index& index, const OperationInfo& op_info) const;
+	Byte field_to_byte(const Field& field, const OperationInfo& op_info) const;
+
+	FutureTranslatedWordRef process_mix_translation(
+		FutureTranslatedWordShared&& partial_result,
+		const Address& address, Byte I, Byte F, Byte C);
+
+	int translate_address(const Address& address) const;
+
+	Word make_mix_command(int address, Byte I, Byte F, Byte C) const;
+
 private:
 	int current_address_;
 	DefinedSymbols defined_symbols_;
 	DefinedLocalSymbols defined_local_symbols_;
+	std::vector<FutureTranslatedWordShared> unresolved_translations_;
 };
 
 } // namespace mixal

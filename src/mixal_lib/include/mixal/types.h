@@ -41,6 +41,13 @@ struct FutureTranslatedWord :
 	public TranslatedWord
 {
 	std::vector<Symbol> forward_references;
+	Address unresolved_address;
+
+	FutureTranslatedWord(int address, std::vector<Symbol> references)
+		: forward_references{std::move(references)}
+	{
+		original_address = address;
+	}
 
 	bool is_ready() const
 	{
@@ -51,5 +58,6 @@ struct FutureTranslatedWord :
 // Note: using `std::shared_ptr` for simplicity purpose. It can be optimized
 // by using simple wrapper around `TranslatedWord` with reference to `Translator`
 using FutureTranslatedWordRef = std::shared_ptr<const FutureTranslatedWord>;
+using FutureTranslatedWordShared = std::shared_ptr<FutureTranslatedWord>;
 
 } // namespace mixal

@@ -1,6 +1,7 @@
 #include <mixal/translator.h>
 #include <mixal/exceptions.h>
 #include <mixal/operations_calculator.h>
+#include <mixal/operation_info.h>
 
 #include <mix/char_table.h>
 #include <mix/word_field.h>
@@ -341,11 +342,23 @@ void Translator::translate_END(const WValue& /*value*/, const Label& /*label*/ /
 }
 
 FutureTranslatedWordRef Translator::translate_MIX(
-	Operation /*command*/,
-	const Address& /*A*/, const Index& /*I*/, const Field& /*F*/,
-	const Label& /*label*/ /*= {}*/)
+	Operation command,
+	const Address& address, const Index& index, const Field& field,
+	const Label& label /*= {}*/)
 {
-	return {};
+	const auto command_info = QueryOperationInfo(command);
+	Byte C = command_info.computer_command;
+	Byte I = index_to_byte(index, command_info);
+	Byte F = field_to_byte(field, command_info);
+
+	auto result = std::make_shared<FutureTranslatedWord>(
+		current_address_,
+		query_address_forward_references(address));
+
+	define_label_if_valid(label, current_address_);
+
+	return process_mix_translation(std::move(result),
+		address, std::move(I), std::move(F), std::move(C));
 }
 
 void Translator::increase_current_address()
@@ -408,5 +421,70 @@ std::vector<Symbol> Translator::query_address_forward_references(const Address& 
 	return symbols;
 }
 
+Byte Translator::index_to_byte(const Index& index, const OperationInfo& op_info) const
+{
+	if (index.empty())
+	{
+		return op_info.default_index;
+	}
+	const auto value = evaluate(index.expression()).value();
+	return int{value};
+}
 
+Byte Translator::field_to_byte(const Field& field, const OperationInfo& op_info) const
+{
+	if (field.empty())
+	{
+		return op_info.default_field.to_byte();
+	}
+
+	const auto value = evaluate(field.expression()).value();
+	return int{value};
+}
+
+int Translator::translate_address(const Address& address) const
+{
+	// Note: `address` shoud not refer to forwarding symbol
+	// (undefined symbol exception will be populated otherwice)
+	if (address.has_expression())
+	{
+		return evaluate(address.expression()).value();
+	}
+	else  if (address.has_w_value())
+	{
+		return evaluate(address.w_value()).value();
+	}
+
+	assert(false);
+	return -1;
+}
+
+Word Translator::make_mix_command(int address, Byte I, Byte F, Byte C) const
+{
+	Word command;
+
+	command.set_value(address, WordField{0, 2});
+	command.set_byte(3, I);
+	command.set_byte(4, F);
+	command.set_byte(5, C);
+
+	return command;
+}
+
+FutureTranslatedWordRef Translator::process_mix_translation(
+	FutureTranslatedWordShared&& partial_result,
+	const Address& address, Byte I, Byte F, Byte C)
+{
+	if (partial_result->is_ready())
+	{
+		partial_result->value = make_mix_command(
+			translate_address(address), I, F, C);
+		return partial_result;
+	}
+
+	partial_result->value = make_mix_command(0, I, F, C);
+	partial_result->unresolved_address = address;
+	unresolved_translations_.push_back(partial_result);
+	return partial_result;
+}
 
