@@ -1,8 +1,6 @@
 #pragma once
 #include <mixal_parse/parser_base.h>
-#include <mixal_parse/types/expression.h>
-
-#include <core/optional.h>
+#include <mixal_parse/types/address.h>
 
 namespace mixal_parse {
 
@@ -10,10 +8,7 @@ class MIXAL_PARSE_LIB_EXPORT AddressParser final :
 	public ParserBase
 {
 public:
-	bool empty() const;
-
-	ConstOptionalRef<Expression> expression() const;
-	ConstOptionalRef<WValue> w_value() const;
+	const Address& address() const;
 
 private:
 	virtual std::size_t do_parse_stream(std::string_view str, std::size_t offset) override;
@@ -23,8 +18,7 @@ private:
 	std::size_t try_parse_literal(const std::string_view& str, std::size_t offset);
 
 private:
-	std::optional<Expression> expression_;
-	std::optional<WValue> w_value_;
+	Address address_;
 };
 
 } // namespace mixal_parse

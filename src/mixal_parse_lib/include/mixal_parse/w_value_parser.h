@@ -15,7 +15,7 @@ private:
 	virtual void do_clear() override;
 
 	std::size_t parse_expr_with_field(std::string_view str, std::size_t offset);
-	void add_token(ExpressionParser&& expr, FieldParser&& field);
+	void add_token(ExpressionParser&& expr_parser, FieldParser&& field_parser);
 
 private:
 	WValue value_;

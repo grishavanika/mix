@@ -230,7 +230,7 @@ void Translator::translate_END(const WValue& /*value*/, const Label& /*label*/ /
 
 FutureWord Translator::translate_MIX(
 	Operation /*command*/,
-	const APart& /*A*/, const IPart& /*I*/, const FPart& /*F*/,
+	const Address& /*A*/, const Index& /*I*/, const Field& /*F*/,
 	const Label& /*label*/ /*= {}*/)
 {
 	return {};

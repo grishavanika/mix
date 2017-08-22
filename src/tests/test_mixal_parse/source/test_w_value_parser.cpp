@@ -40,7 +40,7 @@ TEST_F(WValueParserTest, Field_Can_Be_Specified)
 
 	ASSERT_EQ(expr_parser.expression(), token.expression);
 	ASSERT_TRUE(token.field);
-	ASSERT_EQ(field_parser.expression(), token.field);
+	ASSERT_EQ(field_parser.field().expression(), token.field);
 }
 
 TEST_F(WValueParserTest, Multiple_Expressions_Can_Be_Specified)

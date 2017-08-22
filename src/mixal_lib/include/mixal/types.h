@@ -23,6 +23,9 @@ using Symbol			= mixal_parse::Symbol;
 using Number			= mixal_parse::Number;
 using Operation			= mixal_parse::Operation;
 using BasicExpression	= mixal_parse::BasicExpression;
+using Address			= mixal_parse::Address;
+using Index				= mixal_parse::Index;
+using Field				= mixal_parse::Field;
 
 struct AddressedWord
 {
@@ -33,21 +36,6 @@ struct AddressedWord
 class FutureWord
 {
 	//int address;
-};
-
-class APart
-{
-	//bool is_defaulted() const;
-};
-
-class IPart
-{
-	//bool is_defaulted() const;
-};
-
-class FPart
-{
-	//bool is_defaulted() const;
 };
 
 } // namespace mixal

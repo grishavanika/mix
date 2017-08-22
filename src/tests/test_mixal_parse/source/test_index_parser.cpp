@@ -14,8 +14,8 @@ protected:
 	template<typename... Exprs>
 	void expression_is(const Exprs&... exprs)
 	{
-		ASSERT_TRUE(parser_.expression());
-		ASSERT_EQ(ExpressionBuilder::Build(exprs...), *parser_.expression());
+		ASSERT_FALSE(parser_.index().empty());
+		ASSERT_EQ(ExpressionBuilder::Build(exprs...), parser_.index().expression());
 	}
 };
 
@@ -24,7 +24,7 @@ protected:
 TEST_F(IndexParserTest, Empty_String_Is_Valid_Index)
 {
 	parse("");
-	ASSERT_TRUE(parser_.empty());
+	ASSERT_TRUE(parser_.index().empty());
 }
 
 TEST_F(IndexParserTest, Empty_String_After_Comma_Is_Not_Valid_Index)

@@ -14,19 +14,19 @@ protected:
 	template<typename... Exprs>
 	void expression_is(const Expression::Token& expr0, const Exprs&... exprs)
 	{
-		ASSERT_TRUE(parser_.expression());
-		ASSERT_FALSE(parser_.w_value());
+		ASSERT_TRUE(parser_.address().has_expression());
+		ASSERT_FALSE(parser_.address().has_w_value());
 
-		ASSERT_EQ(ExpressionBuilder::Build(expr0, exprs...), *parser_.expression());
+		ASSERT_EQ(ExpressionBuilder::Build(expr0, exprs...), parser_.address().expression());
 	}
 
 	template<typename... WBuilders>
 	void literal_is(const WTokenBuilder& w_builder, const WBuilders&... builders)
 	{
-		ASSERT_TRUE(parser_.w_value());
-		ASSERT_FALSE(parser_.expression());
+		ASSERT_TRUE(parser_.address().has_w_value());
+		ASSERT_FALSE(parser_.address().has_expression());
 
-		ASSERT_EQ(WTokenBuilder::Build(w_builder, builders...), *parser_.w_value());
+		ASSERT_EQ(WTokenBuilder::Build(w_builder, builders...), parser_.address().w_value());
 	}
 };
 
@@ -35,13 +35,13 @@ protected:
 TEST_F(AddressParserTest, Empty_String_Is_Valid_Address)
 {
 	parse("");
-	ASSERT_TRUE(parser_.empty());
+	ASSERT_TRUE(parser_.address().empty());
 }
 
 TEST_F(AddressParserTest, White_Spaces_Are_Ignored)
 {
 	parse(" \t\t");
-	ASSERT_TRUE(parser_.empty());
+	ASSERT_TRUE(parser_.address().empty());
 }
 
 TEST_F(AddressParserTest, Parses_Expression)

@@ -30,7 +30,7 @@ std::size_t IndexParser::try_parse_expression(const std::string_view& str, std::
 	const auto end = parser.parse_stream(str, offset);
 	if (!IsInvalidStreamPosition(end))
 	{
-		expression_ = parser.expression();
+		index_ = parser.expression();
 	}
 	
 	return end;
@@ -38,15 +38,10 @@ std::size_t IndexParser::try_parse_expression(const std::string_view& str, std::
 
 void IndexParser::do_clear()
 {
-	expression_ = std::nullopt;
+	index_ = {};
 }
 
-ConstOptionalRef<Expression> IndexParser::expression() const
+const Index& IndexParser::index() const
 {
-	return expression_;
-}
-
-bool IndexParser::empty() const
-{
-	return !expression_;
+	return index_;
 }

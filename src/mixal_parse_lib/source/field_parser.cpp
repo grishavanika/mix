@@ -33,23 +33,18 @@ std::size_t FieldParser::do_parse_stream(std::string_view str, std::size_t offse
 		return InvalidStreamPosition();
 	}
 
-	expression_ = expr_parser.expression();
+	field_ = expr_parser.expression();
 
 	return (first_char_after_expr + 1);
 }
 
 void FieldParser::do_clear()
 {
-	expression_ = std::nullopt;
+	field_ = {};
 }
 
-bool FieldParser::empty() const
+const Field& FieldParser::field() const
 {
-	return !expression_;
-}
-
-std::optional<Expression> FieldParser::expression() const
-{
-	return expression_;
+	return field_;
 }
 

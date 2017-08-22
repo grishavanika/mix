@@ -60,11 +60,15 @@ protected:
 
 		const auto& mix = *parser_->mix();
 	
-		ASSERT_EQ(mix_builder.index_expr, mix.index_parser.expression());
-		ASSERT_EQ(mix_builder.field_expr, mix.field_parser.expression());
+		ASSERT_EQ(mix_builder.index_expr.value_or(Expression{}),
+			mix.index_parser.index().expression());
+		ASSERT_EQ(mix_builder.field_expr.value_or(Expression{}),
+			mix.field_parser.field().expression());
 
-		ASSERT_EQ(mix_builder.address_expr, mix.address_parser.expression());
-		ASSERT_EQ(mix_builder.address_w_value, mix.address_parser.w_value());
+		ASSERT_EQ(mix_builder.address_expr.value_or(Expression{}),
+			mix.address_parser.address().expression());
+		ASSERT_EQ(mix_builder.address_w_value.value_or(WValue{}),
+			mix.address_parser.address().w_value());
 	}
 
 protected:

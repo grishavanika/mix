@@ -51,11 +51,16 @@ std::size_t WValueParser::parse_expr_with_field(std::string_view str, std::size_
 	return field_end;
 }
 
-void WValueParser::add_token(ExpressionParser&& expr, FieldParser&& field)
+void WValueParser::add_token(ExpressionParser&& expr_parser, FieldParser&& field_parser)
 {
 	WValue::Token token;
-	token.expression = expr.expression();
-	token.field = field.expression();
+	token.expression = expr_parser.expression();
+
+	const auto& field = field_parser.field();
+	if (!field.empty())
+	{
+		token.field = field.expression();
+	}
 
 	value_.add_token(std::move(token));
 }

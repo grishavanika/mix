@@ -23,7 +23,7 @@ public:
 
 	FutureWord translate_MIX(
 		Operation command,
-		const APart& A, const IPart& I, const FPart& F,
+		const Address& A, const Index& I, const Field& F,
 		const Label& label = {});
 
 	void translate_EQU(const WValue& value, const Label& label = {});

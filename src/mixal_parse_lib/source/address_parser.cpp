@@ -38,7 +38,7 @@ std::size_t AddressParser::try_parse_expression(const std::string_view& str, std
 	const auto end = parser.parse_stream(str, offset);
 	if (!IsInvalidStreamPosition(end))
 	{
-		expression_ = parser.expression();
+		address_ = parser.expression();
 	}
 	
 	return end;
@@ -50,7 +50,7 @@ std::size_t AddressParser::try_parse_literal(const std::string_view& str, std::s
 	const auto end = parser.parse_stream(str, offset);
 	if (!IsInvalidStreamPosition(end))
 	{
-		w_value_ = parser.value();
+		address_ = parser.value();
 	}
 
 	return end;
@@ -58,21 +58,10 @@ std::size_t AddressParser::try_parse_literal(const std::string_view& str, std::s
 
 void AddressParser::do_clear()
 {
-	expression_ = std::nullopt;
-	w_value_ = std::nullopt;
+	address_ = {};
 }
 
-ConstOptionalRef<Expression> AddressParser::expression() const
+const Address& AddressParser::address() const
 {
-	return expression_;
-}
-
-ConstOptionalRef<WValue> AddressParser::w_value() const
-{
-	return w_value_;
-}
-
-bool AddressParser::empty() const
-{
-	return !expression_ && !w_value_;
+	return address_;
 }

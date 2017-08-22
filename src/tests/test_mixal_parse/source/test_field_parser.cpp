@@ -28,8 +28,9 @@ TEST_F(FieldParserTest, Fails_If_Parentheses_Are_Openened_But_Not_Closed)
 TEST_F(FieldParserTest, If_Parentheses_Are_Not_Opened_But_Closed_Parses_Empty_String)
 {
 	parse(")");
+	ASSERT_TRUE(parser_.field().empty());
+	
 	reminder_stream_is(")");
-	ASSERT_TRUE(parser_.empty());
 }
 
 TEST_F(FieldParserTest, Fails_If_Expression_Is_Empty_Inside_Parentheses)
@@ -40,18 +41,17 @@ TEST_F(FieldParserTest, Fails_If_Expression_Is_Empty_Inside_Parentheses)
 TEST_F(FieldParserTest, Parses_Sring_As_Expression_Inside_Parentheses)
 {
 	parse(" ( -1+5*20//6 ) ");
-	ASSERT_FALSE(parser_.empty());
-	ASSERT_TRUE(parser_.expression());
+	ASSERT_FALSE(parser_.field().empty());
 
 	ExpressionParser expr_parser;
 	expr_parser.parse_stream("-1 + 5  * 20 // 6");
-	ASSERT_EQ(expr_parser.expression(), *parser_.expression());
+	ASSERT_EQ(expr_parser.expression(), parser_.field().expression());
 }
 
 TEST_F(FieldParserTest, Ignores_Rest_Of_Non_Field_Expression)
 {
 	parse("(1:2),1000");
-	ASSERT_TRUE(parser_.expression());
-	
+	ASSERT_FALSE(parser_.field().empty());
+
 	reminder_stream_is(",1000");
 }
