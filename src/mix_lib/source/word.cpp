@@ -1,6 +1,8 @@
 #include <mix/word.h>
 #include <mix/exceptions.h>
 
+#include <iomanip>
+
 using namespace mix;
 
 #if defined(__GNUC__)
@@ -210,10 +212,10 @@ bool operator==(const Word& lhs, const Word& rhs)
 
 std::ostream& operator<<(std::ostream& o, const Word& w)
 {
-	o << w.sign() << '|';
+	o << '|' << w.sign() << '|';
 	for (const auto& b : w.bytes())
 	{
-		o << b << '|';
+		o << std::setw(2) << b << '|';
 	}
 	return o;
 }

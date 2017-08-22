@@ -168,7 +168,7 @@ Word Translator::evaluate(const Number& n) const
 
 Word Translator::evaluate(const Symbol& symbol) const
 {
-	return query_defined_symbol(symbol);
+	return query_defined_symbol(symbol, current_address_);
 }
 
 void Translator::set_current_address(int address)
@@ -493,8 +493,7 @@ int Translator::evaluate_address(const Address& address) const
 		return evaluate(address.w_value()).value();
 	}
 
-	assert(false);
-	return -1;
+	return 0;
 }
 
 Word Translator::make_mix_command(int address, Byte I, Byte F, Byte C) const

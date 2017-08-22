@@ -45,7 +45,7 @@ FutureTranslatedWordRef TranslateLine(
 	auto query_address_alf_text = [&]()
 	{
 		assert(address_parser.is_mixal_operation());
-		auto text = address_parser.mixal()->alf_text.value_or(Text{{}});
+		auto text = address_parser.mixal()->alf_text.value_or(Text{std::string_view{}});
 		return text;
 	};
 

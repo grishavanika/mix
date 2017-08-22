@@ -11,6 +11,7 @@
 
 #include <string>
 #include <iostream>
+#include <iomanip>
 
 using namespace mixal;
 using namespace mixal_parse;
@@ -40,6 +41,7 @@ struct Interpreter
 				out << "`" << ref.name() << "`, ";
 			}
 			out << "\n";
+			print_code(*translated);
 			words.push_back(std::move(translated));
 		}
 		else
@@ -66,7 +68,8 @@ struct Interpreter
 
 	void print_code(const FutureTranslatedWord& word)
 	{
-		out << word.original_address << ": " << Command{word.value} << "\n";
+		out << std::setw(4) << std::right << word.original_address
+			<< ": " << Command{word.value} << "\n";
 	}
 };
 
@@ -87,6 +90,9 @@ void TranslateLine(Interpreter& interpreter, const std::string& str)
 		throw std::runtime_error{"parse error"};
 	}
 
+#if (0)
+	interpreter.out << "> " << str << "\n";
+#endif
 	auto translated = TranslateLine(interpreter.translator, parser);
 	interpreter.add(std::move(translated));
 }
@@ -119,9 +125,17 @@ void TranslateStream(Interpreter& interpreter, std::istream& in)
 	}
 }
 
+#include <fstream>
+
 int main()
 {
 	Interpreter interpreter{std::cout};
 	interpreter.code_lines.reserve(1000);
+#if (0)
+	std::ifstream in{R"test.mixal)"};
+	TranslateStream(interpreter, in);
+#else
 	TranslateStream(interpreter, std::cin);
+#endif
 }
+
