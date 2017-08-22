@@ -82,15 +82,21 @@ private:
 		FutureTranslatedWordShared&& partial_result,
 		const Address& address, Byte I, Byte F, Byte C);
 
-	int translate_address(const Address& address) const;
+	int evaluate_address(const Address& address) const;
 
 	Word make_mix_command(int address, Byte I, Byte F, Byte C) const;
+
+	void update_unresolved_references();
+	bool try_resolve_previous_word(FutureTranslatedWord& translation_word);
+
+private:
+	struct ChangeTemporaryCurrentAddress;
 
 private:
 	int current_address_;
 	DefinedSymbols defined_symbols_;
 	DefinedLocalSymbols defined_local_symbols_;
-	std::vector<FutureTranslatedWordShared> unresolved_translations_;
+	std::vector<FutureTranslatedWordShared> unresolved_words_;
 };
 
 } // namespace mixal

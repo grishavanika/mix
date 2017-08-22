@@ -32,6 +32,8 @@ public:
 
 	const Word& to_word() const;
 
+	void change_address(WordValue address);
+
 private:
 	const Byte& field_byte() const;
 

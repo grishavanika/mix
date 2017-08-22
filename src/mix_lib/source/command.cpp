@@ -2,10 +2,19 @@
 
 using namespace mix;
 
+namespace {
+
+const WordField k_address_field{0, 2};
+const std::size_t k_index_byte{3};
+const std::size_t k_field_byte{4};
+const std::size_t k_id_byte{5};
+
+} // namespace
+
 Command::Command(const Word& word)
 	: word_{word}
 	, field_{WordField::FromByte(field_byte())}
-	, address_{word.value(WordField{0, 2})}
+	, address_{word.value(k_address_field)}
 {
 }
 
@@ -27,25 +36,25 @@ Command::Command(
 		, field_{field}
 		, address_{address}
 {
-	word_.set_value(address_, WordField{0, 2});
-	word_.set_byte(3, address_index);
-	word_.set_byte(4, field_.to_byte());
-	word_.set_byte(5, id);
+	change_address(address);
+	word_.set_byte(k_index_byte, address_index);
+	word_.set_byte(k_field_byte, field_.to_byte());
+	word_.set_byte(k_id_byte, id);
 }
 
 std::size_t Command::id() const
 {
-	return word_.byte(5).cast_to<std::size_t>();
+	return word_.byte(k_id_byte).cast_to<std::size_t>();
 }
 
 const Byte& Command::field_byte() const
 {
-	return word_.byte(4);
+	return word_.byte(k_field_byte);
 }
 
 std::size_t Command::address_index() const
 {
-	return word_.byte(3).cast_to<std::size_t>();
+	return word_.byte(k_index_byte).cast_to<std::size_t>();
 }
 
 const WordField& Command::word_field() const
@@ -73,3 +82,8 @@ std::size_t Command::field() const
 	return field_.to_byte().cast_to<std::size_t>();
 }
 
+void Command::change_address(WordValue address)
+{
+	address_ = address;
+	word_.set_value(address_, k_address_field);
+}

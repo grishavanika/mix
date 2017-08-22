@@ -65,21 +65,30 @@ TEST(TranslatorSymbolsTest, Only_HERE_Local_Symbol_Can_Be_Defined)
 	translator.define_symbol(Symbol::FromString("2H"), 1000);
 }
 
-TEST(TranslatorSymbolsTest, Only_BACKWARD_Local_Symbol_Can_Be_Queried)
+TEST(TranslatorSymbolsTest, BACKWARD_Local_Symbol_Can_Be_Queried)
 {
 	Translator translator;
-
 	translator.define_symbol(Symbol::FromString("2H"), 1000);
 	
-	// `Backward` local symbol on the address before `Here` definition
 	ASSERT_FALSE(translator.is_defined_symbol(Symbol::FromString("2B"), 33));
-	// `Backward` local symbol on the address _after_ `Here` definition
 	ASSERT_TRUE(translator.is_defined_symbol(Symbol::FromString("2B"), 1111));
+}
 
-	// `Forward` local symbol is forward reference, hence is not defined
-	ASSERT_FALSE(translator.is_defined_symbol(Symbol::FromString("2F"), 33));
-	// `Here` local symbol defines only `Backward` or `Forward` symbols, but not itself
+TEST(TranslatorSymbolsTest, HERE_Local_Symbol_Can_NOT_Be_Queried)
+{
+	Translator translator;
+	translator.define_symbol(Symbol::FromString("2H"), 1000);
+
 	ASSERT_FALSE(translator.is_defined_symbol(Symbol::FromString("2H"), 1000));
+}
+
+TEST(TranslatorSymbolsTest, FORWARD_Local_Symbol_Can_Be_Queried)
+{
+	Translator translator;
+	translator.define_symbol(Symbol::FromString("2H"), 1000);
+
+	ASSERT_TRUE(translator.is_defined_symbol(Symbol::FromString("2F"), 33));
+	ASSERT_FALSE(translator.is_defined_symbol(Symbol::FromString("2F"), 1111));
 }
 
 TEST(TranslatorSymbolsTest, Multiple_HERE_Local_Symbols_Can_Be_Defined)
@@ -102,6 +111,17 @@ TEST(TranslatorSymbolsTest, Backward_Local_Symbol_Value_Depends_On_Queried_Addre
 
 	ASSERT_EQ(100, translator.query_defined_symbol(Symbol::FromString("2B"), 200));
 	ASSERT_EQ(1000, translator.query_defined_symbol(Symbol::FromString("2B"), 2000));
+}
+
+TEST(TranslatorSymbolsTest, Forward_Local_Symbol_Value_Depends_On_Queried_Address_Location)
+{
+	Translator translator;
+
+	translator.define_symbol(Symbol::FromString("2H"), 100);
+	translator.define_symbol(Symbol::FromString("2H"), 1000);
+
+	ASSERT_EQ(1000, translator.query_defined_symbol(Symbol::FromString("2F"), 200));
+	ASSERT_EQ(100, translator.query_defined_symbol(Symbol::FromString("2F"), 20));
 }
 
 TEST(TranslatorSymbolsTest, Asking_Undefined_Backward_Symbol_Returns_False)

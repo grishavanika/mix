@@ -12,10 +12,24 @@
 
 using namespace mixal;
 
-namespace {
+struct Translator::ChangeTemporaryCurrentAddress
+{
+	ChangeTemporaryCurrentAddress(Translator& translator, int new_address)
+		: translator{translator}
+		, original_address{translator.current_address_}
+	{
+		translator.current_address_ = new_address;
+	}
 
+	~ChangeTemporaryCurrentAddress()
+	{
+		translator.current_address_ = original_address;
+	}
 
-} // namespace
+private:
+	Translator& translator;
+	int original_address;
+};
 
 Translator::Translator(
 	const DefinedSymbols& symbols /*= {}*/,
@@ -178,6 +192,8 @@ void Translator::define_symbol(const Symbol& symbol, const Word& value)
 	{
 		define_usual_symbol(symbol, value);
 	}
+
+	update_unresolved_references();
 }
 
 void Translator::define_usual_symbol(const Symbol& symbol, const Word& value)
@@ -204,7 +220,7 @@ void Translator::define_local_symbol(const Symbol& symbol, int address)
 
 void Translator::prepare_local_addresses(Addresses& addresses) const
 {
-	sort(addresses.begin(), addresses.end(), std::greater<>{});
+	sort(addresses.begin(), addresses.end());
 }
 
 void Translator::prepare_local_addresses(DefinedLocalSymbols& local_symbols) const
@@ -240,12 +256,15 @@ Word Translator::query_usual_symbol(const Symbol& symbol) const
 
 Word Translator::query_local_symbol(const Symbol& symbol, int near_address) const
 {
-	if (symbol.kind() != LocalSymbolKind::Backward)
+	const int* value = nullptr;
+	switch (symbol.kind())
 	{
-		throw InvalidLocalSymbolReference{symbol};
+	case LocalSymbolKind::Backward:
+	case LocalSymbolKind::Forward:
+		value = find_local_symbol(symbol, near_address);
+		break;
 	}
 
-	auto value = find_local_symbol(symbol, near_address);
 	if (!value)
 	{
 		throw InvalidLocalSymbolReference{symbol};
@@ -262,12 +281,20 @@ const int* Translator::find_local_symbol(const Symbol& symbol, int near_address)
 		return nullptr;
 	}
 
+	// Note: depends on sort criteria in `prepare_local_addresses()`
 	const auto& addresses = addresses_it->second;
-	auto address_it = lower_bound(
-		addresses.cbegin(), addresses.cend(),
-		near_address, std::greater<>{});
+	if (symbol.kind() == LocalSymbolKind::Backward)
+	{
+		auto it = lower_bound(addresses.crbegin(), addresses.crend(), near_address, std::greater<>{});
+		return (it != addresses.crend()) ? &*it : nullptr;
+	}
+	else if (symbol.kind() == LocalSymbolKind::Forward)
+	{
+		auto it = lower_bound(addresses.cbegin(), addresses.cend(), near_address);
+		return (it != addresses.cend()) ? &*it : nullptr;
+	}
 
-	return (address_it != addresses.cend()) ? &*address_it : nullptr;
+	return nullptr;
 }
 
 bool Translator::is_defined_symbol(const Symbol& symbol, int near_address /*= -1*/) const
@@ -289,12 +316,14 @@ bool Translator::is_defined_usual_symbol(const Symbol& symbol) const
 
 bool Translator::is_defined_local_symbol(const Symbol& symbol, int near_address) const
 {
-	if (symbol.kind() != LocalSymbolKind::Backward)
+	switch (symbol.kind())
 	{
-		return false;
-	}
-
-	return (find_local_symbol(symbol, near_address) != nullptr);
+	case LocalSymbolKind::Backward:
+	case LocalSymbolKind::Forward:
+		return (find_local_symbol(symbol, near_address) != nullptr);
+	};
+	
+	return false;
 }
 
 void Translator::define_label_if_valid(const Label& label, const Word& value)
@@ -451,7 +480,7 @@ Byte Translator::field_to_byte(const Field& field, const OperationInfo& op_info)
 	return int{value};
 }
 
-int Translator::translate_address(const Address& address) const
+int Translator::evaluate_address(const Address& address) const
 {
 	// Note: `address` shoud not refer to forwarding symbol
 	// (undefined symbol exception will be populated otherwice)
@@ -487,13 +516,45 @@ FutureTranslatedWordRef Translator::process_mix_translation(
 	if (partial_result->is_ready())
 	{
 		partial_result->value = make_mix_command(
-			translate_address(address), I, F, C);
+			evaluate_address(address), I, F, C);
 		return partial_result;
 	}
 
 	partial_result->value = make_mix_command(0, I, F, C);
 	partial_result->unresolved_address = address;
-	unresolved_translations_.push_back(partial_result);
+	unresolved_words_.push_back(partial_result);
 	return partial_result;
+}
+
+void Translator::update_unresolved_references()
+{
+	unresolved_words_.erase(remove_if(begin(unresolved_words_), end(unresolved_words_),
+		[&](auto&& future_word)
+	{
+		return try_resolve_previous_word(*future_word);
+	}) , end(unresolved_words_));
+}
+
+bool Translator::try_resolve_previous_word(FutureTranslatedWord& translation_word)
+{
+	auto& references = translation_word.forward_references;
+	const auto original_address = translation_word.original_address;
+
+	references.erase(remove_if(begin(references), end(references),
+		[&](auto&& symbol)
+	{
+		return is_defined_symbol(symbol, original_address);
+	}), end(references));
+
+	if (translation_word.is_ready())
+	{
+		ChangeTemporaryCurrentAddress _{*this, original_address};
+		mix::Command command{translation_word.value};
+		command.change_address(evaluate_address(translation_word.unresolved_address));
+		translation_word.value = command.to_word();
+		return true;
+	}
+
+	return false;
 }
 
