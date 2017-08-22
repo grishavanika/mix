@@ -43,7 +43,7 @@ struct FutureTranslatedWord :
 	std::vector<Symbol> forward_references;
 	Address unresolved_address;
 
-	FutureTranslatedWord(int address, std::vector<Symbol> references)
+	FutureTranslatedWord(int address, std::vector<Symbol> references = {})
 		: forward_references{std::move(references)}
 	{
 		original_address = address;
