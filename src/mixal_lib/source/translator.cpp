@@ -5,6 +5,7 @@
 
 #include <mix/char_table.h>
 #include <mix/word_field.h>
+#include <mix/command.h>
 
 #include <functional>
 #include <algorithm>
@@ -351,14 +352,22 @@ FutureTranslatedWordRef Translator::translate_MIX(
 	Byte I = index_to_byte(index, command_info);
 	Byte F = field_to_byte(field, command_info);
 
-	auto result = std::make_shared<FutureTranslatedWord>(
-		current_address_,
+	const auto original_address = current_address_;
+	auto future_word = std::make_shared<FutureTranslatedWord>(
+		original_address,
 		query_address_forward_references(address));
 
-	define_label_if_valid(label, current_address_);
+	define_label_if_valid(label, original_address);
 
-	return process_mix_translation(std::move(result),
-		address, std::move(I), std::move(F), std::move(C));
+	auto result = process_mix_translation(
+		std::move(future_word), address, I, F, C);
+
+	// Note: when resolving forwarding references later and translating
+	// `Address` expression to its value, we should replace
+	// `current_address()` with `original_address` to resolve
+	// expressions like `**X` in the past (since `*` will be changed)
+	increase_current_address();
+	return result;
 }
 
 void Translator::increase_current_address()
@@ -461,14 +470,14 @@ int Translator::translate_address(const Address& address) const
 
 Word Translator::make_mix_command(int address, Byte I, Byte F, Byte C) const
 {
-	Word command;
+	// #TODO: check address/index and so on validness
+	const mix::Command command{
+		C.cast_to<std::size_t>(),
+		address,
+		I.cast_to<std::size_t>(),
+		WordField::FromByte(F)};
 
-	command.set_value(address, WordField{0, 2});
-	command.set_byte(3, I);
-	command.set_byte(4, F);
-	command.set_byte(5, C);
-
-	return command;
+	return command.to_word();
 }
 
 FutureTranslatedWordRef Translator::process_mix_translation(
