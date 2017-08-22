@@ -5,6 +5,8 @@
 
 #include <mixal_parse/types/all.h>
 
+#include <memory>
+
 namespace mixal {
 
 using Word				= mix::Word;
@@ -29,15 +31,25 @@ using Address			= mixal_parse::Address;
 using Index				= mixal_parse::Index;
 using Field				= mixal_parse::Field;
 
-struct AddressedWord
+struct TranslatedWord
 {
-	int address{0};
+	int original_address{-1};
 	Word value{};
 };
 
-class FutureWord
+struct FutureTranslatedWord :
+	public TranslatedWord
 {
-	//int address;
+	std::vector<Symbol> forward_references;
+
+	bool is_ready() const
+	{
+		return forward_references.empty();
+	}
 };
+
+// Note: using `std::shared_ptr` for simplicity purpose. It can be optimized
+// by using simple wrapper around `TranslatedWord` with reference to `Translator`
+using FutureTranslatedWordRef = std::shared_ptr<const FutureTranslatedWord>;
 
 } // namespace mixal

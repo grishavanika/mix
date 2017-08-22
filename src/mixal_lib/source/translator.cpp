@@ -10,6 +10,11 @@
 
 using namespace mixal;
 
+namespace {
+
+
+} // namespace
+
 Translator::Translator(
 	const DefinedSymbols& symbols /*= {}*/,
 	const DefinedLocalSymbols& local_symbols /*= {}*/,
@@ -312,20 +317,20 @@ void Translator::translate_ORIG(const WValue& value, const Label& label /*= {}*/
 	set_current_address(address.value());
 }
 
-AddressedWord Translator::translate_CON(const WValue& wvalue, const Label& label /*= {}*/)
+TranslatedWord Translator::translate_CON(const WValue& wvalue, const Label& label /*= {}*/)
 {
 	define_label_if_valid(label, current_address_);
 
-	AddressedWord result{current_address_, evaluate(wvalue)};
+	TranslatedWord result{current_address_, evaluate(wvalue)};
 	increase_current_address();
 	return result;
 }
 
-AddressedWord Translator::translate_ALF(const Text& text, const Label& label /*= {}*/)
+TranslatedWord Translator::translate_ALF(const Text& text, const Label& label /*= {}*/)
 {
 	define_label_if_valid(label, current_address_);
 
-	AddressedWord result{current_address_, evaluate(text)};
+	TranslatedWord result{current_address_, evaluate(text)};
 	increase_current_address();
 	return result;
 }
@@ -335,7 +340,7 @@ void Translator::translate_END(const WValue& /*value*/, const Label& /*label*/ /
 
 }
 
-FutureWord Translator::translate_MIX(
+FutureTranslatedWordRef Translator::translate_MIX(
 	Operation /*command*/,
 	const Address& /*A*/, const Index& /*I*/, const Field& /*F*/,
 	const Label& /*label*/ /*= {}*/)
@@ -347,4 +352,61 @@ void Translator::increase_current_address()
 {
 	++current_address_;
 }
+
+std::vector<Symbol> Translator::query_address_forward_references(const Address& address) const
+{
+	std::vector<Symbol> symbols;
+	
+	auto collect_from_expression_token = [&](const Expression::Token& token)
+	{
+		if (!token.basic_expr.is_symbol())
+		{
+			return;
+		}
+
+		const auto& symbol = token.basic_expr.as_symbol();
+
+		const bool is_forward_symbol = (symbol.kind() == LocalSymbolKind::Forward);
+		const bool is_undefined_usual_symbol =
+			(symbol.kind() == LocalSymbolKind::Usual) &&
+			!is_defined_symbol(symbol);
+
+		if (is_forward_symbol || is_undefined_usual_symbol)
+		{
+			symbols.push_back(symbol);
+		}
+	};
+
+	auto collect_from_expression = [&](const Expression& expr)
+	{
+		for (const auto& token : expr.tokens())
+		{
+			collect_from_expression_token(token);
+		}
+	};
+
+	auto collect_from_wvalue_token = [&](const WValue::Token& token)
+	{
+		collect_from_expression(token.expression);
+		if (token.field)
+		{
+			collect_from_expression(*token.field);
+		}
+	};
+
+	auto collect_from_wvalue = [&](const WValue& wvalue)
+	{
+		for (const auto& token : wvalue.tokens())
+		{
+			collect_from_wvalue_token(token);
+		}
+	};
+
+	collect_from_wvalue(address.w_value());
+	collect_from_expression(address.expression());
+
+	return symbols;
+}
+
+
 

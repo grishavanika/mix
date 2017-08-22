@@ -27,15 +27,17 @@ public:
 	Word evaluate(const Expression& expr) const;
 	Word evaluate(const WValue& wvalue) const;
 
-	FutureWord translate_MIX(
+	FutureTranslatedWordRef translate_MIX(
 		Operation command,
 		const Address& A, const Index& I, const Field& F,
 		const Label& label = {});
 
 	void translate_EQU(const WValue& value, const Label& label = {});
 	void translate_ORIG(const WValue& address, const Label& label = {});
-	AddressedWord translate_CON(const WValue& address, const Label& label = {});
-	AddressedWord translate_ALF(const Text& text, const Label& label = {});
+	
+	// #TODO: `WValue` can contain `Forward reference`, hence we should return `FutureWord`
+	TranslatedWord translate_CON(const WValue& address, const Label& label = {});
+	TranslatedWord translate_ALF(const Text& text, const Label& label = {});
 	void translate_END(const WValue& address, const Label& label = {});
 
 	void set_current_address(int address);
@@ -68,6 +70,8 @@ private:
 
 	void prepare_local_addresses(Addresses& addresses) const;
 	void prepare_local_addresses(DefinedLocalSymbols& local_symbols) const;
+
+	std::vector<Symbol> query_address_forward_references(const Address& address) const;
 
 private:
 	int current_address_;
