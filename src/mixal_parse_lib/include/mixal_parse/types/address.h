@@ -16,6 +16,7 @@ public:
 	bool empty() const;
 	bool has_expression() const;
 	bool has_w_value() const;
+	bool has_literal_constant() const;
 
 private:
 	// #TODO: C++17 std::variant<Expression, WValue>
@@ -70,6 +71,11 @@ inline bool Address::has_expression() const
 inline bool Address::has_w_value() const
 {
 	return wvalue_.is_valid();
+}
+
+inline bool Address::has_literal_constant() const
+{
+	return has_w_value();
 }
 
 } // namespace mixal_parse

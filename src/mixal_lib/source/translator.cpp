@@ -12,6 +12,19 @@
 
 using namespace mixal;
 
+namespace {
+
+Expression MakeExression(const std::string_view& symbol)
+{
+	Expression::Token token;
+	token.basic_expr = BasicExpression{symbol, BasicExpression::Kind::Symbol};
+	Expression expr;
+	expr.add_token(std::move(token));
+	return expr;
+}
+
+} // namespace
+
 struct Translator::ChangeTemporaryCurrentAddress
 {
 	ChangeTemporaryCurrentAddress(Translator& translator, int new_address)
@@ -382,14 +395,15 @@ FutureTranslatedWordRef Translator::translate_MIX(
 	Byte F = field_to_byte(field, command_info);
 
 	const auto original_address = current_address_;
+	const auto transformation = transform_address(address);
 	auto future_word = std::make_shared<FutureTranslatedWord>(
 		original_address,
-		query_address_forward_references(address));
+		transformation.forward_references);
 
 	define_label_if_valid(label, original_address);
 
 	auto result = process_mix_translation(
-		std::move(future_word), address, I, F, C);
+		std::move(future_word), transformation.address, I, F, C);
 
 	// Note: when resolving forwarding references later and translating
 	// `Address` expression to its value, we should replace
@@ -404,9 +418,9 @@ void Translator::increase_current_address()
 	++current_address_;
 }
 
-std::vector<Symbol> Translator::query_address_forward_references(const Address& address) const
+Translator::AddressTransformation Translator::transform_address(const Address& address)
 {
-	std::vector<Symbol> symbols;
+	AddressTransformation transformed;
 	
 	auto collect_from_expression_token = [&](const Expression::Token& token)
 	{
@@ -424,7 +438,7 @@ std::vector<Symbol> Translator::query_address_forward_references(const Address& 
 
 		if (is_forward_symbol || is_undefined_usual_symbol)
 		{
-			symbols.push_back(symbol);
+			transformed.forward_references.push_back(symbol);
 		}
 	};
 
@@ -436,27 +450,28 @@ std::vector<Symbol> Translator::query_address_forward_references(const Address& 
 		}
 	};
 
-	auto collect_from_wvalue_token = [&](const WValue::Token& token)
+	if (address.has_expression())
 	{
-		collect_from_expression(token.expression);
-		if (token.field)
-		{
-			collect_from_expression(*token.field);
-		}
-	};
-
-	auto collect_from_wvalue = [&](const WValue& wvalue)
+		collect_from_expression(address.expression());
+		transformed.address = address;
+	}
+	else if (address.has_literal_constant())
 	{
-		for (const auto& token : wvalue.tokens())
-		{
-			collect_from_wvalue_token(token);
-		}
-	};
+		const auto const_name = make_constant(address.w_value());
+		transformed.forward_references.push_back(const_name);
+		transformed.address = Address{MakeExression(const_name)};
+	}
 
-	collect_from_wvalue(address.w_value());
-	collect_from_expression(address.expression());
+	return transformed;
+}
 
-	return symbols;
+std::string_view Translator::make_constant(const WValue& wvalue)
+{
+	const auto id = constants_storage_.size() + 1;
+	constants_storage_.push_back("@CON" + std::to_string(id));
+	std::string_view name = constants_storage_.back();
+	constant_to_value_[name] = wvalue;
+	return name;
 }
 
 Byte Translator::index_to_byte(const Index& index, const OperationInfo& op_info) const
@@ -482,15 +497,18 @@ Byte Translator::field_to_byte(const Field& field, const OperationInfo& op_info)
 
 int Translator::evaluate_address(const Address& address) const
 {
-	// Note: `address` shoud not refer to forwarding symbol
-	// (undefined symbol exception will be populated otherwice)
 	if (address.has_expression())
 	{
+		// Note: `address` shoud not refer to forwarding symbol
+		// (undefined symbol exception will be populated otherwice)
 		return evaluate(address.expression()).value();
 	}
-	else  if (address.has_w_value())
+	else if (address.has_w_value())
 	{
-		return evaluate(address.w_value()).value();
+		// Address's Literal Contant should be already processed before
+		// and replaced to Forward Reference (see `transform_address()` function)
+		assert(false);
+		return 0;
 	}
 
 	return 0;
