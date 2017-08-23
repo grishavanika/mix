@@ -119,6 +119,7 @@ private:
 	void resolve_previous_word(FutureTranslatedWord& translation_word);
 
 	std::string_view make_constant(const WValue& wvalue);
+	bool is_internal_constant(const Symbol& symbol) const;
 
 	std::vector<Symbol> collect_unresolved_symbols() const;
 	FlatMap<Symbol, Word> evaluate_unresolved_symbols(std::vector<Symbol> symbols) const;
@@ -548,12 +549,10 @@ bool Translator::Impl::is_defined_local_symbol(const Symbol& symbol, int near_ad
 
 void Translator::Impl::define_label_if_valid(const Label& label, const Word& value)
 {
-	if (label.empty())
+	if (!label.empty() || is_internal_constant(label.symbol()))
 	{
-		return;
+		define_symbol(label.symbol(), value);
 	}
-
-	define_symbol(label.symbol(), value);
 }
 
 void Translator::Impl::translate_EQU(const WValue& value, const Label& label)
@@ -564,7 +563,7 @@ void Translator::Impl::translate_EQU(const WValue& value, const Label& label)
 void Translator::Impl::translate_ORIG(const WValue& value, const Label& label)
 {
 	const auto address = evaluate(value);
-	define_label_if_valid(label, address);
+	define_label_if_valid(label, current_address());
 	set_current_address(address.value());
 }
 
@@ -710,6 +709,12 @@ std::string_view Translator::Impl::make_constant(const WValue& wvalue)
 	return name;
 }
 
+bool Translator::Impl::is_internal_constant(const Symbol& symbol) const
+{
+	return !symbol.name().empty() &&
+		(symbol.name().front() == '@');
+}
+
 Byte Translator::Impl::index_to_byte(const Index& index, const OperationInfo& op_info) const
 {
 	if (index.empty())
@@ -836,9 +841,13 @@ std::vector<Symbol> Translator::Impl::collect_unresolved_symbols() const
 	std::vector<Symbol> symbols;
 	for (const auto& unresolved_word : unresolved_words_)
 	{
-		copy(unresolved_word->forward_references.cbegin(),
+		copy_if(unresolved_word->forward_references.cbegin(),
 			unresolved_word->forward_references.cend(),
-			back_inserter(symbols));
+			back_inserter(symbols),
+			[&](const Symbol& symbol)
+		{
+			return !is_internal_constant(symbol);
+		});
 	}
 	return symbols;
 }

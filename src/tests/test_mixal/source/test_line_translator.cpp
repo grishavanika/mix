@@ -70,7 +70,7 @@ TEST_F(LineTranslatorTest, ORIG_Defines_Label_Symbol_Before_Changing_The_Current
 	auto word = translate("TABLE ORIG *+100");
 
 	ASSERT_EQ(nullptr, word);
-	ASSERT_EQ(500, translator_.query_defined_symbol("TABLE"));
+	ASSERT_EQ(400, translator_.query_defined_symbol("TABLE"));
 	ASSERT_EQ(500, translator_.current_address());
 }
 

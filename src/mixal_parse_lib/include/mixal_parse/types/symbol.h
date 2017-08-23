@@ -89,11 +89,6 @@ inline LocalSymbolId Symbol::local_id() const
 
 inline /*static*/ Symbol Symbol::FromString(const std::string_view& str)
 {
-	if (!IsSymbol(str))
-	{
-		return Symbol{};
-	}
-
 	if (!IsLocalSymbol(str))
 	{
 		return Symbol{str};
