@@ -24,7 +24,7 @@ protected:
 		const auto pos = parser.parse_stream(line);
 		if (IsInvalidStreamPosition(pos))
 		{
-			throw std::exception{"bad test input line"};
+			throw std::logic_error{"bad test input line"};
 		}
 		
 		return TranslateLine(translator_, parser);
