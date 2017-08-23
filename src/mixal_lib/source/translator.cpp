@@ -565,13 +565,20 @@ bool Translator::try_resolve_previous_word(FutureTranslatedWord& translation_wor
 
 	if (translation_word.is_ready())
 	{
-		ChangeTemporaryCurrentAddress _{*this, original_address};
-		mix::Command command{translation_word.value};
-		command.change_address(evaluate_address(translation_word.unresolved_address));
-		translation_word.value = command.to_word();
+		resolve_previous_word(translation_word);
 		return true;
 	}
 
 	return false;
+}
+
+void Translator::resolve_previous_word(FutureTranslatedWord& translation_word)
+{
+	assert(translation_word.is_ready());
+	const auto original_address = translation_word.original_address;
+	ChangeTemporaryCurrentAddress _{*this, original_address};
+	mix::Command command{translation_word.value};
+	command.change_address(evaluate_address(translation_word.unresolved_address));
+	translation_word.value = command.to_word();
 }
 

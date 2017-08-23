@@ -95,6 +95,7 @@ private:
 
 	void update_unresolved_references();
 	bool try_resolve_previous_word(FutureTranslatedWord& translation_word);
+	void resolve_previous_word(FutureTranslatedWord& translation_word);
 
 	std::string_view make_constant(const WValue& wvalue);
 
