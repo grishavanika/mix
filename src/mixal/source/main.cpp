@@ -12,6 +12,7 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <list>
 
 using namespace mixal;
 using namespace mixal_parse;
@@ -22,8 +23,18 @@ struct Interpreter
 	std::ostream& out;
 	Translator translator;
 	std::vector<FutureTranslatedWordRef> words;
-	// #TODO: temporary solution
-	std::vector<std::string> code_lines;
+	// #TODO: temporary solution for case when line of MIXAL code contains
+	// "Forward Reference" and we create `string_view` to temporary string
+	// for that reference to resolve later
+	std::list<std::string> code_lines;
+
+	Interpreter(std::ostream& out)
+		: out{out}
+		, translator{}
+		, words{}
+		, code_lines{}
+	{
+	}
 
 	void add(FutureTranslatedWordRef&& translated)
 	{
@@ -41,7 +52,10 @@ struct Interpreter
 				out << "`" << ref.name() << "`, ";
 			}
 			out << "\n";
+			
+			out << "> (partially resolved) - ";
 			print_code(*translated);
+
 			words.push_back(std::move(translated));
 		}
 		else
@@ -56,6 +70,7 @@ struct Interpreter
 		{
 			if ((**it).is_ready())
 			{
+				out << "> (future resolved) - ";
 				print_code(**it);
 				it = words.erase(it);
 			}
@@ -130,7 +145,6 @@ void TranslateStream(Interpreter& interpreter, std::istream& in)
 int main()
 {
 	Interpreter interpreter{std::cout};
-	interpreter.code_lines.reserve(1000);
 #if (0)
 	std::ifstream in{R"(test.mixal)"};
 	TranslateStream(interpreter, in);

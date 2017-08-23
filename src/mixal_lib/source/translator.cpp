@@ -30,6 +30,17 @@ struct AddressTransformation
 	Address address;
 };
 
+template<typename K, typename V>
+FlatMap<K, V> CombineFlatMaps(FlatMap<K, V>&& fm1, FlatMap<K, V>&& fm2)
+{
+	FlatMap<K, V> result = std::move(fm1);
+	result.reserve(fm1.size() + fm2.size());
+	copy(make_move_iterator(fm2.begin()),
+		make_move_iterator(fm2.end()),
+		back_inserter(result));
+	return result;
+}
+
 } // namespace
 
 struct Translator::Impl
@@ -55,8 +66,9 @@ struct Translator::Impl
 
 	// #TODO: `WValue` can contain `Forward reference`, hence we should return `FutureWord`
 	TranslatedWord translate_CON(const WValue& address, const Label& label);
+	TranslatedWord translate_CON(const Word& value, const Label& label);
 	TranslatedWord translate_ALF(const Text& text, const Label& label);
-	void translate_END(const WValue& address, const Label& label);
+	EndCommandGeneratedCode translate_END(const WValue& address, const Label& label);
 
 	void set_current_address(int address, bool notify = true);
 	int current_address() const;
@@ -108,6 +120,10 @@ private:
 
 	std::string_view make_constant(const WValue& wvalue);
 
+	std::vector<Symbol> collect_unresolved_symbols() const;
+	FlatMap<Symbol, Word> evaluate_unresolved_symbols(std::vector<Symbol> symbols) const;
+	FlatMap<Symbol, Word> evaluate_constants() const;
+
 private:
 	struct ChangeTemporaryCurrentAddress;
 
@@ -124,7 +140,7 @@ private:
 	// These strings are referenced by `Expression` of `Address`
 	// after transformation (see `transform_address()`)
 	std::list<std::string> constants_storage_;
-	std::map<std::string_view, WValue> constant_to_value_;
+	FlatMap<Symbol, WValue> constant_to_value_;
 };
 
 struct Translator::Impl::ChangeTemporaryCurrentAddress
@@ -213,7 +229,8 @@ TranslatedWord Translator::translate_ALF(const Text& text, const Label& label /*
 	return impl->translate_ALF(text, label);
 }
 
-void Translator::translate_END(const WValue& address, const Label& label /*= {}*/)
+Translator::EndCommandGeneratedCode Translator::translate_END(
+	const WValue& address, const Label& label /*= {}*/)
 {
 	return impl->translate_END(address, label);
 }
@@ -553,10 +570,15 @@ void Translator::Impl::translate_ORIG(const WValue& value, const Label& label)
 
 TranslatedWord Translator::Impl::translate_CON(const WValue& wvalue, const Label& label)
 {
+	return translate_CON(evaluate(wvalue), label);
+}
+
+TranslatedWord Translator::Impl::translate_CON(const Word& value, const Label& label)
+{
 	const auto address = current_address();
 	define_label_if_valid(label, address);
 
-	TranslatedWord result{address, evaluate(wvalue)};
+	TranslatedWord result{address, value};
 	increase_current_address();
 	return result;
 }
@@ -571,9 +593,31 @@ TranslatedWord Translator::Impl::translate_ALF(const Text& text, const Label& la
 	return result;
 }
 
-void Translator::Impl::translate_END(const WValue& /*value*/, const Label& /*label*/)
+// Note: this function _may be_ not exception safe. This means
+// that after any kind of exception/error `Translator` state will be in
+// undetermined state (TODO: investigate)
+Translator::EndCommandGeneratedCode Translator::Impl::translate_END(
+	const WValue& value, const Label& label)
 {
+	const auto symbols = CombineFlatMaps(
+		evaluate_constants(),
+		evaluate_unresolved_symbols(
+			collect_unresolved_symbols()));
 
+	EndCommandGeneratedCode generated_code;
+	generated_code.program_start_address = evaluate(value).value();
+
+	for (const auto& symbol_value : symbols)
+	{
+		const auto symbol = symbol_value.first;
+		const auto translated = translate_CON(symbol_value.second, symbol);
+
+		generated_code.undefined_symbols.push_back(
+			std::make_pair(symbol, translated));
+	}
+
+	define_label_if_valid(label, current_address());
+	return generated_code;
 }
 
 FutureTranslatedWordRef Translator::Impl::translate_MIX(
@@ -662,7 +706,7 @@ std::string_view Translator::Impl::make_constant(const WValue& wvalue)
 	const auto id = constants_storage_.size() + 1;
 	constants_storage_.push_back("@CON" + std::to_string(id));
 	std::string_view name = constants_storage_.back();
-	constant_to_value_[name] = wvalue;
+	constant_to_value_.push_back(std::make_pair(Symbol{name}, wvalue));
 	return name;
 }
 
@@ -784,5 +828,42 @@ Translator::Impl::Impl(const DefinedSymbols& symbols,
 		, defined_local_symbols_{local_symbols}
 {
 	prepare_local_addresses(defined_local_symbols_);
+}
+
+std::vector<Symbol> Translator::Impl::collect_unresolved_symbols() const
+{
+	// Flatten all forward references of all unresolved words into single array
+	std::vector<Symbol> symbols;
+	for (const auto& unresolved_word : unresolved_words_)
+	{
+		copy(unresolved_word->forward_references.cbegin(),
+			unresolved_word->forward_references.cend(),
+			back_inserter(symbols));
+	}
+	return symbols;
+}
+
+FlatMap<Symbol, Word> Translator::Impl::evaluate_unresolved_symbols(
+	std::vector<Symbol> symbols) const
+{
+	const Word k_undefined_symbol_value{0};
+
+	FlatMap<Symbol, Word> symbol_to_value;
+	for (auto symbol : symbols)
+	{
+		symbol_to_value.push_back(std::make_pair(symbol, k_undefined_symbol_value));
+	}
+	return symbol_to_value;
+}
+
+FlatMap<Symbol, Word> Translator::Impl::evaluate_constants() const
+{
+	FlatMap<Symbol, Word> symbol_to_value;
+	for (const auto& constant_wvalue : constant_to_value_)
+	{
+		symbol_to_value.push_back(std::make_pair(constant_wvalue.first,
+			evaluate(constant_wvalue.second)));
+	}
+	return symbol_to_value;
 }
 

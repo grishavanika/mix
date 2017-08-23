@@ -53,6 +53,12 @@ struct FutureTranslatedWord :
 	{
 		return forward_references.empty();
 	}
+
+	TranslatedWord translated_word() const
+	{
+		assert(is_ready());
+		return *this;
+	}
 };
 
 // Note: using `std::shared_ptr` for simplicity purpose. It can be optimized

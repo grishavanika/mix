@@ -8,6 +8,14 @@
 
 namespace mixal {
 
+// #TODO: move to core lib.
+//
+// Simple typedef for case when needed "map", but without any
+// properties of map (e.g., no sort on instert) since all
+// needed conditions already met (e.g., uniqueness of keys)
+template<typename K, typename V>
+using FlatMap = std::vector<std::pair<K, V>>;
+
 struct OperationInfo;
 
 class MIXAL_LIB_EXPORT Translator
@@ -16,6 +24,12 @@ public:
 	using DefinedSymbols		= std::map<Symbol, Word>;
 	using Addresses				= std::vector<int/*addresses*/>;
 	using DefinedLocalSymbols	= std::map<LocalSymbolId, Addresses>;
+
+	struct EndCommandGeneratedCode
+	{
+		FlatMap<Symbol, TranslatedWord> undefined_symbols;
+		int program_start_address;
+	};
 
 public:
 	Translator(const DefinedSymbols& symbols = {},
@@ -41,7 +55,8 @@ public:
 	
 	TranslatedWord translate_CON(const WValue& address, const Label& label = {});
 	TranslatedWord translate_ALF(const Text& text, const Label& label = {});
-	void translate_END(const WValue& address, const Label& label = {});
+
+	EndCommandGeneratedCode translate_END(const WValue& address, const Label& label = {});
 
 	void set_current_address(int address);
 	int current_address() const;
