@@ -194,7 +194,7 @@ OperationInfo QueryOperationInfo(const Operation& op)
 {
 	const auto id = op.id();
 	const auto index = static_cast<int>(id);
-	if (index < 0 || (index > core::ArraySize(k_operations_info)))
+	if (index < 0 || (index > static_cast<int>(core::ArraySize(k_operations_info))))
 	{
 		throw InvalidOperationId{id};
 	}

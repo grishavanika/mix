@@ -464,6 +464,7 @@ Word Translator::Impl::query_local_symbol(const Symbol& symbol, int near_address
 	case LocalSymbolKind::Forward:
 		value = find_local_symbol(symbol, near_address);
 		break;
+	default: break;
 	}
 
 	if (!value)
@@ -522,6 +523,7 @@ bool Translator::Impl::is_defined_local_symbol(const Symbol& symbol, int near_ad
 	case LocalSymbolKind::Backward:
 	case LocalSymbolKind::Forward:
 		return (find_local_symbol(symbol, near_address) != nullptr);
+	default: break;
 	};
 	
 	return false;
@@ -736,7 +738,7 @@ FutureTranslatedWordRef Translator::Impl::process_mix_translation(
 void Translator::Impl::update_unresolved_references()
 {
 	unresolved_words_.erase(remove_if(begin(unresolved_words_), end(unresolved_words_),
-		[&](auto&& future_word)
+		[this](auto&& future_word)
 	{
 		return try_resolve_previous_word(*future_word);
 	}) , end(unresolved_words_));
@@ -748,7 +750,7 @@ bool Translator::Impl::try_resolve_previous_word(FutureTranslatedWord& translati
 	const auto original_address = translation_word.original_address;
 
 	references.erase(remove_if(begin(references), end(references),
-		[&](auto&& symbol)
+		[=](auto&& symbol)
 	{
 		return is_defined_symbol(symbol, original_address);
 	}), end(references));
