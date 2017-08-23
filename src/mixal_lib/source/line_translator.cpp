@@ -94,7 +94,7 @@ FutureTranslatedWordRef TranslateLine(
 		return MakeFutureWord(translator.translate_ALF(
 			QueryALFText(address), label));
 	case OperationId::END:
-		translator.translate_END(
+		(void)translator.translate_END(
 			QueryWValue(address), label);
 		return MakeNullFutureWord();
 	default:

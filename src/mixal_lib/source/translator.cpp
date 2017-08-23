@@ -15,6 +15,8 @@ using namespace mixal;
 
 namespace {
 
+const WordField k_end_command_address_field{4, 5};
+
 Expression MakeExression(const std::string_view& symbol)
 {
 	Expression::Token token;
@@ -603,20 +605,22 @@ Translator::EndCommandGeneratedCode Translator::Impl::translate_END(
 		evaluate_unresolved_symbols(
 			collect_unresolved_symbols()));
 
-	EndCommandGeneratedCode generated_code;
-	generated_code.program_start_address = evaluate(value).value();
+	EndCommandGeneratedCode code;
+	code.start_address = evaluate(value).value(k_end_command_address_field);
 
 	for (const auto& symbol_value : symbols)
 	{
 		const auto symbol = symbol_value.first;
 		const auto translated = translate_CON(symbol_value.second, symbol);
 
-		generated_code.undefined_symbols.push_back(
-			std::make_pair(symbol, translated));
+		code.defined_symbols.push_back(std::make_pair(symbol, translated));
 	}
 
+	constant_to_value_.clear();
+	unresolved_words_.clear();
+
 	define_label_if_valid(label, current_address());
-	return generated_code;
+	return code;
 }
 
 FutureTranslatedWordRef Translator::Impl::translate_MIX(
