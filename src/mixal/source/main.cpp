@@ -132,7 +132,7 @@ int main()
 	Interpreter interpreter{std::cout};
 	interpreter.code_lines.reserve(1000);
 #if (0)
-	std::ifstream in{R"test.mixal)"};
+	std::ifstream in{R"(test.mixal)"};
 	TranslateStream(interpreter, in);
 #else
 	TranslateStream(interpreter, std::cin);
