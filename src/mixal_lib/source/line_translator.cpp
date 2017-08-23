@@ -8,11 +8,58 @@ namespace mixal {
 
 namespace {
 
-FutureTranslatedWordRef TranslatedWordToFutureWordRef(const TranslatedWord& word)
+// Using this kind of conversion to unify interface of native Translator class
+// (that returns `FutureTranslatedWordRef` or simply `TranslatedWord` depending
+// on called `translate*()` function)
+FutureTranslatedWordRef MakeFutureWord(const TranslatedWord& word)
 {
 	auto ref = std::make_shared<FutureTranslatedWord>(word.original_address);
 	ref->value = word.value;
 	return ref;
+}
+
+FutureTranslatedWordRef MakeNullFutureWord()
+{
+	return {};
+}
+
+Text QueryALFText(const OperationAddressParser& parser)
+{
+	assert(parser.is_mixal_operation());
+	auto alf_text = parser.mixal()->alf_text;
+	auto text = alf_text.value_or(Text{});
+	return text;
+}
+
+WValue QueryWValue(const OperationAddressParser& parser)
+{
+	assert(parser.is_mixal_operation());
+	auto wvalue_parser = parser.mixal()->w_value_parser;
+	auto wvalue = wvalue_parser.value_or(WValueParser{}).value();
+	return wvalue;
+};
+
+MIXOpParser QueryMIXParsers(const OperationAddressParser& parser)
+{
+	assert(parser.is_mix_operation());
+	return *parser.mix();
+}
+
+Operation QueryOperation(const LineParser& line)
+{
+	assert(line.operation_parser());
+	return line.operation_parser()->operation();
+}
+
+Label QueryLabel(const LineParser& line)
+{
+	return line.label_parser().value_or(LabelParser{}).label();
+}
+
+OperationAddressParser QueryAddress(const LineParser& line)
+{
+	const auto operation = QueryOperation(line);
+	return line.address().value_or(OperationAddressParser{operation.id()});
 }
 
 } // namespace
@@ -23,58 +70,36 @@ FutureTranslatedWordRef TranslateLine(
 {
 	if (line.has_only_comment())
 	{
-		return {};
+		return MakeNullFutureWord();
 	}
 
-	assert(line.operation_parser());
-
-	const Label label = line.label_parser()
-		.value_or(LabelParser{}).label();
-	const Operation operation = line.operation_parser()
-		.value_or(OperationParser{}).operation();
-	const auto address_parser = line.address()
-		.value_or(OperationAddressParser{operation.id()});
-
-	auto query_address_w_value = [&]()
-	{
-		assert(address_parser.is_mixal_operation());
-		auto wvalue = address_parser.mixal()->w_value_parser.value_or(WValueParser{}).value();
-		return wvalue;
-	};
-
-	auto query_address_alf_text = [&]()
-	{
-		assert(address_parser.is_mixal_operation());
-		auto text = address_parser.mixal()->alf_text.value_or(Text{std::string_view{}});
-		return text;
-	};
-
-	auto query_address_mix = [&]()
-	{
-		assert(address_parser.is_mix_operation());
-		return *address_parser.mix();
-	};
+	const auto operation = QueryOperation(line);
+	const auto label = QueryLabel(line);
+	const auto address = QueryAddress(line);
 
 	switch (operation.id())
 	{
 	case OperationId::EQU:
-		translator.translate_EQU(query_address_w_value(), label);
-		return {};
+		translator.translate_EQU(
+			QueryWValue(address), label);
+		return MakeNullFutureWord();
 	case OperationId::ORIG:
-		translator.translate_ORIG(query_address_w_value(), label);
-		return {};
+		translator.translate_ORIG(
+			QueryWValue(address), label);
+		return MakeNullFutureWord();
 	case OperationId::CON:
-		return TranslatedWordToFutureWordRef(
-			translator.translate_CON(query_address_w_value(), label));
+		return MakeFutureWord(translator.translate_CON(
+			QueryWValue(address), label));
 	case OperationId::ALF:
-		return TranslatedWordToFutureWordRef(
-			translator.translate_ALF(query_address_alf_text(), label));
+		return MakeFutureWord(translator.translate_ALF(
+			QueryALFText(address), label));
 	case OperationId::END:
-		translator.translate_END(query_address_w_value(), label);
-		return {};
+		translator.translate_END(
+			QueryWValue(address), label);
+		return MakeNullFutureWord();
 	default:
 	{
-		const auto mix = query_address_mix();
+		const auto mix = QueryMIXParsers(address);
 		return translator.translate_MIX(
 			operation,
 			mix.address_parser.address(),

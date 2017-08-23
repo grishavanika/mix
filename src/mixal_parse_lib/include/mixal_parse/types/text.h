@@ -11,6 +11,7 @@ public:
 	// Note: there is no validation of `str` to be correct MIX string
 	Text(const std::string_view& str);
 	Text(const char* str);
+	Text();
 
 	std::string_view data() const;
 
@@ -25,6 +26,11 @@ bool operator==(const Text& lhs, const Text& rhs);
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace mixal_parse {
+
+inline Text::Text()
+	: Text{std::string_view{}}
+{
+}
 
 inline Text::Text(const std::string_view& str)
 	: str_{str}

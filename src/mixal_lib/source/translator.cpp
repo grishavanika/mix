@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <algorithm>
+#include <list>
 
 using namespace mixal;
 
@@ -23,39 +24,226 @@ Expression MakeExression(const std::string_view& symbol)
 	return expr;
 }
 
+struct AddressTransformation
+{
+	std::vector<Symbol> forward_references;
+	Address address;
+};
+
 } // namespace
 
-struct Translator::ChangeTemporaryCurrentAddress
+struct Translator::Impl
 {
-	ChangeTemporaryCurrentAddress(Translator& translator, int new_address)
-		: translator{translator}
-		, original_address{translator.current_address_}
+	Impl(const DefinedSymbols& symbols,
+		const DefinedLocalSymbols& local_symbols,
+		int current_address);
+
+	Word evaluate(const Text& text) const;
+	Word evaluate(const Symbol& symbol) const;
+	Word evaluate(const Number& n) const;
+	Word evaluate(const BasicExpression& expr) const;
+	Word evaluate(const Expression& expr) const;
+	Word evaluate(const WValue& wvalue) const;
+
+	FutureTranslatedWordRef translate_MIX(
+		Operation command,
+		const Address& A, const Index& I, const Field& F,
+		const Label& label);
+
+	void translate_EQU(const WValue& value, const Label& label);
+	void translate_ORIG(const WValue& address, const Label& label);
+
+	// #TODO: `WValue` can contain `Forward reference`, hence we should return `FutureWord`
+	TranslatedWord translate_CON(const WValue& address, const Label& label);
+	TranslatedWord translate_ALF(const Text& text, const Label& label);
+	void translate_END(const WValue& address, const Label& label);
+
+	void set_current_address(int address, bool notify = true);
+	int current_address() const;
+
+	void define_symbol(const Symbol& symbol, const Word& value);
+	Word query_defined_symbol(const Symbol& symbol, int near_address) const;
+
+	bool is_defined_symbol(const Symbol& symbol, int near_address) const;
+
+private:
+	WordField evaluate_wvalue_field(const std::optional<Expression>& field_expr) const;
+
+	void process_wvalue_token(const WValue::Token& token, Word& dest) const;
+	Byte process_ALF_text_char(char ch) const;
+
+	void define_label_if_valid(const Label& label, const Word& value);
+	void define_usual_symbol(const Symbol& symbol, const Word& value);
+	void define_local_symbol(const Symbol& symbol, int address);
+
+	Word query_usual_symbol(const Symbol& symbol) const;
+	Word query_local_symbol(const Symbol& symbol, int near_address) const;
+
+	const int* find_local_symbol(const Symbol& symbol, int near_address) const;
+
+	bool is_defined_usual_symbol(const Symbol& symbol) const;
+	bool is_defined_local_symbol(const Symbol& symbol, int near_address) const;
+
+	void increase_current_address();
+
+	void prepare_local_addresses(Addresses& addresses) const;
+	void prepare_local_addresses(DefinedLocalSymbols& local_symbols) const;
+
+	AddressTransformation transform_address(const Address& address);
+
+	Byte index_to_byte(const Index& index, const OperationInfo& op_info) const;
+	Byte field_to_byte(const Field& field, const OperationInfo& op_info) const;
+
+	FutureTranslatedWordRef process_mix_translation(
+		FutureTranslatedWordShared&& partial_result,
+		const Address& address, Byte I, Byte F, Byte C);
+
+	int evaluate_address(const Address& address) const;
+
+	Word make_mix_command(int address, Byte I, Byte F, Byte C) const;
+
+	void update_unresolved_references();
+	bool try_resolve_previous_word(FutureTranslatedWord& translation_word);
+	void resolve_previous_word(FutureTranslatedWord& translation_word);
+
+	std::string_view make_constant(const WValue& wvalue);
+
+private:
+	struct ChangeTemporaryCurrentAddress;
+
+private:
+	int current_address_;
+
+	DefinedSymbols defined_symbols_;
+	DefinedLocalSymbols defined_local_symbols_;
+
+	std::vector<FutureTranslatedWordShared> unresolved_words_;
+
+	// Note: using this as a storage for created on the heap
+	// runtime strings for names of internal constants.
+	// These strings are referenced by `Expression` of `Address`
+	// after transformation (see `transform_address()`)
+	std::list<std::string> constants_storage_;
+	std::map<std::string_view, WValue> constant_to_value_;
+};
+
+struct Translator::Impl::ChangeTemporaryCurrentAddress
+{
+	ChangeTemporaryCurrentAddress(Translator::Impl& impl, int new_address)
+		: impl{impl}
+		, original_address{impl.current_address()}
 	{
-		translator.current_address_ = new_address;
+		impl.set_current_address(new_address, false/*do not notify*/);
 	}
 
 	~ChangeTemporaryCurrentAddress()
 	{
-		translator.current_address_ = original_address;
+		impl.set_current_address(original_address, false/*do not notify*/);
 	}
 
 private:
-	Translator& translator;
+	Translator::Impl& impl;
 	int original_address;
 };
 
-Translator::Translator(
-	const DefinedSymbols& symbols /*= {}*/,
+Translator::Translator(const DefinedSymbols& symbols /*= {}*/,
 	const DefinedLocalSymbols& local_symbols /*= {}*/,
 	int current_address /*= 0*/)
-		: current_address_{current_address}
-		, defined_symbols_{symbols}
-		, defined_local_symbols_{local_symbols}
+		: impl{std::make_unique<Impl>(symbols, local_symbols, current_address)}
 {
-	prepare_local_addresses(defined_local_symbols_);
 }
 
+Translator::~Translator() = default;
+
 Word Translator::evaluate(const Text& text) const
+{
+	return impl->evaluate(text);
+}
+
+Word Translator::evaluate(const Symbol& symbol) const
+{
+	return impl->evaluate(symbol);
+}
+
+Word Translator::evaluate(const Number& n) const
+{
+	return impl->evaluate(n);
+}
+
+Word Translator::evaluate(const BasicExpression& expr) const
+{
+	return impl->evaluate(expr);
+}
+
+Word Translator::evaluate(const Expression& expr) const
+{
+	return impl->evaluate(expr);
+}
+
+Word Translator::evaluate(const WValue& wvalue) const
+{
+	return impl->evaluate(wvalue);
+}
+
+FutureTranslatedWordRef Translator::translate_MIX(
+	Operation command,
+	const Address& A, const Index& I, const Field& F,
+	const Label& label /*= {}*/)
+{
+	return impl->translate_MIX(command, A, I, F, label);
+}
+
+void Translator::translate_EQU(const WValue& value, const Label& label /*= {}*/)
+{
+	return impl->translate_EQU(value, label);
+}
+
+void Translator::translate_ORIG(const WValue& address, const Label& label /*= {}*/)
+{
+	return impl->translate_ORIG(address, label);
+}
+
+TranslatedWord Translator::translate_CON(const WValue& address, const Label& label /*= {}*/)
+{
+	return impl->translate_CON(address, label);
+}
+
+TranslatedWord Translator::translate_ALF(const Text& text, const Label& label /*= {}*/)
+{
+	return impl->translate_ALF(text, label);
+}
+
+void Translator::translate_END(const WValue& address, const Label& label /*= {}*/)
+{
+	return impl->translate_END(address, label);
+}
+
+void Translator::set_current_address(int address)
+{
+	return impl->set_current_address(address);
+}
+
+int Translator::current_address() const
+{
+	return impl->current_address();
+}
+
+void Translator::define_symbol(const Symbol& symbol, const Word& value)
+{
+	return impl->define_symbol(symbol, value);
+}
+
+Word Translator::query_defined_symbol(const Symbol& symbol, int near_address /*= -1*/) const
+{
+	return impl->query_defined_symbol(symbol, near_address);
+}
+
+bool Translator::is_defined_symbol(const Symbol& symbol, int near_address /*= -1*/) const
+{
+	return impl->is_defined_symbol(symbol, near_address);
+}
+
+Word Translator::Impl::evaluate(const Text& text) const
 {
 	const auto& data = text.data();
 	if (data.size() != Word::k_bytes_count)
@@ -73,7 +261,7 @@ Word Translator::evaluate(const Text& text) const
 	return bytes;
 }
 
-Byte Translator::process_ALF_text_char(char ch) const
+Byte Translator::Impl::process_ALF_text_char(char ch) const
 {
 	bool converted = false;
 	const auto char_byte = mix::CharToByte(ch, &converted);
@@ -84,11 +272,11 @@ Byte Translator::process_ALF_text_char(char ch) const
 	return char_byte;
 }
 
-Word Translator::evaluate(const BasicExpression& expr) const
+Word Translator::Impl::evaluate(const BasicExpression& expr) const
 {
 	if (expr.is_current_address())
 	{
-		return current_address_;
+		return current_address();
 	}
 	else if (expr.is_number())
 	{
@@ -104,7 +292,7 @@ Word Translator::evaluate(const BasicExpression& expr) const
 	return {};
 }
 
-Word Translator::evaluate(const WValue& wvalue) const
+Word Translator::Impl::evaluate(const WValue& wvalue) const
 {
 	assert(wvalue.is_valid());
 
@@ -117,7 +305,7 @@ Word Translator::evaluate(const WValue& wvalue) const
 	return value;
 }
 
-void Translator::process_wvalue_token(const WValue::Token& token, Word& dest) const
+void Translator::Impl::process_wvalue_token(const WValue::Token& token, Word& dest) const
 {
 	const auto part = evaluate(token.expression);
 	const auto field = evaluate_wvalue_field(token.field);
@@ -130,9 +318,9 @@ void Translator::process_wvalue_token(const WValue::Token& token, Word& dest) co
 		false/*do not overwrite sign*/);
 }
 
-WordField Translator::evaluate_wvalue_field(const std::optional<Expression>& field_expr) const
+WordField Translator::Impl::evaluate_wvalue_field(const std::optional<Expression>& field_expr) const
 {
-	WordField field{0, Word::k_bytes_count};
+	WordField field = Word::MaxField();
 	if (field_expr)
 	{
 		const auto value = evaluate(*field_expr).value();
@@ -147,7 +335,7 @@ WordField Translator::evaluate_wvalue_field(const std::optional<Expression>& fie
 	return field;
 }
 
-Word Translator::evaluate(const Expression& expr) const
+Word Translator::Impl::evaluate(const Expression& expr) const
 {
 	assert(expr.is_valid());
 	const auto& tokens = expr.tokens();
@@ -168,7 +356,7 @@ Word Translator::evaluate(const Expression& expr) const
 	return value;
 }
 
-Word Translator::evaluate(const Number& n) const
+Word Translator::Impl::evaluate(const Number& n) const
 {
 	const auto v = n.value();
 	if (v > Word::k_max_abs_value)
@@ -179,23 +367,23 @@ Word Translator::evaluate(const Number& n) const
 	return static_cast<int>(v);
 }
 
-Word Translator::evaluate(const Symbol& symbol) const
+Word Translator::Impl::evaluate(const Symbol& symbol) const
 {
-	return query_defined_symbol(symbol, current_address_);
+	return query_defined_symbol(symbol, current_address());
 }
 
-void Translator::set_current_address(int address)
+void Translator::Impl::set_current_address(int address, bool /*notify*/ /*= true*/)
 {
 	assert(address >= 0);
 	current_address_ = address;
 }
 
-int Translator::current_address() const
+int Translator::Impl::current_address() const
 {
 	return current_address_;
 }
 
-void Translator::define_symbol(const Symbol& symbol, const Word& value)
+void Translator::Impl::define_symbol(const Symbol& symbol, const Word& value)
 {
 	if (symbol.is_local())
 	{
@@ -209,7 +397,7 @@ void Translator::define_symbol(const Symbol& symbol, const Word& value)
 	update_unresolved_references();
 }
 
-void Translator::define_usual_symbol(const Symbol& symbol, const Word& value)
+void Translator::Impl::define_usual_symbol(const Symbol& symbol, const Word& value)
 {
 	const auto it = defined_symbols_.insert(std::make_pair(symbol, value));
 	const bool inserted = it.second;
@@ -219,7 +407,7 @@ void Translator::define_usual_symbol(const Symbol& symbol, const Word& value)
 	}
 }
 
-void Translator::define_local_symbol(const Symbol& symbol, int address)
+void Translator::Impl::define_local_symbol(const Symbol& symbol, int address)
 {
 	if (symbol.kind() != LocalSymbolKind::Here)
 	{
@@ -231,12 +419,12 @@ void Translator::define_local_symbol(const Symbol& symbol, int address)
 	prepare_local_addresses(addresses);
 }
 
-void Translator::prepare_local_addresses(Addresses& addresses) const
+void Translator::Impl::prepare_local_addresses(Addresses& addresses) const
 {
 	sort(addresses.begin(), addresses.end());
 }
 
-void Translator::prepare_local_addresses(DefinedLocalSymbols& local_symbols) const
+void Translator::Impl::prepare_local_addresses(DefinedLocalSymbols& local_symbols) const
 {
 	for (auto& addresses : local_symbols)
 	{
@@ -244,7 +432,7 @@ void Translator::prepare_local_addresses(DefinedLocalSymbols& local_symbols) con
 	}
 }
 
-Word Translator::query_defined_symbol(const Symbol& symbol, int near_address /*= -1*/) const
+Word Translator::Impl::query_defined_symbol(const Symbol& symbol, int near_address) const
 {
 	if (symbol.is_local())
 	{
@@ -256,7 +444,7 @@ Word Translator::query_defined_symbol(const Symbol& symbol, int near_address /*=
 	}
 }
 
-Word Translator::query_usual_symbol(const Symbol& symbol) const
+Word Translator::Impl::query_usual_symbol(const Symbol& symbol) const
 {
 	auto it = defined_symbols_.find(symbol);
 	if (it == defined_symbols_.end())
@@ -267,7 +455,7 @@ Word Translator::query_usual_symbol(const Symbol& symbol) const
 	return it->second;
 }
 
-Word Translator::query_local_symbol(const Symbol& symbol, int near_address) const
+Word Translator::Impl::query_local_symbol(const Symbol& symbol, int near_address) const
 {
 	const int* value = nullptr;
 	switch (symbol.kind())
@@ -286,7 +474,7 @@ Word Translator::query_local_symbol(const Symbol& symbol, int near_address) cons
 	return *value;
 }
 
-const int* Translator::find_local_symbol(const Symbol& symbol, int near_address) const
+const int* Translator::Impl::find_local_symbol(const Symbol& symbol, int near_address) const
 {
 	const auto addresses_it = defined_local_symbols_.find(symbol.local_id());
 	if (addresses_it == defined_local_symbols_.end())
@@ -310,7 +498,7 @@ const int* Translator::find_local_symbol(const Symbol& symbol, int near_address)
 	return nullptr;
 }
 
-bool Translator::is_defined_symbol(const Symbol& symbol, int near_address /*= -1*/) const
+bool Translator::Impl::is_defined_symbol(const Symbol& symbol, int near_address) const
 {
 	if (symbol.is_local())
 	{
@@ -322,12 +510,12 @@ bool Translator::is_defined_symbol(const Symbol& symbol, int near_address /*= -1
 	}
 }
 
-bool Translator::is_defined_usual_symbol(const Symbol& symbol) const
+bool Translator::Impl::is_defined_usual_symbol(const Symbol& symbol) const
 {
 	return (defined_symbols_.find(symbol) != defined_symbols_.end());
 }
 
-bool Translator::is_defined_local_symbol(const Symbol& symbol, int near_address) const
+bool Translator::Impl::is_defined_local_symbol(const Symbol& symbol, int near_address) const
 {
 	switch (symbol.kind())
 	{
@@ -339,7 +527,7 @@ bool Translator::is_defined_local_symbol(const Symbol& symbol, int near_address)
 	return false;
 }
 
-void Translator::define_label_if_valid(const Label& label, const Word& value)
+void Translator::Impl::define_label_if_valid(const Label& label, const Word& value)
 {
 	if (label.empty())
 	{
@@ -349,52 +537,54 @@ void Translator::define_label_if_valid(const Label& label, const Word& value)
 	define_symbol(label.symbol(), value);
 }
 
-void Translator::translate_EQU(const WValue& value, const Label& label /*= {}*/)
+void Translator::Impl::translate_EQU(const WValue& value, const Label& label)
 {
 	define_label_if_valid(label, evaluate(value));
 }
 
-void Translator::translate_ORIG(const WValue& value, const Label& label /*= {}*/)
+void Translator::Impl::translate_ORIG(const WValue& value, const Label& label)
 {
 	const auto address = evaluate(value);
 	define_label_if_valid(label, address);
 	set_current_address(address.value());
 }
 
-TranslatedWord Translator::translate_CON(const WValue& wvalue, const Label& label /*= {}*/)
+TranslatedWord Translator::Impl::translate_CON(const WValue& wvalue, const Label& label)
 {
-	define_label_if_valid(label, current_address_);
+	const auto address = current_address();
+	define_label_if_valid(label, address);
 
-	TranslatedWord result{current_address_, evaluate(wvalue)};
+	TranslatedWord result{address, evaluate(wvalue)};
 	increase_current_address();
 	return result;
 }
 
-TranslatedWord Translator::translate_ALF(const Text& text, const Label& label /*= {}*/)
+TranslatedWord Translator::Impl::translate_ALF(const Text& text, const Label& label)
 {
-	define_label_if_valid(label, current_address_);
+	const auto address = current_address();
+	define_label_if_valid(label, address);
 
-	TranslatedWord result{current_address_, evaluate(text)};
+	TranslatedWord result{address, evaluate(text)};
 	increase_current_address();
 	return result;
 }
 
-void Translator::translate_END(const WValue& /*value*/, const Label& /*label*/ /*= {}*/)
+void Translator::Impl::translate_END(const WValue& /*value*/, const Label& /*label*/)
 {
 
 }
 
-FutureTranslatedWordRef Translator::translate_MIX(
+FutureTranslatedWordRef Translator::Impl::translate_MIX(
 	Operation command,
 	const Address& address, const Index& index, const Field& field,
-	const Label& label /*= {}*/)
+	const Label& label)
 {
 	const auto command_info = QueryOperationInfo(command);
 	Byte C = command_info.computer_command;
 	Byte I = index_to_byte(index, command_info);
 	Byte F = field_to_byte(field, command_info);
 
-	const auto original_address = current_address_;
+	const auto original_address = current_address();
 	const auto transformation = transform_address(address);
 	auto future_word = std::make_shared<FutureTranslatedWord>(
 		original_address,
@@ -413,12 +603,12 @@ FutureTranslatedWordRef Translator::translate_MIX(
 	return result;
 }
 
-void Translator::increase_current_address()
+void Translator::Impl::increase_current_address()
 {
-	++current_address_;
+	set_current_address(current_address() + 1);
 }
 
-Translator::AddressTransformation Translator::transform_address(const Address& address)
+AddressTransformation Translator::Impl::transform_address(const Address& address)
 {
 	AddressTransformation transformed;
 	
@@ -434,7 +624,7 @@ Translator::AddressTransformation Translator::transform_address(const Address& a
 		const bool is_forward_symbol = (symbol.kind() == LocalSymbolKind::Forward);
 		const bool is_undefined_usual_symbol =
 			(symbol.kind() == LocalSymbolKind::Usual) &&
-			!is_defined_symbol(symbol);
+			!is_defined_symbol(symbol, -1/*ignore address*/);
 
 		if (is_forward_symbol || is_undefined_usual_symbol)
 		{
@@ -465,7 +655,7 @@ Translator::AddressTransformation Translator::transform_address(const Address& a
 	return transformed;
 }
 
-std::string_view Translator::make_constant(const WValue& wvalue)
+std::string_view Translator::Impl::make_constant(const WValue& wvalue)
 {
 	const auto id = constants_storage_.size() + 1;
 	constants_storage_.push_back("@CON" + std::to_string(id));
@@ -474,7 +664,7 @@ std::string_view Translator::make_constant(const WValue& wvalue)
 	return name;
 }
 
-Byte Translator::index_to_byte(const Index& index, const OperationInfo& op_info) const
+Byte Translator::Impl::index_to_byte(const Index& index, const OperationInfo& op_info) const
 {
 	if (index.empty())
 	{
@@ -484,7 +674,7 @@ Byte Translator::index_to_byte(const Index& index, const OperationInfo& op_info)
 	return int{value};
 }
 
-Byte Translator::field_to_byte(const Field& field, const OperationInfo& op_info) const
+Byte Translator::Impl::field_to_byte(const Field& field, const OperationInfo& op_info) const
 {
 	if (field.empty())
 	{
@@ -495,7 +685,7 @@ Byte Translator::field_to_byte(const Field& field, const OperationInfo& op_info)
 	return int{value};
 }
 
-int Translator::evaluate_address(const Address& address) const
+int Translator::Impl::evaluate_address(const Address& address) const
 {
 	if (address.has_expression())
 	{
@@ -514,7 +704,7 @@ int Translator::evaluate_address(const Address& address) const
 	return 0;
 }
 
-Word Translator::make_mix_command(int address, Byte I, Byte F, Byte C) const
+Word Translator::Impl::make_mix_command(int address, Byte I, Byte F, Byte C) const
 {
 	// #TODO: check address/index and so on validness
 	const mix::Command command{
@@ -526,7 +716,7 @@ Word Translator::make_mix_command(int address, Byte I, Byte F, Byte C) const
 	return command.to_word();
 }
 
-FutureTranslatedWordRef Translator::process_mix_translation(
+FutureTranslatedWordRef Translator::Impl::process_mix_translation(
 	FutureTranslatedWordShared&& partial_result,
 	const Address& address, Byte I, Byte F, Byte C)
 {
@@ -543,7 +733,7 @@ FutureTranslatedWordRef Translator::process_mix_translation(
 	return partial_result;
 }
 
-void Translator::update_unresolved_references()
+void Translator::Impl::update_unresolved_references()
 {
 	unresolved_words_.erase(remove_if(begin(unresolved_words_), end(unresolved_words_),
 		[&](auto&& future_word)
@@ -552,7 +742,7 @@ void Translator::update_unresolved_references()
 	}) , end(unresolved_words_));
 }
 
-bool Translator::try_resolve_previous_word(FutureTranslatedWord& translation_word)
+bool Translator::Impl::try_resolve_previous_word(FutureTranslatedWord& translation_word)
 {
 	auto& references = translation_word.forward_references;
 	const auto original_address = translation_word.original_address;
@@ -572,7 +762,7 @@ bool Translator::try_resolve_previous_word(FutureTranslatedWord& translation_wor
 	return false;
 }
 
-void Translator::resolve_previous_word(FutureTranslatedWord& translation_word)
+void Translator::Impl::resolve_previous_word(FutureTranslatedWord& translation_word)
 {
 	assert(translation_word.is_ready());
 	const auto original_address = translation_word.original_address;
@@ -580,5 +770,15 @@ void Translator::resolve_previous_word(FutureTranslatedWord& translation_word)
 	mix::Command command{translation_word.value};
 	command.change_address(evaluate_address(translation_word.unresolved_address));
 	translation_word.value = command.to_word();
+}
+
+Translator::Impl::Impl(const DefinedSymbols& symbols,
+	const DefinedLocalSymbols& local_symbols,
+	int current_address)
+		: current_address_{current_address}
+		, defined_symbols_{symbols}
+		, defined_local_symbols_{local_symbols}
+{
+	prepare_local_addresses(defined_local_symbols_);
 }
 
