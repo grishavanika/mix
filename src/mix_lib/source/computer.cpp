@@ -1,6 +1,9 @@
 #include <mix/computer.h>
+#include <mix/command.h>
 #include <mix/command_processor.h>
 #include <mix/computer_listener.h>
+
+#include <mix/default_device.h>
 
 #include "internal/helpers.hpp"
 
@@ -17,6 +20,8 @@ Computer::Computer(IComputerListener* listener /*= nullptr*/)
 	, memory_()
 	, devices_{listener}
 	, listener_{listener}
+	, halted_{false}
+	, was_jump_{false}
 {
 	setup_default_devices();
 }
@@ -41,6 +46,7 @@ void Computer::jump(int address)
 	const auto next = next_command();
 	set_next_command(address);
 	rj_.set_value(next);
+	was_jump_ = true;
 	internal::InvokeListener(listener_, &IComputerListener::on_jump, next);
 }
 
@@ -165,9 +171,25 @@ void Computer::set_comparison_state(ComparisonIndicator comparison)
 	internal::InvokeListener(listener_, &IComputerListener::on_comparison_state_set);
 }
 
+void Computer::run()
+{
+	while (!halted_)
+	{
+		const int current_address = current_command();
+		execute(Command{memory(current_address)});
+
+		if (!was_jump_)
+		{
+			set_next_command(current_address + 1);
+		}
+
+		was_jump_ = false;
+	}
+}
+
 void Computer::halt()
 {
-
+	halted_ = true;
 }
 
 IIODevice& Computer::device(DeviceId id)
@@ -192,5 +214,7 @@ IIODevice& Computer::wait_device_ready(DeviceId id)
 
 void Computer::setup_default_devices()
 {
+	devices_.inject_device(18, std::make_unique<DefaultDevice>(24));
+	devices_.inject_device(19, std::make_unique<DefaultDevice>(14));
 	// #TODO: add default devices to `devices_`
 }

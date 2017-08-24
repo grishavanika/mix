@@ -64,4 +64,15 @@ How to translate:
 2051: |+|             3|
 ```
 
+##### Executing "FIRST FIVE HUNDRED PRIMES"
+
+How to run:
+    ```
+    mixal --execute < src\tests\mixal_code\program_p.mixal
+    ```
+
+![](docs/first_500_primes.png)
+
+
+
 

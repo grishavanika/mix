@@ -1,3 +1,4 @@
+#pragma once
 #include <mix/config.h>
 #include <mix/registers.h>
 #include <mix/general_types.h>
@@ -20,6 +21,7 @@ public:
 
 	void execute(const Command& command);
 
+	void run();
 	void halt();
 
 	int current_command() const;
@@ -72,6 +74,8 @@ private:
 	DeviceController devices_;
 
 	IComputerListener* listener_;
+	bool halted_;
+	bool was_jump_;
 };
 
 

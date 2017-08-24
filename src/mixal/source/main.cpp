@@ -1,11 +1,13 @@
 #include <mixal/line_translator.h>
 #include <mixal/translator.h>
 #include <mixal/exceptions.h>
+#include <mixal/program_executor.h>
 
 #include <mixal_parse/line_parser.h>
 
 #include <mix/exceptions.h>
 #include <mix/command.h>
+#include <mix/computer.h>
 
 #include <core/string.h>
 
@@ -224,37 +226,46 @@ void TranslateLine(Interpreter& interpreter, const std::string& str)
 		TranslateLine(interpreter.translator, parser));
 }
 
+template<typename Callable>
+void HandleAnyException(Callable callable)
+{
+	try
+	{
+		callable();
+	}
+	catch (const mixal::MixalException& mixal_error)
+	{
+		std::cerr << "[MIXAL] Error: " << mixal_error.what() << "\n";
+	}
+	catch (const mix::MixException& mix_error)
+	{
+		std::cerr << "[MIX] Error: " << mix_error.what() << "\n";
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "Error: " << e.what() << "\n";
+	}
+	catch (...)
+	{
+		std::cerr << "Error: " << "UNKNOWN" << "\n";
+	}
+}
+
 void TranslateStream(Interpreter& interpreter, std::istream& in)
 {
 	std::string line;
 	while (getline(in, line))
 	{
-		try
+		HandleAnyException([&]()
 		{
 			TranslateLine(interpreter, line);
-		}
-		catch (const mixal::MixalException& mixal_error)
-		{
-			std::cerr << "[MIXAL] Error: " << mixal_error.what() << "\n";
-		}
-		catch (const mix::MixException& mix_error)
-		{
-			std::cerr << "[MIX] Error: " << mix_error.what() << "\n";
-		}
-		catch (const std::exception& e)
-		{
-			std::cerr << "Error: " << e.what() << "\n";
-		}
-		catch (...)
-		{
-			std::cerr << "Error: " << "UNKNOWN" << "\n";
-		}
+		});
 	}
 }
 
 #include <fstream>
 
-int main(int argc, char* /*argv*/[])
+int RunInterpreter(int argc, char* /*argv*/[])
 {
 	const bool hide_details = (argc > 1);
 	Interpreter interpreter{std::cout, !hide_details};
@@ -264,5 +275,62 @@ int main(int argc, char* /*argv*/[])
 #else
 	TranslateStream(interpreter, std::cin);
 #endif
+	return 0;
+}
+
+int ExecuteProgram(const TranslatedProgram& program)
+{
+	if (!program.completed)
+	{
+		return -1;
+	}
+
+	Computer computer;
+	LoadProgram(computer, program);
+	computer.run();
+	return 0;
+}
+
+int RunProgram(int /*argc*/, char* /*argv*/[])
+{
+#if (0)
+	std::ifstream file_input{R"(program_primes.mixal)"};
+	std::istream& in{file_input};
+#else
+	std::istream& in{std::cin};
+#endif
+
+	Translator translator;
+	ProgramTranslator program_translator{translator};
+	std::string line;
+
+	HandleAnyException([&]()
+	{
+		while (getline(in, line))
+		{
+			const auto status = program_translator.translate_line(line);
+			if (status == ProgramTranslator::Status::Completed)
+			{
+				break;
+			}
+		}
+
+		(void)ExecuteProgram(program_translator.program());
+	});
+
+	return 0;
+}
+
+int main(int argc, char* argv[])
+{
+	const bool run_interpreter = false;
+	if (run_interpreter)
+	{
+		return RunInterpreter(argc, argv);
+	}
+	else
+	{
+		return RunProgram(argc, argv);
+	}
 }
 
