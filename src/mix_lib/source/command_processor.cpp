@@ -644,7 +644,7 @@ void CommandProcessor::jmp_flags_group(const Command& command)
 		do_jump = true;
 		break;
 	case 1: // JSJ
-		mix_.set_next_command(next_address);
+		mix_.set_next_address(next_address);
 		break;
 	case 2: // JOV
 		if (has_overflow)

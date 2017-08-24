@@ -43,28 +43,36 @@ const AddressRegister& Computer::rj() const
 
 void Computer::jump(int address)
 {
-	const auto next = next_command();
-	set_next_command(address);
+	const auto next = next_address();
+	set_next_address(address);
 	rj_.set_value(next);
 	was_jump_ = true;
 	internal::InvokeListener(listener_, &IComputerListener::on_jump, next);
 }
 
-void Computer::set_next_command(int address)
+void Computer::set_next_address(int address)
 {
 	// #TODO: validate `address` (in range [0; 4000))
-	rip_.set_value(address);
-	internal::InvokeListener(listener_, &IComputerListener::on_current_command_changed, address);
+	if (address != current_address())
+	{
+		rip_.set_value(address);
+		internal::InvokeListener(listener_, &IComputerListener::on_current_address_changed, address);
+	}
 }
 
-int Computer::current_command() const
+int Computer::current_address() const
 {
 	return rip_.value();
 }
 
-int Computer::next_command() const
+int Computer::next_address() const
 {
-	return current_command() + 1;
+	if (was_jump_)
+	{
+		return current_address();
+	}
+
+	return current_address() + 1;
 }
 
 void Computer::set_memory(int address, const Word& value)
@@ -175,24 +183,20 @@ void Computer::run()
 {
 	while (!halted_)
 	{
-		execute(Command{memory(current_command())});
-		move_to_next_command();
+		execute(Command{memory(current_address())});
+		set_next_address(next_address());
+		clear_jump_flag();
 	}
-}
-
-void Computer::move_to_next_command()
-{
-	if (!was_jump_)
-	{
-		set_next_command(next_command());
-	}
-
-	was_jump_ = false;
 }
 
 void Computer::halt()
 {
 	halted_ = true;
+}
+
+void Computer::clear_jump_flag()
+{
+	was_jump_ = false;
 }
 
 IIODevice& Computer::device(DeviceId id)

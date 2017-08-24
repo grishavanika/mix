@@ -24,9 +24,9 @@ public:
 	void run();
 	void halt();
 
-	int current_command() const;
-	int next_command() const;
-	void set_next_command(int address);
+	int current_address() const;
+	int next_address() const;
+	void set_next_address(int address);
 
 	void jump(int address);
 
@@ -58,7 +58,7 @@ public:
 
 private:
 	void setup_default_devices();
-	void move_to_next_command();
+	void clear_jump_flag();
 
 private:
 	Register ra_;

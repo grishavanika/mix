@@ -113,11 +113,11 @@ TEST(IOJRED, Does_Jump_If_Device_Is_Ready)
 
 	Computer mix{&listener};
 	mix.replace_device(k_device_id, std::move(device_mock));
-	mix.set_next_command(current_ip);
+	mix.set_next_address(current_ip);
 
 	mix.execute(MakeJRED(1000, k_device_id));
 
-	ASSERT_EQ(1001, mix.next_command());
+	ASSERT_EQ(1000, mix.next_address());
 }
 
 TEST(IOJBUS, Does_Nothing_If_Device_Is_Ready)
@@ -149,11 +149,11 @@ TEST(IOJBUS, Does_Jump_If_Device_Is_Busy)
 
 	Computer mix{&listener};
 	mix.replace_device(k_device_id, std::move(device_mock));
-	mix.set_next_command(current_ip);
+	mix.set_next_address(current_ip);
 
 	mix.execute(MakeJBUS(1000, k_device_id));
 
-	ASSERT_EQ(1001, mix.next_command());
+	ASSERT_EQ(1000, mix.next_address());
 }
 
 TEST(IOOutput, Writes_Device_Block_Size_Cells_From_Memory_To_Device)
