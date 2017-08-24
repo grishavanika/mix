@@ -228,7 +228,7 @@ void Computer::setup_default_devices()
 	{
 		devices_.inject_device(id,
 			std::make_unique<BinaryDevice>(
-				10/*block size*/,
+				100/*block size*/,
 				std::cout,
 				std::cin));
 	}

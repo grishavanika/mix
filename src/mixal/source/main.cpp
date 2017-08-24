@@ -291,14 +291,23 @@ int ExecuteProgram(const TranslatedProgram& program)
 	return 0;
 }
 
-int RunProgram(int /*argc*/, char* /*argv*/[])
+int RunProgram(int argc, char* argv[])
 {
-#if (0)
-	std::ifstream file_input{R"(program_primes.mixal)"};
+	if (argc != 2)
+	{
+		std::cerr << "Expecting file name as 1st argument: "
+			<< "mixal <program_to_execute_file.mixal>" << "\n";
+		return -1;
+	}
+
+	std::ifstream file_input{argv[1]};
+	if (!file_input)
+	{
+		std::cerr << "Input file is invalid: " << argv[1] << "\n";
+		return -1;
+	}
+
 	std::istream& in{file_input};
-#else
-	std::istream& in{std::cin};
-#endif
 
 	Translator translator;
 	ProgramTranslator program_translator{translator};
