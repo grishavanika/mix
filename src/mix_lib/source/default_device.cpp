@@ -134,3 +134,57 @@ Word SymbolDevice::word_with_all_spaces() const
 	return bytes;
 }
 
+BinaryDevice::BinaryDevice(int block_size, std::ostream& out, std::istream& in)
+	: block_size_{block_size}
+	, out_{out}
+	, in_{in}
+{
+}
+
+bool BinaryDevice::ready() const
+{
+	return true;
+}
+
+int BinaryDevice::block_size() const
+{
+	return block_size_;
+}
+
+BinaryDevice::Block BinaryDevice::prepare_block() const
+{
+	Block block;
+	block.resize(static_cast<std::size_t>(block_size()));
+	return block;
+}
+
+BinaryDevice::Block BinaryDevice::read(DeviceBlockId /*block_id*/)
+{
+	auto block = prepare_block();
+	for (auto& word : block)
+	{
+		word = read_word();
+	}
+	return block;
+}
+
+void BinaryDevice::write(DeviceBlockId /*block_id*/, Block&& block)
+{
+	for (const auto& word : block)
+	{
+		write_word(word);
+	}
+}
+
+void BinaryDevice::write_word(const Word& word)
+{
+	out_ << int{word.value()};
+}
+
+Word BinaryDevice::read_word()
+{
+	int value = 0;
+	in_ >> value;
+	return value;
+}
+

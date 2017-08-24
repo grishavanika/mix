@@ -223,6 +223,16 @@ IIODevice& Computer::wait_device_ready(DeviceId id)
 
 void Computer::setup_default_devices()
 {
+	// MagneticTape [0; 7] and Drum [8; 15]
+	for (DeviceId id = 0; id <= 15; ++id)
+	{
+		devices_.inject_device(id,
+			std::make_unique<BinaryDevice>(
+				10/*block size*/,
+				std::cout,
+				std::cin));
+	}
+
 	const struct
 	{
 		const DeviceId id;
@@ -244,16 +254,5 @@ void Computer::setup_default_devices()
 				std::cout,
 				std::cin,
 				symbol_device.fill_new_line_with_spaces));
-	}
-
-	// #TODO: add default non-symbols devices
-	for (DeviceId id = 0; id <= 15; ++id)
-	{
-		devices_.inject_device(id,
-			std::make_unique<SymbolDevice>(
-				100/*block size*/,
-				std::cout,
-				std::cin,
-				true/*fill result with spaces when new line entered*/));
 	}
 }

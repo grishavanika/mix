@@ -363,7 +363,6 @@ void CommandProcessor::stz(const Command& command)
 
 void CommandProcessor::stj(const Command& command)
 {
-	// #TODO(MIXAL): default WordField should be (0, 2) instead of (0, 5)
 	do_store(mix_.rj(), command);
 }
 

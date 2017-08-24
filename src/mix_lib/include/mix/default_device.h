@@ -36,6 +36,29 @@ private:
 	bool handle_new_line_;
 };
 
+class BinaryDevice final :
+	public IIODevice
+{
+public:
+	BinaryDevice(int block_size, std::ostream& out, std::istream& in);
+
+	virtual bool ready() const override;
+	virtual int block_size() const override;
+
+	virtual Block prepare_block() const override;
+	virtual Block read(DeviceBlockId block_id) override;
+	virtual void write(DeviceBlockId block_id, Block&&) override;
+
+private:
+	void write_word(const Word& word);
+	Word read_word();
+
+private:
+	const int block_size_;
+	std::ostream& out_;
+	std::istream& in_;
+};
+
 } // namespace mix
 
 

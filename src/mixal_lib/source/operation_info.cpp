@@ -60,7 +60,7 @@ const Data k_operations_info[] =
 	{OperationId::ST5,		29, Word::MaxField()},
 	{OperationId::ST6,		30, Word::MaxField()},
 	{OperationId::STX,		31, Word::MaxField()},
-	{OperationId::STJ,		31, WordField{0, 2}},
+	{OperationId::STJ,		32, WordField{0, 2}},
 	{OperationId::STZ,		33, Word::MaxField()},
 	{OperationId::JBUS,		34, WordField::FromByte(0)},
 	{OperationId::IOC,		35, WordField::FromByte(0)},
