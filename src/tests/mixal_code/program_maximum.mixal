@@ -1,0 +1,26 @@
+X          EQU    1000                
+           ORIG   3000                
+MAXIMUM    STJ    EXIT                
+INIT       ENT3   0,1                 
+           JMP    CHANGEM             
+LOOP       CMPA   X,3                 
+           JGE    *+3                 
+CHANGEM    ENT2   0,3                 
+           LDA    X,3                 
+           DEC3   1                   
+           J3P    LOOP                
+EXIT       JMP    *                   
+
+START      IN     X+1(0)              
+           JBUS   *(0)                
+           ENT1   100                 
+1H         JMP    MAXIMUM             
+           LDX    X,1                 
+           STA    X,1                 
+           STX    X,2                 
+           DEC1   1                   
+           J1P    1B                  
+           OUT    X+1(1)              
+           HLT                        
+           END    START               
+

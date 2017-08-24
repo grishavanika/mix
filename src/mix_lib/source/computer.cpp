@@ -175,16 +175,19 @@ void Computer::run()
 {
 	while (!halted_)
 	{
-		const int current_address = current_command();
-		execute(Command{memory(current_address)});
-
-		if (!was_jump_)
-		{
-			set_next_command(current_address + 1);
-		}
-
-		was_jump_ = false;
+		execute(Command{memory(current_command())});
+		move_to_next_command();
 	}
+}
+
+void Computer::move_to_next_command()
+{
+	if (!was_jump_)
+	{
+		set_next_command(next_command());
+	}
+
+	was_jump_ = false;
 }
 
 void Computer::halt()

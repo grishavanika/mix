@@ -58,6 +58,7 @@ public:
 
 private:
 	void setup_default_devices();
+	void move_to_next_command();
 
 private:
 	Register ra_;
