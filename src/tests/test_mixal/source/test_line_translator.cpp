@@ -27,7 +27,7 @@ protected:
 			throw std::logic_error{"bad test input line"};
 		}
 		
-		return TranslateLine(translator_, parser);
+		return TranslateLine(translator_, parser).word_ref;
 	}
 
 protected:

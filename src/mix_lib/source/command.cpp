@@ -96,7 +96,7 @@ namespace mix {
 std::ostream& operator<<(std::ostream& out, const Command& command)
 {
 	out << "|" << command.sign();
-	out << "|" << std::setw(4) << std::right << std::abs(command.address());
+	out << "|" << ' ' << std::setw(4) << std::right << std::abs(command.address());
 	out << "|" << std::setw(2) << std::right << command.address_index();
 	out << "|" << std::setw(2) << std::right << command.field();
 	out << "|" << std::setw(2) << std::right << command.id();

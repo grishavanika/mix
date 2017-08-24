@@ -64,7 +64,19 @@ OperationAddressParser QueryAddress(const LineParser& line)
 
 } // namespace
 
-FutureTranslatedWordRef TranslateLine(
+TranslatedLine::TranslatedLine(FutureTranslatedWordRef&& ref)
+	: word_ref{std::move(ref)}
+	, end_code{}
+{
+}
+
+TranslatedLine::TranslatedLine(EndCommandGeneratedCode&& end_code)
+	: word_ref{}
+	, end_code{std::move(end_code)}
+{
+}
+
+TranslatedLine TranslateLine(
 	Translator& translator,
 	const LineParser& line)
 {
@@ -94,9 +106,8 @@ FutureTranslatedWordRef TranslateLine(
 		return MakeFutureWord(translator.translate_ALF(
 			QueryALFText(address), label));
 	case OperationId::END:
-		(void)translator.translate_END(
+		return translator.translate_END(
 			QueryWValue(address), label);
-		return MakeNullFutureWord();
 	default:
 	{
 		const auto mix = QueryMIXParsers(address);

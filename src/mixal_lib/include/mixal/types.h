@@ -56,7 +56,6 @@ struct FutureTranslatedWord :
 
 	TranslatedWord translated_word() const
 	{
-		assert(is_ready());
 		return *this;
 	}
 };

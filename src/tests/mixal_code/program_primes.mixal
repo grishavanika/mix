@@ -1,14 +1,12 @@
 * Program P ("First 500 PRIMES")
 
 L          EQU    500                 
-TERMINAL   EQU    19                  
 PRINTER    EQU    18                  
-CARDPUNCH  EQU    17                  
 PRIME      EQU    -1                  
 BUF0       EQU    2000                
 BUF1       EQU    BUF0+25             
            ORIG   3000                
-START      IOC    0(CARDPUNCH)        
+START      IOC    0(PRINTER)        
            LD1    =1-L=               
            LD2    =3=                 
 2H         INC1   1                   
@@ -24,7 +22,7 @@ START      IOC    0(CARDPUNCH)
            INC3   1                   
            JG     6B                  
            JMP    2B                  
-2H         OUT    TITLE(CARDPUNCH)    
+2H         OUT    TITLE(PRINTER)    
            ENT4   BUF1+10             
            ENT5   -50                 
 2H         INC5   L+1                 
@@ -34,7 +32,7 @@ START      IOC    0(CARDPUNCH)
            DEC4   1                   
            DEC5   50                  
            J5P    4B                  
-           OUT    0,4(CARDPUNCH)      
+           OUT    0,4(PRINTER)      
            LD4    24,4                
            J5N    2B                  
            HLT                        
