@@ -27,10 +27,22 @@ struct ComputerListenerMock :
 struct DeviceMock :
 	public mix::IIODevice
 {
+	virtual void write(mix::DeviceBlockId block_id, Block&& block) override
+	{
+		return write_helper(block_id, block);
+	}
+
+	virtual Block prepare_block() const override
+	{
+		Block block;
+		block.resize(static_cast<std::size_t>(block_size()));
+		return block;
+	}
+
 	MOCK_CONST_METHOD0(ready, bool());
 	MOCK_CONST_METHOD0(block_size, int());
-	MOCK_METHOD1(read_next, mix::Word (mix::DeviceBlockId));
-	MOCK_METHOD2(write_next, void (mix::DeviceBlockId, const mix::Word&));
+	MOCK_METHOD1(read, mix::IIODevice::Block (mix::DeviceBlockId));
+	MOCK_METHOD2(write_helper, void (mix::DeviceBlockId, const Block&));
 };
 
 

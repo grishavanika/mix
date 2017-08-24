@@ -6,18 +6,31 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::NiceMock;
 
+template<typename... T>
+DeviceMock::Block MakeBlock(T&&... word)
+{
+	DeviceMock::Block block;
+	(void)std::initializer_list<int>{((void)block.push_back(Word{std::forward<T>(word)}), 0)...};
+	return block;
+}
+
+int BlockSize(const DeviceMock::Block& block)
+{
+	return static_cast<int>(block.size());
+}
+
 TEST(IOInput, Reads_Device_Block_Size_Cells_To_Memory_From_Device)
 {
 	const DeviceId k_device_id = 16;
 
 	auto device_mock = std::make_unique<DeviceMock>();
+	const auto block = MakeBlock(42, 42);
 	EXPECT_CALL(*device_mock, ready()).WillOnce(Return(true));
-	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(2));
-	EXPECT_CALL(*device_mock, read_next(0)).WillRepeatedly(Return(42));
-	EXPECT_CALL(*device_mock, write_next(_, _)).Times(0);
+	EXPECT_CALL(*device_mock, read(0)).WillRepeatedly(Return(block));
+	EXPECT_CALL(*device_mock, write_helper(_, _)).Times(0);
 
 	NiceMock<ComputerListenerMock> listener;
-	EXPECT_CALL(listener, on_device_read(k_device_id, 0)).Times(2);
+	EXPECT_CALL(listener, on_device_read(k_device_id, 0)).Times(1);
 	EXPECT_CALL(listener, on_device_write(_, _)).Times(0);
 	EXPECT_CALL(listener, on_wait_on_device(_)).Times(0);
 	
@@ -39,14 +52,13 @@ TEST(IOInput, Waits_While_Device_Is_Busy)
 	const DeviceId k_device_id = 16;
 
 	auto device_mock = std::make_unique<DeviceMock>();
+	const auto block = MakeBlock(42);
 	EXPECT_CALL(*device_mock, ready())
 		.WillOnce(Return(false))
 		.WillOnce(Return(false))
 		.WillOnce(Return(true));
 
-	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(1));
-	EXPECT_CALL(*device_mock, read_next(0)).WillOnce(Return(42));
-	EXPECT_CALL(*device_mock, write_next(_, _)).Times(0);
+	EXPECT_CALL(*device_mock, write_helper(_, _)).Times(0);
 
 	NiceMock<ComputerListenerMock> listener;
 	EXPECT_CALL(listener, on_device_read(k_device_id, 0)).Times(1);
@@ -67,10 +79,10 @@ TEST(IOInput, Takes_Into_Account_Device_Block_ID_From_RX_For_Drum_Devices)
 	ASSERT_EQ(DeviceType::Drum, DeviceController::DeviceTypeFromId(k_device_id));
 
 	auto device_mock = std::make_unique<DeviceMock>();
+	const auto block = MakeBlock(42);
 	EXPECT_CALL(*device_mock, ready()).WillOnce(Return(true));
-	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(1));
-	EXPECT_CALL(*device_mock, read_next(k_drum_block_id)).WillRepeatedly(Return(42));
-	EXPECT_CALL(*device_mock, write_next(_, _)).Times(0);
+	EXPECT_CALL(*device_mock, read(k_drum_block_id)).WillRepeatedly(Return(block));
+	EXPECT_CALL(*device_mock, write_helper(_, _)).Times(0);
 
 	NiceMock<ComputerListenerMock> listener;
 	EXPECT_CALL(listener, on_device_read(k_device_id, k_drum_block_id)).Times(1);
@@ -161,14 +173,15 @@ TEST(IOOutput, Writes_Device_Block_Size_Cells_From_Memory_To_Device)
 	const DeviceId k_device_id = 16;
 
 	auto device_mock = std::make_unique<DeviceMock>();
+	const auto block = MakeBlock(42, 42, 42);
 	EXPECT_CALL(*device_mock, ready()).WillOnce(Return(true));
-	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(3));
-	EXPECT_CALL(*device_mock, read_next(_)).Times(0);
-	EXPECT_CALL(*device_mock, write_next(0, Word{42})).Times(3);
+	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(BlockSize(block)));
+	EXPECT_CALL(*device_mock, read(_)).Times(0);
+	EXPECT_CALL(*device_mock, write_helper(0, block)).Times(1);
 
 	NiceMock<ComputerListenerMock> listener;
 	EXPECT_CALL(listener, on_device_read(_, _)).Times(0);
-	EXPECT_CALL(listener, on_device_write(k_device_id, 0)).Times(3);
+	EXPECT_CALL(listener, on_device_write(k_device_id, 0)).Times(1);
 	EXPECT_CALL(listener, on_wait_on_device(_)).Times(0);
 
 	Computer mix{&listener};
@@ -188,10 +201,11 @@ TEST(IOOutput, Takes_Into_Account_Device_Block_ID_From_RX_For_Drum_Devices)
 	const DeviceBlockId k_drum_block_id = 5;
 
 	auto device_mock = std::make_unique<DeviceMock>();
+	const auto block = MakeBlock(42);
 	EXPECT_CALL(*device_mock, ready()).WillOnce(Return(true));
-	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(1));
-	EXPECT_CALL(*device_mock, read_next(_)).Times(0);
-	EXPECT_CALL(*device_mock, write_next(k_drum_block_id, Word{42})).Times(1);
+	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(BlockSize(block)));
+	EXPECT_CALL(*device_mock, read(_)).Times(0);
+	EXPECT_CALL(*device_mock, write_helper(k_drum_block_id, block)).Times(1);
 
 	NiceMock<ComputerListenerMock> listener;
 	EXPECT_CALL(listener, on_device_read(_, _)).Times(0);
@@ -212,15 +226,16 @@ TEST(IOOutput, Waits_While_Device_Is_Busy)
 	const DeviceBlockId k_drum_block_id = 5;
 
 	auto device_mock = std::make_unique<DeviceMock>();
+	const auto block = MakeBlock(42);
 	EXPECT_CALL(*device_mock, ready())
 		.WillOnce(Return(false))
 		.WillOnce(Return(false))
 		.WillOnce(Return(false))
 		.WillOnce(Return(false))
 		.WillOnce(Return(true));
-	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(1));
-	EXPECT_CALL(*device_mock, read_next(_)).Times(0);
-	EXPECT_CALL(*device_mock, write_next(k_drum_block_id, Word{42})).Times(1);
+	EXPECT_CALL(*device_mock, block_size()).WillOnce(Return(BlockSize(block)));
+	EXPECT_CALL(*device_mock, read(_)).Times(0);
+	EXPECT_CALL(*device_mock, write_helper(k_drum_block_id, block)).Times(1);
 
 	NiceMock<ComputerListenerMock> listener;
 	EXPECT_CALL(listener, on_device_read(_, _)).Times(0);

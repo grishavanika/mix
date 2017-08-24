@@ -7,6 +7,8 @@
 
 #include "internal/helpers.hpp"
 
+#include <iostream>
+
 using namespace mix;
 
 Computer::Computer(IComputerListener* listener /*= nullptr*/)
@@ -221,7 +223,37 @@ IIODevice& Computer::wait_device_ready(DeviceId id)
 
 void Computer::setup_default_devices()
 {
-	devices_.inject_device(18, std::make_unique<DefaultDevice>(24));
-	devices_.inject_device(19, std::make_unique<DefaultDevice>(14));
-	// #TODO: add default devices to `devices_`
+	const struct
+	{
+		const DeviceId id;
+		const int block_size;
+		const bool fill_new_line_with_spaces;
+	} k_symbol_devices[] = {
+		{16, 16, false}, // PunchCard
+		{17, 16, false}, // Perforator
+		{18, 24, false}, // Printer
+		{19, 14, true}, // Terminal
+		{20, 14, false}, // PunchedTape
+	};
+
+	for (auto symbol_device : k_symbol_devices)
+	{
+		devices_.inject_device(symbol_device.id,
+			std::make_unique<SymbolDevice>(
+				symbol_device.block_size,
+				std::cout,
+				std::cin,
+				symbol_device.fill_new_line_with_spaces));
+	}
+
+	// #TODO: add default non-symbols devices
+	for (DeviceId id = 0; id <= 15; ++id)
+	{
+		devices_.inject_device(id,
+			std::make_unique<SymbolDevice>(
+				100/*block size*/,
+				std::cout,
+				std::cin,
+				true/*fill result with spaces when new line entered*/));
+	}
 }

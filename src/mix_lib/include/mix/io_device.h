@@ -3,6 +3,8 @@
 #include <mix/word.h>
 #include <mix/general_types.h>
 
+#include <vector>
+
 namespace mix {
 
 class MIX_LIB_EXPORT IIODeviceListener
@@ -18,13 +20,16 @@ protected:
 class IIODevice
 {
 public:
+	using Block = std::vector<Word>;
+
 	virtual ~IIODevice() = default;
 
 	virtual bool ready() const = 0;
 	virtual int block_size() const = 0;
 
-	virtual Word read_next(DeviceBlockId block_id) = 0;
-	virtual void write_next(DeviceBlockId block_id, const Word&) = 0;
+	virtual Block prepare_block() const = 0;
+	virtual Block read(DeviceBlockId block_id) = 0;
+	virtual void write(DeviceBlockId block_id, Block&&) = 0;
 };
 
 } // namespace mix

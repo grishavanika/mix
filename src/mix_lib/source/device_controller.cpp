@@ -33,21 +33,26 @@ struct DeviceProxy final :
 		return device_->ready();
 	}
 
+	virtual Block prepare_block() const override
+	{
+		return device_->prepare_block();
+	}
+
 	virtual int block_size() const override
 	{
 		return device_->block_size();
 	}
 
-	virtual Word read_next(DeviceBlockId block_id) override
+	virtual Block read(DeviceBlockId block_id) override
 	{
 		listener_->on_device_read(id_, block_id);
-		return device_->read_next(block_id);
+		return device_->read(block_id);
 	}
 
-	virtual void write_next(DeviceBlockId block_id, const Word& word) override
+	virtual void write(DeviceBlockId block_id, Block&& block) override
 	{
 		listener_->on_device_write(id_, block_id);
-		device_->write_next(block_id, word);
+		device_->write(block_id, std::move(block));
 	}
 
 private:

@@ -889,12 +889,11 @@ void CommandProcessor::in(const Command& command)
 
 	const auto block_id = device_block_id(device_id);
 	const int dest_address = indexed_address(command);
-	const int cells_count = device.block_size();
+	const auto block = device.read(block_id);
 
-	for (int i = 0; i < cells_count; ++i)
+	for (std::size_t i = 0, cells_count = block.size(); i < cells_count; ++i)
 	{
-		// #TODO: should we wait after each word read ?
-		mix_.set_memory(dest_address + i, device.read_next(block_id));
+		mix_.set_memory(dest_address + static_cast<int>(i), block[i]);
 	}
 }
 
@@ -905,12 +904,14 @@ void CommandProcessor::out(const Command& command)
 
 	const auto block_id = device_block_id(device_id);
 	const int source_address = indexed_address(command);
-	const int cells_count = device.block_size();
 
-	for (int i = 0; i < cells_count; ++i)
+	auto block = device.prepare_block();
+	for (std::size_t i = 0, cells_count = block.size(); i < cells_count; ++i)
 	{
-		device.write_next(block_id, mix_.memory(source_address + i));
+		block[i] = mix_.memory(source_address + static_cast<int>(i));
 	}
+
+	device.write(block_id, std::move(block));
 }
 
 void CommandProcessor::ioc(const Command& command)
