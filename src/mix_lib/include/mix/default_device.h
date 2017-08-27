@@ -30,7 +30,7 @@ private:
 
 private:
 	const int block_size_;
-	int current_column_;
+	std::size_t current_column_;
 	std::ostream& out_;
 	std::istream& in_;
 	bool handle_new_line_;

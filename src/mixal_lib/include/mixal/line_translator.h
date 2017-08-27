@@ -1,4 +1,5 @@
 #pragma once
+#include <mixal/config.h>
 #include <mixal/translator.h>
 
 #include <mixal_parse/line_parser.h>
@@ -28,11 +29,12 @@ struct TranslatedProgram
 	bool completed{false};
 };
 
+MIXAL_LIB_EXPORT
 TranslatedLine TranslateLine(
 	Translator& translator,
 	const mixal_parse::LineParser& line);
 
-class ProgramTranslator
+class MIXAL_LIB_EXPORT ProgramTranslator
 {
 public:
 	enum class Status
