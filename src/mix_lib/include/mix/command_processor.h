@@ -8,22 +8,20 @@ namespace mix {
 
 class Computer;
 class Command;
-class Word;
-class WordValue;
 
 class MIX_LIB_EXPORT CommandProcessor
 {
 public:
-	static constexpr std::size_t k_commands_count = 64;
-
 	explicit CommandProcessor(Computer& mix);
 
 	void process(const Command& command);
 
 private:
+	void set_rax(const RAX& rax);
+
 	const Word& memory(const Command& command) const;
-	int indexed_address(int address, std::size_t index) const;
 	int indexed_address(const Command& command) const;
+	int indexed_address(int address, std::size_t index) const;
 
 	Register do_load(
 		Register prev_value,
@@ -43,7 +41,7 @@ private:
 	void do_jump(const Register& r, const Command& command);
 
 	// #TODO: make statefull functions to return created value
-	// if this is possible/make sense (hint: almost all functions that return `void`)
+	// (if this is possible/make sense)
 
 	DeviceBlockId device_block_id(DeviceId device_id) const;
 
@@ -85,6 +83,12 @@ private:
 	void mul(const Command& command);
 	void div(const Command& command);
 
+	void in(const Command& command);
+	void out(const Command& command);
+	void ioc(const Command& command);
+	void jred(const Command& command);
+	void jbus(const Command& command);
+
 	void enta_group(const Command& command);
 	void entx_group(const Command& command);
 	void enti_group(std::size_t index, const Command& command);
@@ -116,27 +120,22 @@ private:
 	void jmp_ri6_group(const Command& command);
 
 	void shift_group(const Command& command);
-	void ra_shift(int shift);
-	void rax_shift(int shift, bool cyclic);
 
 	void move(const Command& command);
 
 	void convert_or_halt_group(const Command& command);
 
+	void ra_shift(int shift);
+	void rax_shift(int shift, bool cyclic);
+
 	Register num() const;
 	void char_impl();
-
-	void in(const Command& command);
-	void out(const Command& command);
-	void ioc(const Command& command);
-	void jred(const Command& command);
-	void jbus(const Command& command);
 
 private:
 	Computer& mix_;
 
 	using CommandAction = void (CommandProcessor::*)(const Command& command);
-	static const std::array<CommandAction, k_commands_count> k_command_actions;
+	static const std::array<CommandAction, Byte::k_values_count> k_command_actions;
 };
 
 } // namespace mix

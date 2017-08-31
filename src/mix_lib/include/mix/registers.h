@@ -2,6 +2,8 @@
 #include <mix/config.h>
 #include <mix/word.h>
 
+#include <cstdint>
+
 namespace mix {
 
 class MIX_LIB_EXPORT Register : public Word
@@ -38,6 +40,18 @@ public:
 
 	// #TODO: `sing() == Sign::Positive` should be true always
 };
+
+struct RAX
+{
+	Register ra;
+	Register rx;
+
+	static constexpr std::size_t k_bytes_count = 2 * Register::k_bytes_count;
+	using Type = std::uint64_t;
+};
+
+static_assert((sizeof(RAX::Type) * CHAR_BIT) >= (2 * Register::k_bits_count),
+	"Native `uint64_t` can't hold the result of RAX command");
 
 } // namespace mix
 

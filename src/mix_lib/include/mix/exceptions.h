@@ -75,7 +75,7 @@ class UnknownCommandField :
 	public MixException
 {
 public:
-	UnknownCommandField()
+	UnknownCommandField(std::size_t /*field*/)
 		: MixException{"unknown command field"}
 	{
 	}

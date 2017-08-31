@@ -13,7 +13,7 @@ using namespace mix;
 
 /*static*/ const std::array<
 	CommandProcessor::CommandAction,
-	CommandProcessor::k_commands_count>
+	Byte::k_values_count>
 CommandProcessor::k_command_actions = {{
 	/*00*/&CommandProcessor::nop,
 	/*01*/&CommandProcessor::add,
@@ -98,7 +98,8 @@ bool CalculateWordAddOverflow(int lhs, int rhs, int& overflow_part)
 	assert(SignValue(lhs) == SignValue(rhs));
 
 	const auto abs_rhs = static_cast<std::size_t>(std::abs(rhs));
-	const auto part_without_overflow = (Word::k_max_abs_value - static_cast<std::size_t>(std::abs(lhs)));
+	const auto part_without_overflow =
+		(Word::k_max_abs_value - static_cast<std::size_t>(std::abs(lhs)));
 
 	const bool overflow = (part_without_overflow < abs_rhs);
 	if (overflow)
@@ -110,12 +111,10 @@ bool CalculateWordAddOverflow(int lhs, int rhs, int& overflow_part)
 	return overflow;
 }
 
-std::uint64_t TwoRegistersToNumber(const Register& r1, const Register& r2)
+RAX::Type RAXToNumber(const Register& r1, const Register& r2)
 {
-	// We have two 5-bytes words that are combined into
-	// 10-bytes "word" in decimal system
-	std::size_t pow = 2 * Word::k_bytes_count;
-	std::uint64_t result = 0;
+	std::size_t pow = RAX::k_bytes_count;
+	RAX::Type result = 0;
 
 	auto result_from_byte = [&](const Register& r)
 	{
@@ -142,11 +141,8 @@ CommandProcessor::CommandProcessor(Computer& mix)
 
 void CommandProcessor::process(const Command& command)
 {
-	static_assert(k_commands_count == (Byte::k_values_count),
-		"Command actions array should have all possible variations of command IDs");
-
 	auto callback = k_command_actions[command.id()];
-	assert(callback && "Invalid callback for command");
+	assert(callback && "Invalid/not implemented command");
 
 	(this->*callback)(command);
 }
@@ -154,6 +150,12 @@ void CommandProcessor::process(const Command& command)
 const Word& CommandProcessor::memory(const Command& command) const
 {
 	return mix_.memory(indexed_address(command));
+}
+
+void CommandProcessor::set_rax(const RAX& rax)
+{
+	mix_.set_ra(rax.ra);
+	mix_.set_rx(rax.rx);
 }
 
 void CommandProcessor::nop(const Command& /*command*/)
@@ -174,7 +176,7 @@ Register CommandProcessor::do_load(
 	prev_value.set_zero_abs_value();
 	prev_value.set_value(reverse_sorce_sign ? value.reverse_sign() : value, dest_field);
 	
-#if (0) // #TODO (Clang): why "redundant move in return statement" ?
+#if (0) // #INV (Clang): why "redundant move in return statement" ?
 	return std::move(prev_value);
 #else
 	return prev_value;
@@ -397,7 +399,7 @@ Register CommandProcessor::do_add(Register r, const WordValue& value)
 		{
 			mix_.set_overflow();
 			r.set_value(overflow_result);
-#if (0) // #TODO (Clang): why "redundant move in return statement" ?
+#if (0) // #INV (Clang): why "redundant move in return statement" ?
 			return std::move(r);
 #else
 			return r;
@@ -422,21 +424,18 @@ void CommandProcessor::sub(const Command& command)
 
 void CommandProcessor::mul(const Command& command)
 {
-	static_assert((sizeof(std::uint64_t) * CHAR_BIT) >= (2 * Word::k_bits_count),
-		"Native `uint64_t` can't hold the result of MUL command");
-
 	const auto ra = mix_.ra().value();
 	const auto value = memory(command).value(command.word_field());
 	const Sign sign = ((ra.sign() == value.sign()) ? Sign::Positive : Sign::Negative);
-	const auto abs_result = std::uint64_t{ra.abs_value()} * value.abs_value();
+	const auto abs_result = RAX::Type{ra.abs_value()} * value.abs_value();
 	
 	// Store less significant part to RX
 	const auto rx_part = (abs_result & Word::k_max_abs_value);
 	// ... and most significant part to RA
 	const auto ra_part = ((abs_result >> Word::k_bits_count) & Word::k_max_abs_value);
 
-	mix_.set_ra(Register{WordValue{sign, static_cast<int>(ra_part)}});
-	mix_.set_rx(Register{WordValue{sign, static_cast<int>(rx_part)}});
+	set_rax({{WordValue{sign, static_cast<int>(ra_part)}},
+		{WordValue{sign, static_cast<int>(rx_part)}}});
 }
 
 void CommandProcessor::div(const Command& command)
@@ -453,7 +452,7 @@ void CommandProcessor::div(const Command& command)
 	}
 
 	const auto rx = mix_.rx().value();
-	std::uint64_t rax = (std::uint64_t{abs_ra} << Word::k_bits_count);
+	RAX::Type rax = (RAX::Type{abs_ra} << Word::k_bits_count);
 	rax |= rx.abs_value();
 
 	const auto new_a = rax / abs_value;
@@ -461,15 +460,17 @@ void CommandProcessor::div(const Command& command)
 	const Sign prev_sign = ra.sign();
 	const Sign sign = ((prev_sign == value.sign()) ? Sign::Positive : Sign::Negative);
 
-	mix_.set_ra(Register{WordValue{sign, static_cast<int>(new_a)}});
-	mix_.set_rx(Register{WordValue{prev_sign, static_cast<int>(new_x)}});
+	set_rax({{WordValue{sign, static_cast<int>(new_a)}},
+		{WordValue{prev_sign, static_cast<int>(new_x)}}});
 }
 
 void CommandProcessor::enta_group(const Command& command)
 {
 	const WordValue value = indexed_address(command);
+	const auto field = command.field();
+
 	Register ra;
-	switch (command.field())
+	switch (field)
 	{
 	case 0: // INCA
 		ra = do_add(mix_.ra(), value);
@@ -484,7 +485,7 @@ void CommandProcessor::enta_group(const Command& command)
 		ra = do_enter_negative(value, command);
 		break;
 	default:
-		throw UnknownCommandField{};
+		throw UnknownCommandField{field};
 	}
 
 	mix_.set_ra(std::move(ra));
@@ -493,8 +494,10 @@ void CommandProcessor::enta_group(const Command& command)
 void CommandProcessor::entx_group(const Command& command)
 {
 	const WordValue value = indexed_address(command);
+	const auto field = command.field();
+
 	Register rx;
-	switch (command.field())
+	switch (field)
 	{
 	case 0: // INCX
 		rx = do_add(mix_.rx(), value);
@@ -509,7 +512,7 @@ void CommandProcessor::entx_group(const Command& command)
 		rx = do_enter_negative(value, command);
 		break;
 	default:
-		throw UnknownCommandField{};
+		throw UnknownCommandField{field};
 	}
 
 	mix_.set_rx(std::move(rx));
@@ -518,8 +521,10 @@ void CommandProcessor::entx_group(const Command& command)
 void CommandProcessor::enti_group(std::size_t index, const Command& command)
 {
 	const WordValue value = indexed_address(command);
+	const auto field = command.field();
+
 	Register result;
-	switch (command.field())
+	switch (field)
 	{
 	case 0: // INCI
 		// Note: overflow is not possible since `do_add()` works with 5 bytes overflow
@@ -536,7 +541,7 @@ void CommandProcessor::enti_group(std::size_t index, const Command& command)
 		result = do_enter_negative(value, command);
 		break;
 	default:
-		throw UnknownCommandField{};
+		throw UnknownCommandField{field};
 	}
 
 	mix_.set_ri(index, IndexRegister{result});
@@ -635,9 +640,10 @@ void CommandProcessor::jmp_flags_group(const Command& command)
 	const int next_address = indexed_address(command);
 	const ComparisonIndicator comparison_flag = mix_.comparison_state();
 	const bool has_overflow = mix_.has_overflow();
+	const auto field = command.field();
 
 	bool do_jump = false;
-	switch (command.field())
+	switch (field)
 	{
 	case 0: // JMP
 		do_jump = true;
@@ -676,7 +682,7 @@ void CommandProcessor::jmp_flags_group(const Command& command)
 			(comparison_flag == ComparisonIndicator::Equal));
 		break;
 	default:
-		throw UnknownCommandField{};
+		throw UnknownCommandField{field};
 	};
 
 	if (do_jump)
@@ -688,8 +694,10 @@ void CommandProcessor::jmp_flags_group(const Command& command)
 void CommandProcessor::do_jump(const Register& r, const Command& command)
 {
 	const int value = r.value();
+	const auto field = command.field();
+
 	bool do_jump = false;
-	switch (command.field())
+	switch (field)
 	{
 	case 0:
 		do_jump = (value < 0);
@@ -710,7 +718,7 @@ void CommandProcessor::do_jump(const Register& r, const Command& command)
 		do_jump = (value <= 0);
 		break;
 	default:
-		throw UnknownCommandField{};
+		throw UnknownCommandField{field};
 	}
 
 	if (do_jump)
@@ -764,8 +772,9 @@ void CommandProcessor::shift_group(const Command& command)
 {
 	const int shift = indexed_address(command);
 	assert(shift >= 0);
+	const auto field = command.field();
 
-	switch (command.field())
+	switch (field)
 	{
 	case 0: // SLA
 		ra_shift(+shift);
@@ -786,7 +795,7 @@ void CommandProcessor::shift_group(const Command& command)
 		rax_shift(-shift, true/*cyclic*/);
 		break;
 	default:
-		throw UnknownCommandField{};
+		throw UnknownCommandField{field};
 	}
 }
 
@@ -831,7 +840,9 @@ void CommandProcessor::move(const Command& command)
 
 void CommandProcessor::convert_or_halt_group(const Command& command)
 {
-	switch (command.field())
+	const auto field = command.field();
+
+	switch (field)
 	{
 	case 0: // NUM
 		mix_.set_ra(num());
@@ -843,19 +854,17 @@ void CommandProcessor::convert_or_halt_group(const Command& command)
 		mix_.halt();
 		break;
 	default:
-		throw UnknownCommandField{};
+		throw UnknownCommandField{field};
 	}
 }
 
 Register CommandProcessor::num() const
 {
-	auto result = TwoRegistersToNumber(mix_.ra(), mix_.rx());
+	auto result = RAXToNumber(mix_.ra(), mix_.rx());
 	if (result > Word::k_max_abs_value)
 	{
-		// #TODO: should be overflow flag set ?
-		// #TODO: maybe this should be a reminder of Word's max value ?
-		// .. reminder of b^5 where b is byte's size
-		result %= static_cast<std::uint64_t>(std::pow(Byte::k_bits_count, 5));
+		result %= Word::k_max_abs_value;
+		mix_.set_overflow();
 	}
 
 	return Register{WordValue{mix_.ra().sign(), static_cast<int>(result)}};
