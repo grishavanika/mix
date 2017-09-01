@@ -75,4 +75,14 @@ How to run:
 
 
 
+##### Building
+
+To use it with MinGW please install STL's port from https://nuwen.net/mingw.html.
+
+And then:
+```
+set path=%path%;C:\Programs\mingw\bin
+cmake -G "MinGW Makefiles" ..
+```
+
 

@@ -445,7 +445,7 @@ void CommandProcessor::div(const Command& command)
 
 	const auto abs_ra = ra.abs_value();
 	const auto abs_value = value.abs_value();
-	if ((abs_ra >= abs_value) || (abs_value == 0))
+	if ((abs_value == 0) || (abs_ra >= abs_value))
 	{
 		mix_.set_overflow();
 		return;

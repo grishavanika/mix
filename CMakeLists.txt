@@ -1,25 +1,18 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.9.1)
+include(CheckCXXCompilerFlag)
+include(GenerateExportHeader)
+
 project(mix)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(build_shared_lib OFF)
-if (build_shared_lib)
-	set(lib_type SHARED)
-else()
-	set(lib_type STATIC)
+set(CMAKE_CXX_STANDARD 17)
+if (MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
 endif()
 
+# Set BUILD_SHARED_LIBS to build all libraries as DLLs
+
 set(bin_folders "tools;tests")
-
-# Note: to avoid Visual Studio 2017 "Error: Specified cast is not valid." 
-# you need to disable "Enable Faster Project Load" option
-# (under Tools / Options / Text Editor / C/C++ / Experimental / Project)
-# 
-
-# TODO: wrap this into a function(s)
-
-# TODO: correctly detect this flags on *nix
-# TODO: enable c++14 or higher on *nix
 
 set(clang_on_msvc OFF)
 set(only_msvc ${MSVC})
@@ -34,53 +27,42 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 	set(gcc ON)
 endif()
 
-if (MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
-else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z")
-endif()
-
 if (only_msvc)
-	# Force to always compile with W4 and WX
-	if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-		string(REGEX REPLACE "/W[0-4]" "/WX /W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-	else()
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
-	endif()
+	add_compile_options(/W4 /WX)
 endif()
 
 if (NOT MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
+	add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 endif()
 
 if (clang_on_msvc)
-	# almost all of these are from VC system headers
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHa")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-argument")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-command-line-argument")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-attributes")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-microsoft-template")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dllimport-static-field-def")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dangling-else")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-logical-op-parentheses")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedef")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-noreturn")
+	add_compile_options(/EHa)
 
-	# investigate why this happens with Clang toolset
+	# almost all of these are from VC system headers
+	add_compile_options(
+		-Wno-deprecated-declarations
+		-Wno-unknown-argument
+		-Wno-unused-command-line-argument
+		-Wno-ignored-attributes
+		-Wno-microsoft-template
+		-Wno-dllimport-static-field-def
+		-Wno-dangling-else
+		-Wno-logical-op-parentheses
+		-Wno-unused-local-typedef
+		-Wno-invalid-noreturn)
+
+	#INV: why this happens with Clang toolset ?
 	add_definitions(-D_HAS_CXX17=1)
 	include_directories(SYSTEM "C:/Programs/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.11.25503/include")
 endif()
 
-if (MSVC)
+if (MSVC AND BUILD_SHARED_LIBS)
 	# class needs to have dll-interface to be used by clients of class
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251")
+	add_compile_options(/wd4251)
 endif ()
 
 # Remove unneeded configurations
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
-
-message("Options: ${CMAKE_CXX_FLAGS}")
 
 # third party libraries
 # GoogleTest uses static C++ runtime by default
@@ -129,9 +111,3 @@ add_test(NAME mixal COMMAND test_mixal)
 # from http://llvm.org/builds/ (5.0.0 for the moment)
 # CMake command:
 # cmake -G "Visual Studio 14 2015 Win64" -T "LLVM-vs2014" ..
-
-# To use it with MinGW please install STL's port from
-# https://nuwen.net/mingw.html
-# 
-# set path=%path%;C:\Programs\mingw\bin
-# cmake -G "MinGW Makefiles" ..

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.9.1)
 
 # set PCH for VS project
 # https://stackoverflow.com/questions/148570/using-pre-compiled-headers-with-cmake

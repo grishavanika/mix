@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
-
-include(GenerateExportHeader)
+cmake_minimum_required(VERSION 3.9.1)
 
 set(lib_name core_lib)
 
@@ -16,7 +14,7 @@ generate_export_header(${lib_name})
 # From: http://stackoverflow.com/questions/11216408/cmake-dependencies-headers-between-apps-libraries-in-same-project
 target_include_directories(${lib_name} PUBLIC include)
 
-if (${build_shared_lib})
+if (${BUILD_SHARED_LIBS})
 
 	foreach (config ${CMAKE_CONFIGURATION_TYPES})
 		foreach (bin_folder ${bin_folders})

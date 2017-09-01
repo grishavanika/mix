@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.9.1)
 
 include(GenerateExportHeader)
 
@@ -20,7 +20,7 @@ target_link_libraries(${lib_name} PUBLIC core_lib)
 
 target_include_directories(${lib_name} PUBLIC include)
 
-if (${build_shared_lib})
+if (${BUILD_SHARED_LIBS})
 
 	foreach (config ${CMAKE_CONFIGURATION_TYPES})
 		foreach (bin_folder ${bin_folders})

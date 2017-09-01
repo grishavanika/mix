@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.9.1)
 include(GenerateExportHeader)
 
 set(lib_name mixal_format_lib)
@@ -14,7 +14,7 @@ target_include_directories(${lib_name} PUBLIC include)
 generate_export_header(${lib_name})
 target_include_directories(${lib_name} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
-if (${build_shared_lib})
+if (${BUILD_SHARED_LIBS})
 
 	foreach (config ${CMAKE_CONFIGURATION_TYPES})
 		foreach (bin_folder ${bin_folders})
