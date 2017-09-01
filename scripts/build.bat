@@ -26,13 +26,7 @@ if "%config%" == "" (
 pushd %build_root%
 
 :: Build all
-cmake --build . --target install --config %config%
-if NOT %errorlevel% == 0 (
-	goto:eof
-	)
-
-:: Check with tests
-ctest -C %config% --verbose
+cmake --build . --config %config%
 if NOT %errorlevel% == 0 (
 	goto:eof
 	)
@@ -41,6 +35,12 @@ if NOT %errorlevel% == 0 (
 :: cmake --build . --config %config% --target install 
 :: Workaround for broken CMake's Makefile install (?)
 cmake -DBUILD_TYPE=%config% -P cmake_install.cmake
+
+:: Check with tests
+ctest -C %config% --verbose
+if NOT %errorlevel% == 0 (
+	goto:eof
+	)
 
 popd
 

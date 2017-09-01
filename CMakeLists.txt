@@ -6,13 +6,7 @@ include(scripts/cmake/utils.cmake)
 project(mix)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# Note: can be removed once CMake `CMAKE_CXX_STANDARD`
-# will support C++17 for all platforms
-if (MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
-else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z")
-endif()
+set_cpp17_standard()
 
 # Remove unneeded configurations
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
@@ -21,26 +15,9 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 
 set(bin_folders "tools;tests")
 
-set(clang_on_msvc OFF)
-set(only_msvc ${MSVC})
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND MSVC)
-	set(clang_on_msvc ON)
-	set(only_msvc OFF)
-endif()
+detect_compilers()
 
-set(gcc OFF)
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-	set(only_msvc OFF)
-	set(gcc ON)
-endif()
-
-if (only_msvc)
-	add_compile_options(/W4 /WX)
-endif()
-
-if (NOT MSVC)
-	add_compile_options(-Wall -Wextra -Wpedantic -Werror)
-endif()
+set_all_warnings()
 
 if (clang_on_msvc)
 	add_compile_options(/EHa)

@@ -1,5 +1,40 @@
 include(CMakePrintHelpers)
 
+macro(set_cpp17_standard)
+	# Note: can be removed once CMake `CMAKE_CXX_STANDARD`
+	# will support C++17 for all platforms
+	if (MSVC)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
+	else()
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z")
+	endif()
+endmacro()
+
+macro(detect_compilers)
+	set(clang_on_msvc OFF)
+	set(only_msvc ${MSVC})
+	set(gcc ${GNU})
+
+	if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND MSVC)
+		set(clang_on_msvc ON)
+		set(only_msvc OFF)
+	endif()
+endmacro()
+
+macro(set_all_warnings)
+	if (only_msvc)
+		add_compile_options(/W4 /WX)
+	endif()
+
+	if (NOT MSVC)
+		add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+	endif()
+
+	if (clang_on_msvc)
+		add_compile_options(-Wall -Wextra -Werror)
+	endif()
+endmacro()
+
 # set PCH for VS project
 # https://stackoverflow.com/questions/148570/using-pre-compiled-headers-with-cmake
 
