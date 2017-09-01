@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.2)
+project(mix)
+
 include(CheckCXXCompilerFlag)
 include(GenerateExportHeader)
+include(CTest)
 include(scripts/cmake/utils.cmake)
 
-project(mix)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set_cpp17_standard()
@@ -74,8 +76,6 @@ set_target_properties(mixal PROPERTIES FOLDER "app")
 set_target_properties(mixal_format PROPERTIES FOLDER "app/tools")
 
 # tests
-# Can't do this in subdirectory since cctest will fail to run tests
-enable_testing()
 
 add_subdirectory(src/tests)
 
