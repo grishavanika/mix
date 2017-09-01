@@ -22,12 +22,13 @@ install:
   - if [ "$CXX" == "g++" ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90; fi
 
 env:
-  - BUILD_CONFIGURATION=Debug
-  - BUILD_CONFIGURATION=Release
+  - config=Debug
+  - config=Release
 
 script:
   - mkdir build
   - cd build
-  - cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DCMAKE_INSTALL_PREFIX=deploy ..
-  - cmake --build . --config $BUILD_CONFIGURATION
-  - ctest -C $BUILD_CONFIGURATION --verbose
+  - cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=$config -DCMAKE_INSTALL_PREFIX=deploy ..
+  - cmake --build . --config $config
+  - cmake -DBUILD_TYPE=$config -P cmake_install.cmake
+  - ctest -C $config --verbose
