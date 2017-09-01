@@ -10,7 +10,7 @@
 
 #include <core/utils.h>
 
-#include <gtest/gtest.h>
+#include <gtest_all.h>
 
 #include "commands_factory.h"
 

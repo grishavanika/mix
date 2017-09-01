@@ -87,7 +87,7 @@ TEST_P(SubTest, Substracts_Memory_Cell_From_RA)
 	ASSERT_EQ(param.should_be_overflow, mix.has_overflow());
 }
 
-INSTANTIATE_TEST_CASE_P(Sub_With_Overflow,
+DEF_INSTANTIATE_TEST_CASE_P(Sub_With_Overflow,
 	SubTest,
 	::testing::Values(
 		/*00*/SubParam{0, true, MinRegister(), 1, Word::MaxField(), 1000},
@@ -99,7 +99,7 @@ INSTANTIATE_TEST_CASE_P(Sub_With_Overflow,
 		/*06*/SubParam{0, true, MinRegister(), {1, WordField{5, 5}}, WordField{5, 5}, 1000}
 	));
 
-INSTANTIATE_TEST_CASE_P(Sub_Without_Overflow,
+DEF_INSTANTIATE_TEST_CASE_P(Sub_Without_Overflow,
 	SubTest,
 	::testing::Values(
 		/*00*/SubParam{0, false, 1, 1, Word::MaxField(), 1000},

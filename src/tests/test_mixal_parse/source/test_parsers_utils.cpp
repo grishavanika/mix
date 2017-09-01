@@ -1,6 +1,6 @@
 #include <mixal_parse/parsers_utils.h>
 
-#include <gtest/gtest.h>
+#include <gtest_all.h>
 
 using namespace mixal_parse;
 

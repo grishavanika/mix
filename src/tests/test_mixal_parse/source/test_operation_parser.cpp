@@ -86,7 +86,7 @@ TEST_P(OperationParserTestParam, Has_Valid_MIX_Or_MIXAL_Operations_Queries)
 	}
 }
 
-INSTANTIATE_TEST_CASE_P(ValidOperationStrings,
+DEF_INSTANTIATE_TEST_CASE_P(ValidOperationStrings,
 	OperationParserTestParam,
 	::testing::Values(
 		/*00*/OperationIdParam{OperationId::ADD, OperationType::MIX, "ADD"},

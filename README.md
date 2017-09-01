@@ -77,12 +77,17 @@ How to run:
 
 ##### Building
 
-To use it with MinGW please install STL's port from https://nuwen.net/mingw.html.
-
+- To use it with MinGW please install STL's port from https://nuwen.net/mingw.html.
 And then:
-```
-set path=%path%;C:\Programs\mingw\bin
-cmake -G "MinGW Makefiles" ..
-```
+    ```
+    set path=%path%;C:\Programs\mingw\bin
+    cmake -G "MinGW Makefiles" ..
+    ```
 
+- To use it with Clang on Windows you need to install latest one
+from http://llvm.org/builds/ (5.0.0 for the moment).
+And then:
+    ```
+    cmake -G "Visual Studio 14 2015 Win64" -T "LLVM-vs2014" ..
+    ```
 

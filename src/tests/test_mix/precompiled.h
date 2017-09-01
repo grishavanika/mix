@@ -7,7 +7,7 @@
 #include "source/mocks.h"
 #include "source/commands_factory.h"
 
-#include <gtest/gtest.h>
+#include <gtest_all.h>
 
 #include <tuple>
 #include <random>

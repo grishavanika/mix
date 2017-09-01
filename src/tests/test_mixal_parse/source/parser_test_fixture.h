@@ -1,7 +1,7 @@
 #pragma once
 #include <mixal_parse/parsers_utils.h>
 
-#include <gtest/gtest.h>
+#include <gtest_all.h>
 
 template<typename Parser>
 class ParserTest :

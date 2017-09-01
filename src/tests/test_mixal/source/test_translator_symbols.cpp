@@ -1,7 +1,7 @@
 #include <mixal/translator.h>
 #include <mixal/exceptions.h>
 
-#include <gtest/gtest.h>
+#include <gtest_all.h>
 
 using namespace mixal;
 using namespace mix;

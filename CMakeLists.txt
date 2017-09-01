@@ -10,6 +10,9 @@ if (MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
 endif()
 
+# Remove unneeded configurations
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
+
 # Set BUILD_SHARED_LIBS to build all libraries as DLLs
 
 set(bin_folders "tools;tests")
@@ -61,13 +64,11 @@ if (MSVC AND BUILD_SHARED_LIBS)
 	add_compile_options(/wd4251)
 endif ()
 
-# Remove unneeded configurations
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
-
 # third party libraries
 # GoogleTest uses static C++ runtime by default
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory(third_party/googletest/googlemock)
+
 set_target_properties(gtest PROPERTIES FOLDER third_party)
 set_target_properties(gmock PROPERTIES FOLDER third_party)
 set_target_properties(gtest_main PROPERTIES FOLDER third_party)
@@ -92,22 +93,12 @@ set_target_properties(mixal PROPERTIES FOLDER "app")
 set_target_properties(mixal_format PROPERTIES FOLDER "app/tools")
 
 # tests
-add_subdirectory(src/tests/test_core)
-add_subdirectory(src/tests/test_mix)
-add_subdirectory(src/tests/test_mixal)
-add_subdirectory(src/tests/test_mixal_parse)
-set_target_properties(test_core PROPERTIES FOLDER tests)
-set_target_properties(test_mix PROPERTIES FOLDER tests)
-set_target_properties(test_mixal PROPERTIES FOLDER tests)
-set_target_properties(test_mixal_parse PROPERTIES FOLDER tests)
+add_subdirectory(src/tests)
 
+# Can't do this in subdirectory since cctest will fail to run tests
 enable_testing()
 add_test(NAME core COMMAND test_core)
 add_test(NAME mix COMMAND test_mix)
 add_test(NAME mixal_parse COMMAND test_mixal_parse)
 add_test(NAME mixal COMMAND test_mixal)
 
-# Note: to use it with clang you need to install latest one
-# from http://llvm.org/builds/ (5.0.0 for the moment)
-# CMake command:
-# cmake -G "Visual Studio 14 2015 Win64" -T "LLVM-vs2014" ..

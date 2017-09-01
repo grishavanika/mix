@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <gtest/gtest.h>
+#include <gtest_all.h>
 
 #include "expression_builders.h"
 

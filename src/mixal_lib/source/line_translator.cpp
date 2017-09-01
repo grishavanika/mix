@@ -37,7 +37,7 @@ WValue QueryWValue(const OperationAddressParser& parser)
 	auto wvalue_parser = parser.mixal()->w_value_parser;
 	auto wvalue = wvalue_parser.value_or(WValueParser{}).value();
 	return wvalue;
-};
+}
 
 MIXOpParser QueryMIXParsers(const OperationAddressParser& parser)
 {
