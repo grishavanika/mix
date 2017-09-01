@@ -91,3 +91,4 @@ And then:
     cmake -G "Visual Studio 14 2015 Win64" -T "LLVM-vs2014" ..
     ```
 
+- See also `scripts/generate_proj.bat` and `scripts/build.*(sh|bat)`

@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.9.1)
-
 set(exe_name test_mixal)
 
 target_collect_sources(${exe_name})

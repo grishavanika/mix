@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.9.1)
-
 set(lib_name mix_lib)
 
 target_collect_sources(${lib_name})

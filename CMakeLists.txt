@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9.1)
+cmake_minimum_required(VERSION 3.2)
 include(CheckCXXCompilerFlag)
 include(GenerateExportHeader)
 include(scripts/cmake/utils.cmake)
@@ -6,9 +6,12 @@ include(scripts/cmake/utils.cmake)
 project(mix)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(CMAKE_CXX_STANDARD 17)
+# Note: can be removed once CMake `CMAKE_CXX_STANDARD`
+# will support C++17 for all platforms
 if (MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
+else()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z")
 endif()
 
 # Remove unneeded configurations

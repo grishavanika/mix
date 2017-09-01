@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.9.1)
-
 if(clang_on_msvc)
 	add_compile_options(-Wno-inconsistent-missing-override)
 endif()
