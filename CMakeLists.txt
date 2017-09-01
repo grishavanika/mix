@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.9.1)
 include(CheckCXXCompilerFlag)
 include(GenerateExportHeader)
+include(scripts/cmake/utils.cmake)
 
 project(mix)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -93,12 +94,8 @@ set_target_properties(mixal PROPERTIES FOLDER "app")
 set_target_properties(mixal_format PROPERTIES FOLDER "app/tools")
 
 # tests
-add_subdirectory(src/tests)
-
 # Can't do this in subdirectory since cctest will fail to run tests
 enable_testing()
-add_test(NAME core COMMAND test_core)
-add_test(NAME mix COMMAND test_mix)
-add_test(NAME mixal_parse COMMAND test_mixal_parse)
-add_test(NAME mixal COMMAND test_mixal)
+
+add_subdirectory(src/tests)
 

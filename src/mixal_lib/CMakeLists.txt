@@ -1,12 +1,10 @@
 cmake_minimum_required(VERSION 3.9.1)
-include(GenerateExportHeader)
 
 set(lib_name mixal_lib)
 
-file(GLOB_RECURSE ${lib_name}_src "source" "*.cpp")
-file(GLOB_RECURSE ${lib_name}_hds "include" "*.h")
+target_collect_sources(${lib_name})
 
-add_library(${lib_name} ${lib_type} ${${lib_name}_src} ${${lib_name}_hds})
+add_library(${lib_name} ${${lib_name}_files})
 
 target_link_libraries(${lib_name} PUBLIC mix_lib mixal_parse_lib)
 target_include_directories(${lib_name} PUBLIC include)
@@ -14,14 +12,4 @@ target_include_directories(${lib_name} PUBLIC include)
 generate_export_header(${lib_name})
 target_include_directories(${lib_name} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
-if (${BUILD_SHARED_LIBS})
-
-	foreach (config ${CMAKE_CONFIGURATION_TYPES})
-		foreach (bin_folder ${bin_folders})
-			install(TARGETS ${lib_name}
-				RUNTIME DESTINATION bin/${config}/${bin_folder}
-				CONFIGURATIONS ${config})
-		endforeach (bin_folder)
-	endforeach (config)
-
-endif ()
+target_install_lib_binaries(${lib_name})

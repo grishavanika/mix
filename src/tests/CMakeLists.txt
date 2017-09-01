@@ -14,3 +14,8 @@ set_target_properties(test_core PROPERTIES FOLDER tests)
 set_target_properties(test_mix PROPERTIES FOLDER tests)
 set_target_properties(test_mixal PROPERTIES FOLDER tests)
 set_target_properties(test_mixal_parse PROPERTIES FOLDER tests)
+
+new_test(core test_core)
+new_test(mix test_mix)
+new_test(mixal_parse test_mixal_parse)
+new_test(mixal test_mixal)

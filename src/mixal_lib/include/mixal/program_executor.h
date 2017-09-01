@@ -5,6 +5,7 @@
 
 namespace mixal {
 
+MIXAL_LIB_EXPORT
 void LoadProgram(mix::Computer& computer, const TranslatedProgram& program);
 
 } // namespace mixal

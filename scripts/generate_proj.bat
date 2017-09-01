@@ -19,6 +19,7 @@ if NOT exist %build_root%\NUL (
 
 pushd %build_root%
 
+:: -DBUILD_SHARED_LIBS=Yes
 cmake -G %generator% -DCMAKE_INSTALL_PREFIX=deploy %source_root%
 
 popd

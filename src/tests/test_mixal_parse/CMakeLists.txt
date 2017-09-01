@@ -2,19 +2,13 @@ cmake_minimum_required(VERSION 3.9.1)
 
 set(exe_name test_mixal_parse)
 
-file(GLOB_RECURSE ${exe_name}_src "source" "*.cpp")
-file(GLOB_RECURSE ${exe_name}_hds "source" "*.h")
+target_collect_sources(${exe_name})
 
-add_executable(${exe_name} ${${exe_name}_src} ${${exe_name}_hds})
+add_executable(${exe_name} ${${exe_name}_files})
 target_include_directories(${exe_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(${exe_name} PRIVATE mixal_parse_lib)
 target_link_libraries(${exe_name} PRIVATE gtest gmock gmock_main)
 
-install(TARGETS ${exe_name}
-	DESTINATION bin/Debug/tests
-	CONFIGURATIONS Debug)
+target_install_binaries(${exe_name})
 
-install(TARGETS ${exe_name}
-	DESTINATION bin/Release/tests
-	CONFIGURATIONS Release)

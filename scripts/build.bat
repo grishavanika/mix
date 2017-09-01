@@ -26,7 +26,7 @@ if "%config%" == "" (
 pushd %build_root%
 
 :: Build all
-cmake --build . --config %config%
+cmake --build . --target install --config %config%
 if NOT %errorlevel% == 0 (
 	goto:eof
 	)
