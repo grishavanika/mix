@@ -18,7 +18,7 @@ to play with it in web-page
 
 How to translate:
     ```
-    mixal --hide-details < src\tests\mixal_code\program_primes.mixal
+    mixal --hide-details --file src/tests/mixal_code/program_primes.mixal
     ```
 
 ```
@@ -68,7 +68,7 @@ How to translate:
 
 How to run:
     ```
-    mixal --execute < src\tests\mixal_code\program_primes.mixal
+    mixal --execute --file src/tests/mixal_code/program_primes.mixal
     ```
 
 ![](docs/first_500_primes.png)

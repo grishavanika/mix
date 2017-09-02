@@ -42,6 +42,13 @@ if (clang_on_msvc)
 	include_directories(SYSTEM "C:/Programs/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.11.25503/include")
 endif()
 
+if (GNU OR Clang OR clang_on_msvc)
+	add_compile_options(
+		-Wno-sign-compare # MSVC <regex>
+		-Wno-delete-non-virtual-dtor # third-party cxxopts
+		)
+endif ()
+
 if (MSVC AND BUILD_SHARED_LIBS)
 	# class needs to have dll-interface to be used by clients of class
 	add_compile_options(/wd4251)
@@ -51,6 +58,9 @@ endif ()
 # GoogleTest uses static C++ runtime by default
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory(third_party/googletest/googlemock)
+
+set(CXXOPTS_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory(third_party/cxxopts)
 
 set_target_properties(gtest PROPERTIES FOLDER third_party)
 set_target_properties(gmock PROPERTIES FOLDER third_party)
