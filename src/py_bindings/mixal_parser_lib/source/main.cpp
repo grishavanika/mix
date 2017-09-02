@@ -81,6 +81,7 @@ PYBIND11_MODULE(py_mixal_parse, m)
 	DefineNumber(m);
 	DefineSymbol(m);
 	DefineBasicExpression(m);
+	DefineExpressionToken(m);
 	DefineExpression(m);
 }
 
