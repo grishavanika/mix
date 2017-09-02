@@ -7,8 +7,7 @@
 
 #include <mixal/exceptions_handler.h>
 
-using namespace mixal;
-using namespace mix;
+namespace mixal {
 
 inline int ExecuteProgram(const TranslatedProgram& program)
 {
@@ -17,7 +16,7 @@ inline int ExecuteProgram(const TranslatedProgram& program)
 		return -1;
 	}
 
-	Computer computer;
+	mix::Computer computer;
 	LoadProgram(computer, program);
 	computer.run();
 	return 0;
@@ -57,3 +56,4 @@ inline int RunProgram(Options options)
 	return status;
 }
 
+} // namespace mixal

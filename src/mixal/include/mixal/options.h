@@ -24,10 +24,10 @@ inline cxxopts::Options CreateOptions()
 {
 	cxxopts::Options options{"mixal", "MIX interpreter/emulator"};
 	options.add_options()
-		("h,help", "Show this help and exit")
-		("x,hide-details", "Hide additional information during translating")
-		("e,execute", "Compile and execute file")
-		("f,file", "File that contains MIXAL code", cxxopts::value<std::string>());
+		("h,help",			"Show this help and exit")
+		("x,hide-details",	"Hide additional information during translating")
+		("e,execute",		"Compile and execute file")
+		("f,file",			"File that contains MIXAL code", cxxopts::value<std::string>());
 	return options;
 }
 

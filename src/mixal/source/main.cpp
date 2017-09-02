@@ -1,6 +1,8 @@
 #include <mixal/interpreter.h>
 #include <mixal/program_executor.h>
 
+using namespace mixal;
+
 int HandleOptions(Options options)
 {
 	if (options.show_help)

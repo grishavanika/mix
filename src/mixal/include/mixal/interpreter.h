@@ -20,21 +20,22 @@
 #include <string>
 #include <iomanip>
 
-// Since it's small helper that is used by only main let's do using for everything
-using namespace mixal;
-using namespace mixal_parse;
-using namespace mix;
+namespace mixal {
 
-struct Interpreter
+namespace parse = mixal_parse;
+
+class Interpreter
 {
+public:
 	Interpreter(std::ostream& out, bool show_details);
 
-	Translator& translator();
-	std::string_view prepare_line(const std::string& line);
-	void add_translated_line(OperationId command, TranslatedLine&& line);
+	void translate_line(const std::string& str);
 
 private:
 	std::size_t lines_number() const;
+
+	std::string_view prepare_line(const std::string& line);
+	void add_translated_line(OperationId command, TranslatedLine&& line);
 
 	void add_translated_word(OperationId command,
 		FutureTranslatedWordRef&& translated);
@@ -51,6 +52,8 @@ private:
 		const char* details_text = nullptr);
 	void print_details(const char* details_text);
 
+	static OperationId LineOperationId(const parse::LineParser& parser);
+
 private:
 	using DelayedWords = FlatMap<FutureTranslatedWordRef, OperationId>;
 
@@ -63,9 +66,12 @@ private:
 
 int RunInterpreter(Options options);
 void TranslateStream(Interpreter& interpreter, std::istream& in);
-void TranslateLine(Interpreter& interpreter, const std::string& str);
+
+} // namespace mixal
 
 ////////////////////////////////////////////////////////////////////////////////
+
+namespace mixal {
 
 inline Interpreter::Interpreter(std::ostream& out, bool show_details)
 	: out_{out, show_details}
@@ -192,7 +198,7 @@ inline void Interpreter::print_code(OperationId command, const TranslatedWord& w
 		out_.stream << word.value << "\n";
 		break;
 	default:
-		out_.stream << Command{word.value} << "\n";
+		out_.stream << mix::Command{word.value} << "\n";
 		break;
 	}
 
@@ -201,13 +207,8 @@ inline void Interpreter::print_code(OperationId command, const TranslatedWord& w
 
 inline void Interpreter::print_details(const char* details_text)
 {
-	out_ << std::setw(3) << lines_number()
-		<< "> " << details_text;
-}
-
-inline Translator& Interpreter::translator()
-{
-	return translator_;
+	assert(details_text);
+	out_ << std::setw(3) << lines_number() << "> " << details_text;
 }
 
 inline std::string_view Interpreter::prepare_line(const std::string& line)
@@ -220,33 +221,34 @@ inline std::string_view Interpreter::prepare_line(const std::string& line)
 	return code_lines_.back();
 }
 
-inline OperationId LineOperationId(const LineParser& parser)
+inline OperationId Interpreter::LineOperationId(const parse::LineParser& parser)
 {
-	if (parser.operation_parser())
+	const auto op_parser = parser.operation_parser();
+	if (op_parser)
 	{
-		return parser.operation_parser()->operation().id();
+		return op_parser->operation().id();
 	}
 	return OperationId::Unknown;
 }
 
-inline void TranslateLine(Interpreter& interpreter, const std::string& str)
+inline void Interpreter::translate_line(const std::string& str)
 {
 	if (core::Trim(str).empty())
 	{
 		return;
 	}
 
-	const auto line = interpreter.prepare_line(str);
-	LineParser parser;
+	const auto line = prepare_line(str);
+	parse::LineParser parser;
 	const auto pos = parser.parse_stream(line);
-	if (IsInvalidStreamPosition(pos))
+	if (parse::IsInvalidStreamPosition(pos))
 	{
-		throw std::runtime_error{"parse error"};
+		throw MixalException{"parse error"};
 	}
 
-	interpreter.add_translated_line(
+	add_translated_line(
 		LineOperationId(parser),
-		TranslateLine(interpreter.translator(), parser));
+		TranslateLine(translator_, parser));
 }
 
 inline void TranslateStream(Interpreter& interpreter, std::istream& in)
@@ -256,7 +258,7 @@ inline void TranslateStream(Interpreter& interpreter, std::istream& in)
 	{
 		HandleAnyException([&]()
 		{
-			TranslateLine(interpreter, line);
+			interpreter.translate_line(line);
 		});
 	}
 }
@@ -268,4 +270,6 @@ inline int RunInterpreter(Options options)
 	TranslateStream(interpreter, in);
 	return 0;
 }
+
+} // namespace mixal
 
