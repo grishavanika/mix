@@ -1,6 +1,8 @@
 @echo off
 set cmake=C:\Programs\CMake\bin
 set mingw=C:\Programs\mingw\bin
+:: TODO: 32-bit version support
+set python=C:\Programs\Python\Python36-64
 
 :: Build folder relative to `scripts` folder
 set build_root=..\build
@@ -9,7 +11,7 @@ set source_root=..
 set generator=%1
 
 :: Inject our executables
-set path=%path%;%cmake%;%mingw%;
+set path=%path%;%cmake%;%mingw%;%python%;
 
 call:set_cmake_generator_update_build_dir
 

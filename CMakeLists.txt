@@ -62,6 +62,13 @@ add_subdirectory(third_party/googletest/googlemock)
 set(CXXOPTS_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(third_party/cxxopts)
 
+option(build_python_libs "Build Python ports of MIX[AL]" OFF)
+
+if (build_python_libs)
+	add_subdirectory(third_party/pybind11)
+	add_subdirectory(src/py_bindings)
+endif()
+
 set_target_properties(gtest PROPERTIES FOLDER third_party)
 set_target_properties(gmock PROPERTIES FOLDER third_party)
 set_target_properties(gtest_main PROPERTIES FOLDER third_party)

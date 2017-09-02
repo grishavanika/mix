@@ -2,6 +2,7 @@
 :: Note: should be configured by every user
 set cmake=C:\Programs\CMake\bin
 set mingw=C:\Programs\mingw\bin
+set python=C:\Programs\Python\Python36-64
 
 set build_root=..\build
 set name=note
@@ -9,7 +10,7 @@ set generator=%1
 set config=%2
 
 :: Inject our executables
-set path=%path%;%cmake%;%mingw%;
+set path=%path%;%cmake%;%mingw%;%python%
 
 call:update_build_dir
 
