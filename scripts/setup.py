@@ -11,31 +11,44 @@ from distutils.version import LooseVersion
 from shutil import copyfile
 from shutil import copy
 
-class CMakeExtension(Extension):
-    def __init__(self, name, sourcedir=''):
+class PydFileExtension(Extension):
+    def __init__(self, name, pyd_file, sourcedir=''):
         Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
+        self.pyd_file = pyd_file
 
-class CMakeBuild(build_ext):
+class PydFileBuild(build_ext):
     def run(self):
         for ext in self.extensions:
             self.build_extension(ext)
 
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
-        src = 'C:/dev/mix/build_msvc/src/py_bindings/mixal_parser_lib/Debug/py_mixal_parse.cp36-win_amd64.pyd'
         if not os.path.exists(extdir):
             os.makedirs(extdir)
-        copy(src, extdir)
+        copy(ext.pyd_file, extdir)
 
-setup(
-    name='py_mixal_parse',
-    version='0.0.1',
-    author='Orange Line',
-    author_email='orane.line@gmail.com',
-    description='MIXAL parser',
-    long_description='',
-    ext_modules=[CMakeExtension('py_mixal_parse')],
-    cmdclass=dict(build_ext=CMakeBuild),
-    zip_safe=False,
-)
+def list_all_pyds(root):
+    # Assume that .pyd file has next format: `module_name.info.pyd`
+    info = [(fn.split('.')[0], os.path.join(root, fn))
+        for fn in os.listdir(root) if fn.endswith('.pyd')]
+    return info
+
+root_dir = os.path.abspath(os.environ['pyds_root'])
+#root_dir = 'C:/dev/mix/build_msvc/deploy/bin/Debug/py/'
+
+for module in list_all_pyds(root_dir):
+    name = module[0]
+    file = module[1]
+    setup(
+        name=name,
+        version='0.0.1',
+        author='Orange Line',
+        author_email='orane.line@gmail.com',
+        long_description='',
+        ext_modules=[PydFileExtension(name, file)],
+        cmdclass=dict(build_ext=PydFileBuild),
+        zip_safe=False
+        )
+
+

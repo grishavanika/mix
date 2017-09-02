@@ -1,6 +1,11 @@
 include(CMakePrintHelpers)
 
 macro(set_cpp17_standard)
+	# Need to set it explicitly (even it does not work for
+	# our version of CMake) to avoid overwrite
+	# of C++ standard by `pybind11` third party library
+	set(CMAKE_CXX_STANDARD 17)
+
 	# Note: can be removed once CMake `CMAKE_CXX_STANDARD`
 	# will support C++17 for all platforms
 	if (MSVC)

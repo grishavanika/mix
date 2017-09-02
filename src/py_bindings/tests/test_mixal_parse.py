@@ -1,3 +1,10 @@
-import py_mixal_parse
+from py_mixal_parse import *
 
-assert py_mixal_parse.test() == 42
+expr = BasicExpression("*")
+assert expr.is_current_address()
+print(expr.kind)
+
+expr = BasicExpression("99999")
+assert expr.is_number()
+print(expr.as_number().data)
+
