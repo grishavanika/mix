@@ -92,3 +92,8 @@ And then:
     ```
 
 - See also `scripts/generate_proj.bat` and `scripts/build.*(sh|bat)`
+
+- On *nix with Python:
+    * do not forget to install development version of Python: `sudo apt-get install python3-dev`
+    (maybe you will need to tell CMake how to find needed version of Python: `-DPYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3`)
+    

@@ -42,7 +42,7 @@ if (clang_on_msvc)
 	include_directories(SYSTEM "C:/Programs/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.11.25503/include")
 endif()
 
-if (GNU OR Clang OR clang_on_msvc)
+if (GNU OR clang OR clang_on_msvc)
 	add_compile_options(
 		-Wno-sign-compare # MSVC <regex>
 		-Wno-delete-non-virtual-dtor # third-party cxxopts

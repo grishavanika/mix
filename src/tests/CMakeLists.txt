@@ -1,4 +1,4 @@
-if(GNU OR Clang OR clang_on_msvc)
+if(GNU OR clang OR clang_on_msvc)
 	add_compile_options(-Wno-inconsistent-missing-override)
 endif()
 
