@@ -443,7 +443,6 @@ PYBIND11_NOINLINE inline std::string error_string() {
                 handle(frame->f_code->co_name).cast<std::string>() + "\n";
             frame = frame->f_back;
         }
-        trace = trace->tb_next;
     }
 #endif
 
@@ -1800,6 +1799,9 @@ struct function_call {
 
     /// The parent, if any
     handle parent;
+
+    /// If this is a call to an initializer, this argument contains `self`
+    handle init_self;
 };
 
 

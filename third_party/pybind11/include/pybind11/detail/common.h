@@ -108,7 +108,6 @@
 #  endif
 #endif
 
-#include <math.h>
 #include <Python.h>
 #include <frameobject.h>
 #include <pythread.h>
