@@ -33,15 +33,7 @@ private:
 protected:
 	const Word& dest_word()
 	{
-#if defined(__clang__)
-#  pragma clang diagnostic push
-	// implicit conversion loses integer precision
-#  pragma clang diagnostic ignored "-Wshorten-64-to-32"
-#endif
-		return mix.memory(static_cast<std::size_t>(dest_address));
-#if defined(__clang__)
-#  pragma clang diagnostic pop
-#endif
+		return mix.memory(dest_address);
 	}
 
 protected:
