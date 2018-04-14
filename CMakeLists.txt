@@ -69,14 +69,14 @@ if (clang_on_msvc)
 	#INV: why this happens with Clang toolset ?
 	add_definitions(-D_HAS_CXX17=1)
 	set(msvc_version "14.13.26128")
+	#TODO: document hard-coded path
 	include_directories(SYSTEM "C:/Programs/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/${msvc_version}/include")
 endif()
 
 if (GNU OR clang OR clang_on_msvc)
 	add_compile_options(
-		-Wno-sign-compare # MSVC <regex>
-		-Wno-delete-non-virtual-dtor # third-party cxxopts
-		)
+		# MSVC <regex>
+		-Wno-sign-compare)
 endif()
 
 if (MSVC AND BUILD_SHARED_LIBS)
@@ -84,74 +84,8 @@ if (MSVC AND BUILD_SHARED_LIBS)
 	add_compile_options(/wd4251)
 endif()
 
-if (MSVC)
-	# Because of gtest.
-	# TODO: move third-party libraries configuration to own, separate CMake file
-	add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
-endif()
-
 # third party libraries
-# GoogleTest uses static C++ runtime by default
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-add_subdirectory(third_party/googletest/googlemock)
-
-if (clang_on_msvc)
-	# TODO: update gtests (better to use it as git submodule).
-	# TODO: do not enable -Werror for third-party libs
-	target_compile_options(gtest PUBLIC
-		-Wno-undef
-		-Wno-exit-time-destructors
-		-Wno-format-nonliteral
-		-Wno-missing-prototypes
-		-Wno-missing-noreturn
-		-Wno-shift-sign-overflow
-		-Wno-used-but-marked-unused
-		-Wno-nonportable-system-include-path
-		-Wno-missing-variable-declarations
-		-Wno-covered-switch-default
-		-Wno-unused-member-function)
-	target_compile_options(gmock PUBLIC
-		-Wno-undef
-		-Wno-exit-time-destructors
-		-Wno-format-nonliteral
-		-Wno-missing-prototypes
-		-Wno-missing-noreturn
-		-Wno-shift-sign-overflow
-		-Wno-used-but-marked-unused
-		-Wno-nonportable-system-include-path
-		-Wno-missing-variable-declarations
-		-Wno-covered-switch-default
-		-Wno-unused-member-function)
-	target_compile_options(gmock_main PUBLIC
-		-Wno-undef
-		-Wno-exit-time-destructors
-		-Wno-format-nonliteral
-		-Wno-missing-prototypes
-		-Wno-missing-noreturn
-		-Wno-shift-sign-overflow
-		-Wno-used-but-marked-unused
-		-Wno-nonportable-system-include-path
-		-Wno-missing-variable-declarations
-		-Wno-covered-switch-default
-		-Wno-unused-member-function)
-endif()
-
-set(CXXOPTS_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(third_party/cxxopts)
-
-if (clang_on_msvc)
-	# cxxopts is header-only (interface) library,
-	# can't use target_compile_options()
-	add_compile_options(
-		-Wno-non-virtual-dtor
-		-Wno-exit-time-destructors
-		-Wno-covered-switch-default)
-endif()
-
-set_target_properties(gtest PROPERTIES FOLDER third_party)
-set_target_properties(gmock PROPERTIES FOLDER third_party)
-set_target_properties(gtest_main PROPERTIES FOLDER third_party)
-set_target_properties(gmock_main PROPERTIES FOLDER third_party)
+add_subdirectory(third_party)
 
 # libraries
 add_subdirectory(src/core_lib)
@@ -172,6 +106,5 @@ set_target_properties(mixal PROPERTIES FOLDER "app")
 set_target_properties(mixal_format PROPERTIES FOLDER "app/tools")
 
 # tests
-
 add_subdirectory(src/tests)
 

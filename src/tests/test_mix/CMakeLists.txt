@@ -12,3 +12,8 @@ target_link_libraries(${exe_name} PRIVATE gtest gmock gmock_main)
 
 target_install_binaries(${exe_name})
 
+if (clang_on_msvc)
+	# Mocks
+	target_compile_options(${exe_name} PRIVATE
+		-Wno-non-virtual-dtor)
+endif()
