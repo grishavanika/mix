@@ -69,8 +69,8 @@ if (clang_on_msvc)
 	#INV: why this happens with Clang toolset ?
 	add_definitions(-D_HAS_CXX17=1)
 	set(msvc_version "14.13.26128")
-	#TODO: document hard-coded path
-	include_directories(SYSTEM "C:/Programs/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/${msvc_version}/include")
+    set(msvc_install_root "C:/Programs")
+    include_directories(SYSTEM "${msvc_install_root}/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/${msvc_version}/include")
 endif()
 
 if (GNU OR clang OR clang_on_msvc)

@@ -77,11 +77,16 @@ from http://llvm.org/builds/ (7.0.0 for the moment).
 
     **Note:**
     There is small issue with include directories and it should be fixed by hands.
+
     You need to change `msvc_version` (CMakeLists.txt) variable to your's MSVC version
-    (it can be detected by looking into ${MSVC}/2017/Community/VC/Tools/MSVC folder name):
+    (it can be detected by looking into ${MSVC}/2017/Community/VC/Tools/MSVC folder name).
+    Also, specify proper path of MSVC installation.
+
+    In a nutshell, fix these 2 lines:
 
     ```
     set(msvc_version "14.13.26128")
+    set(msvc_install_root "C:/Programs")
     ```
 
     And then:
