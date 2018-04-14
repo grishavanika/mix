@@ -3,23 +3,11 @@
 [![Build Status (Windows)](https://ci.appveyor.com/api/projects/status/github/grishavanika/mix?svg=true)](https://ci.appveyor.com/project/grishavanika/mix)
 [![Build Status (Linux)](https://travis-ci.org/grishavanika/mix.svg)](https://travis-ci.org/grishavanika/mix)
 
-
-###### TODO
-
-- add index register influence to LD/ST/ADD/SUB and similar tests:
-	* `LDA 2000,3(1:3)`
-- remove googletest third_party files and use git submodule instead
-- add Travis CI build support for **Clang**
-- port interpreter to JavaScript (with **[emscripten](http://kripken.github.io/emscripten-site/)**)
-to play with it in web-page
-- use WSL to build & debug *linux version with Visual Studio
-
 ##### Translating "FIRST FIVE HUNDRED PRIMES"
 
-How to translate:
-    ```
-    mixal --hide-details --file src/tests/mixal_code/program_primes.mixal
-    ```
+```
+mixal --hide-details --file src/tests/mixal_code/program_primes.mixal
+```
 
 ```
 3000: |+| 0000|00|18|35|
@@ -64,48 +52,52 @@ How to translate:
 2051: |+|             3|
 ```
 
-##### Executing "FIRST FIVE HUNDRED PRIMES"
+##### Executing "FIRST FIVE HUNDRED PRIMES" program from book
 
-How to run:
-    ```
-    mixal --execute --file src/tests/mixal_code/program_primes.mixal
-    ```
+```
+mixal --execute --file src/tests/mixal_code/program_primes.mixal
+```
 
 ![](docs/first_500_primes.png)
 
 
-
 ##### Building
 
-- To use it with MinGW please install STL's port from https://nuwen.net/mingw.html.
-Latest checked version is 7.3.0.
+1. To use it with MinGW please install STL's port from https://nuwen.net/mingw.html.
+    Latest checked version is GCC 7.3.0.
 
-And then:
+    And then:
     ```
     set path=%path%;C:\Programs\mingw\bin
     cmake -G "MinGW Makefiles" ..
     ```
 
-- To use it with Clang on Windows you need to install latest one
+2. To use it with Clang on Windows you need to install latest one
 from http://llvm.org/builds/ (7.0.0 for the moment).
 
+    **Note:**
+    There is small issue with include directories and it should be fixed by hands.
+    You need to change `msvc_version` (CMakeLists.txt) variable to your's MSVC version
+    (it can be detected by looking into ${MSVC}/2017/Community/VC/Tools/MSVC folder name):
 
-There is small issue with include directories and it should be fixed by hands.
-You need to change `msvc_version` (CMakeLists.txt) variable to your's MSVC version
-(it can be detected by looking into ${MSVC}/2017/Community/VC/Tools/MSVC folder name):
-
-```
+    ```
     set(msvc_version "14.13.26128")
-```
+    ```
 
-And then:
+    And then:
     ```
     cmake -G "Visual Studio 14 2015 Win64" -T "LLVM-vs2014" ..
     ```
 
-- See also `scripts/generate_proj.bat` and `scripts/build.*(sh|bat)`
+3. See also `scripts/generate_proj.bat` and `scripts/build.*(sh|bat)`
 
-- On *nix with Python:
-    * do not forget to install development version of Python: `sudo apt-get install python3-dev`
-    (maybe you will need to tell CMake how to find needed version of Python: `-DPYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3`)
-    
+###### TODO
+
+1. add index register influence to LD/ST/ADD/SUB and similar tests:
+    * `LDA 2000,3(1:3)`
+2. remove googletest third_party files and use git submodule instead
+3. add Travis CI build support for **Clang**
+4. port interpreter to JavaScript (with **[emscripten](http://kripken.github.io/emscripten-site/)**)
+to play with it in web-page
+5. use WSL to build & debug linux version with Visual Studio
+
