@@ -96,7 +96,34 @@ from http://llvm.org/builds/ (7.0.0 for the moment).
     cmake -G "Visual Studio 14 2015 Win64" -T "LLVM-vs2014" ..
     ```
 
-3. See also `scripts/generate_proj.bat` and `scripts/build.*(sh|bat)`
+3. Build with MSVC:
+
+    ```
+    mkdir build && cd build
+    cmake -G "Visual Studio 15 2017 Win64" ..
+    cmake --build . --config Release
+    ```
+
+4. See also `scripts/generate_proj.bat` and `scripts/build.*(sh|bat)`
+
+###### Toolset & third-party libraries
+
+Latest working build was done with next toolset:
+
+- Clang 7.0.0 (Windows)
+- GCC 7.3.0 (MinGW, Windows)
+- MSVC 15.6.6
+- CMake 3.10.1
+
+
+Third-party libraries (handled implicitly with CMake):
+
+- [cxxopt]: version 2.1.0
+- [googletest]: version 1.9.0
+
+[cxxopt]: https://github.com/jarro2783/cxxopts
+[googletest]: https://github.com/google/googletest
+
 
 ###### TODO
 
