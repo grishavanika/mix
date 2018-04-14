@@ -34,8 +34,7 @@ inline cxxopts::Options CreateOptions()
 inline Options ParseOptions(int argc, char* argv[])
 {
 	Options parsed{CreateOptions()};
-	auto& options = parsed.raw_options;
-	options.parse(argc, argv);
+	auto options = parsed.raw_options.parse(argc, argv);
 
 	parsed.execute = (options.count("execute") > 0);
 	parsed.hide_details = (options.count("hide-details") > 0);

@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 2.8.2)
+
+project(cxxopt-download NONE)
+
+include(ExternalProject)
+ExternalProject_Add(cxxopt
+  GIT_REPOSITORY    https://github.com/jarro2783/cxxopts.git
+  GIT_TAG           master
+  SOURCE_DIR        "${CMAKE_BINARY_DIR}/cxxopt-src"
+  BINARY_DIR        "${CMAKE_BINARY_DIR}/cxxopt-build"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND   ""
+  TEST_COMMAND      ""
+)

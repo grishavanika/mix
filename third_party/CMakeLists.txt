@@ -66,3 +66,15 @@ if (GNU OR clang OR clang_on_msvc)
 	target_compile_options(cxxopts INTERFACE
 		-Wno-delete-non-virtual-dtor)
 endif()
+
+if (MSVC)
+	target_compile_options(cxxopts INTERFACE
+		# conversion from 'size_t' to 'type', possible loss of data
+		/wd4267)
+endif()
+
+if (clang_on_msvc)
+	target_compile_options(cxxopts INTERFACE
+		-Wno-conversion)
+endif()
+

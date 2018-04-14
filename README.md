@@ -102,9 +102,9 @@ from http://llvm.org/builds/ (7.0.0 for the moment).
 
 1. add index register influence to LD/ST/ADD/SUB and similar tests:
     * `LDA 2000,3(1:3)`
-2. remove googletest third_party files and use git submodule instead
 3. add Travis CI build support for **Clang**
 4. port interpreter to JavaScript (with **[emscripten](http://kripken.github.io/emscripten-site/)**)
 to play with it in web-page
 5. use WSL to build & debug linux version with Visual Studio
-
+6. build with Clang on linux. Probably there will be warnings.
+    Need to go thru all if (clang_on_msvc) and fix them to also include native Clang
