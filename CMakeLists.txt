@@ -23,21 +23,6 @@ if (clang_on_msvc)
 	make_clang_work_on_windows()
 endif()
 
-if (clang_on_msvc)
-	# Own code shut-up
-	# TODO: move to proper project's CMake files and use 
-	# target_compile_options()
-	add_compile_options(
-		# definition of implicit copy assignment operator for 'IIODevice'
-		# is deprecated because it has a user-declared destructor [...]
-		# because of usage of move-constructor for DeviceProxy class
-		-Wno-deprecated
-		# enumeration values not explicitly handled in switch
-		# Disabling since there are proper default statements and warning
-		# does not help
-		-Wno-switch-enum)
-endif()
-
 if (GNU OR clang OR clang_on_msvc)
 	add_compile_options(
 		# MSVC <regex>

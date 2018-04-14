@@ -4,6 +4,14 @@ target_collect_sources(${lib_name})
 
 add_library(${lib_name} ${${lib_name}_files})
 
+if (clang_on_msvc)
+	target_compile_options(${lib_name} PRIVATE
+		# definition of implicit copy assignment operator for 'IIODevice'
+		# is deprecated because it has a user-declared destructor [...]
+		# because of usage of move-constructor for DeviceProxy class
+		-Wno-deprecated)
+endif()
+
 # See internal/valarray_register_helpers.h std::copy() call.
 # Can be removed once valarray_register_helpers.h will be removed
 target_compile_definitions(${lib_name} PRIVATE -D_SCL_SECURE_NO_WARNINGS)

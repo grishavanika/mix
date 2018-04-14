@@ -33,7 +33,11 @@ macro(setup_gtest_lib lib_name)
 			-Wno-nonportable-system-include-path
 			-Wno-missing-variable-declarations
 			-Wno-covered-switch-default
-			-Wno-unused-member-function)
+			-Wno-unused-member-function
+			-Wno-switch-enum
+			-Wno-deprecated
+			)
+
 	endif()
 
 	set_target_properties(${lib_name} PROPERTIES FOLDER third_party)
