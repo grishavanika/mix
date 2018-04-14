@@ -3,23 +3,26 @@
 
 using namespace mixal;
 
-int HandleOptions(Options options)
+namespace
 {
-	if (options.show_help)
+	int HandleOptions(Options options)
 	{
-		std::cout << options.raw_options.help() << '\n';
-		return 0;
-	}
+		if (options.show_help)
+		{
+			std::cout << options.raw_options.help() << '\n';
+			return 0;
+		}
 
-	if (options.execute)
-	{
-		return RunProgram(std::move(options));
+		if (options.execute)
+		{
+			return RunProgram(std::move(options));
+		}
+		else
+		{
+			return RunInterpreter(std::move(options));
+		}
 	}
-	else
-	{
-		return RunInterpreter(std::move(options));
-	}
-}
+} // namespace
 
 int main(int argc, char* argv[])
 {

@@ -70,9 +70,9 @@ TranslatedLine::TranslatedLine(FutureTranslatedWordRef&& ref)
 {
 }
 
-TranslatedLine::TranslatedLine(EndCommandGeneratedCode&& end_code)
+TranslatedLine::TranslatedLine(EndCommandGeneratedCode&& end_code_)
 	: word_ref{}
-	, end_code{std::move(end_code)}
+	, end_code{std::move(end_code_)}
 {
 }
 

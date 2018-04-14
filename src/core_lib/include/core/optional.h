@@ -1,9 +1,11 @@
 #pragma once
 
 #if defined(_MSC_VER) && !defined(__clang__)
-#include <optional>
+#  include <optional>
+#elif __has_include(<optional>)
+#  include <optional>
 #elif __has_include(<experimental/optional>)
-#include <experimental/optional>
+#  include <experimental/optional>
 
 namespace std {
 
@@ -12,9 +14,6 @@ using optional = experimental::optional<T>;
 
 constexpr auto nullopt = experimental::nullopt;
 } // namespace std
-
-#else
-#include <optional>
 #endif
 
 template<typename T>

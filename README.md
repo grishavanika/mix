@@ -78,6 +78,8 @@ How to run:
 ##### Building
 
 - To use it with MinGW please install STL's port from https://nuwen.net/mingw.html.
+Latest checked version is 7.3.0.
+
 And then:
     ```
     set path=%path%;C:\Programs\mingw\bin
@@ -85,7 +87,17 @@ And then:
     ```
 
 - To use it with Clang on Windows you need to install latest one
-from http://llvm.org/builds/ (5.0.0 for the moment).
+from http://llvm.org/builds/ (7.0.0 for the moment).
+
+
+There is small issue with include directories and it should be fixed by hands.
+You need to change `msvc_version` (CMakeLists.txt) variable to your's MSVC version
+(it can be detected by looking into ${MSVC}/2017/Community/VC/Tools/MSVC folder name):
+
+```
+    set(msvc_version "14.13.26128")
+```
+
 And then:
     ```
     cmake -G "Visual Studio 14 2015 Win64" -T "LLVM-vs2014" ..

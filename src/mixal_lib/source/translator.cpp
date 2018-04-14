@@ -148,8 +148,8 @@ private:
 
 struct Translator::Impl::ChangeTemporaryCurrentAddress
 {
-	ChangeTemporaryCurrentAddress(Translator::Impl& impl, int new_address)
-		: impl{impl}
+	ChangeTemporaryCurrentAddress(Translator::Impl& impl_, int new_address)
+		: impl{impl_}
 		, original_address{impl.current_address()}
 	{
 		impl.set_current_address(new_address, false/*do not notify*/);

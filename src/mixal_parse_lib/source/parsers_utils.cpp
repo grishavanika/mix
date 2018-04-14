@@ -33,13 +33,14 @@ bool IsCurrentAddressChar(char ch)
 	return (ch == k_current_address_marker);
 }
 
-} // namespace
-
 bool IsMixAlphaCharacter(char symbol)
 {
 	// #TODO: get alpha-chars from MIX chars table
 	return std::isalpha(symbol) && std::isupper(symbol);
 }
+
+} // namespace
+
 
 bool IsSymbol(const std::string_view& str)
 {

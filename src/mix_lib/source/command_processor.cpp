@@ -118,7 +118,7 @@ RAX::Type RAXToNumber(const Register& r1, const Register& r2)
 
 	auto result_from_byte = [&](const Register& r)
 	{
-		for (const auto byte : r.bytes())
+		for (const auto& byte : r.bytes())
 		{
 			--pow;
 			result += ByteToDecimalDigit(byte) * static_cast<std::size_t>(std::pow(10u, pow));

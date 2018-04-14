@@ -45,11 +45,21 @@ std::string Sprintf(const char* format, ...)
 		return str;
 	}
 
+#if defined(__clang__)
+#  pragma clang diagnostic push
+	// format string is not a string literal
+#  pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
+
 	length = vsnprintf(
 		StringWriteInto(str, length + 1),
 		length + 1,
 		format,
 		args);
+
+#if defined(__clang__)
+#  pragma clang diagnostic pop
+#endif
 
 	va_end(args);
 
