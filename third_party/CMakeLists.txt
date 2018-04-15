@@ -21,7 +21,6 @@ macro(setup_gtest_lib lib_name)
 		-DGTEST_HAS_TR1_TUPLE=0)
 
 	if (clang_on_msvc)
-		# TODO: do not enable -Werror for third-party libs
 		target_compile_options(${lib_name} PUBLIC
 			-Wno-undef
 			-Wno-exit-time-destructors
@@ -35,8 +34,7 @@ macro(setup_gtest_lib lib_name)
 			-Wno-covered-switch-default
 			-Wno-unused-member-function
 			-Wno-switch-enum
-			-Wno-deprecated
-			)
+			-Wno-deprecated)
 
 	endif()
 

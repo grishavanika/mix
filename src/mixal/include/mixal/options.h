@@ -2,7 +2,19 @@
 
 #include <core/optional.h>
 
+#if defined(_MSC_VER) && defined(__clang__)
+#  pragma clang diagnostic push
+// Comes from <regex>, -Wno-sign-compare on command line does not help
+// 
+// comparison of integers of different signs
+#  pragma clang diagnostic ignored "-Wsign-compare"
+#endif
+
 #include <cxxopts.hpp>
+
+#if defined(_MSC_VER) && defined(__clang__)
+#  pragma clang diagnostic pop
+#endif
 
 #include <fstream>
 

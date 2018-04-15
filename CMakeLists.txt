@@ -11,7 +11,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 detect_compilers()
 set_cpp17_standard()
-set_all_warnings()
 
 # Remove unneeded configurations
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)

@@ -4,6 +4,8 @@ target_collect_sources(${exe_name})
 
 add_executable(${exe_name} ${${exe_name}_files})
 
+set_all_warnings(${exe_name} PRIVATE)
+
 target_link_libraries(${exe_name} PRIVATE core_lib)
 target_link_libraries(${exe_name} PRIVATE gtest gmock gmock_main)
 

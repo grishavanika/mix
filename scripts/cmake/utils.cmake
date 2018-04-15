@@ -24,17 +24,20 @@ macro(detect_compilers)
 	endif()
 endmacro()
 
-macro(set_all_warnings)
+macro(set_all_warnings target visibility)
 	if (only_msvc)
-		add_compile_options(/W4 /WX)
+		target_compile_options(${target} ${visibility}
+			/W4 /WX)
 	endif()
 
 	if (NOT MSVC)
-		add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+		target_compile_options(${target} ${visibility}
+			-Wall -Wextra -Wpedantic -Werror)
 	endif()
 
 	if (clang_on_msvc)
-		add_compile_options(-Wall -Wextra -Werror)
+		target_compile_options(${target} ${visibility}
+			-Wall -Wextra -Werror)
 	endif()
 endmacro()
 

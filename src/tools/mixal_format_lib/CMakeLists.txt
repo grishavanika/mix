@@ -5,6 +5,8 @@ target_collect_sources(${lib_name})
 add_library(${lib_name} ${${lib_name}_files})
 target_link_libraries(${lib_name} PUBLIC mixal_parse_lib)
 
+set_all_warnings(${lib_name} PUBLIC)
+
 target_include_directories(${lib_name} PUBLIC include)
 
 generate_export_header(${lib_name})

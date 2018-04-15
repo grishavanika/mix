@@ -4,6 +4,8 @@ target_collect_sources(${lib_name})
 
 add_library(${lib_name} ${${lib_name}_files})
 
+set_all_warnings(${lib_name} PUBLIC)
+
 if (clang_on_msvc)
 	target_compile_options(${lib_name} PRIVATE
 		# definition of implicit copy assignment operator
