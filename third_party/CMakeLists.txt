@@ -70,7 +70,9 @@ endif()
 if (MSVC)
 	target_compile_options(cxxopts INTERFACE
 		# conversion from 'size_t' to 'type', possible loss of data
-		/wd4267)
+		/wd4267
+		# '<': signed/unsigned mismatch
+		/wd4018)
 endif()
 
 if (clang_on_msvc)
