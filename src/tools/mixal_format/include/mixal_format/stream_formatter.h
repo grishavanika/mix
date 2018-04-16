@@ -1,7 +1,5 @@
 #pragma once
-#include <mixal_format/line_formatter.h>
-
-#include <iosfwd>
+#include <string>
 
 namespace mixal_format {
 
