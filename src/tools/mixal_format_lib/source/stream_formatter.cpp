@@ -28,11 +28,23 @@ std::string ToUpper(const std::string& str)
 
 void FormatStream(std::istream& in, std::ostream& out, const FormatOptions& options /*= {}*/)
 {
+	if (!options.title_comment.empty())
+	{
+		out << "* " << options.title_comment << "\n";
+	}
+
 	std::string line;
 	while (getline(in, line))
 	{
-		// #TODO: making uppercase should be controlled via flag
-		out << FormatLine(ToUpper(line), options) << "\n";
+		line = options.make_all_uppercase ? ToUpper(line) : line;
+		
+		const auto formatted_line = FormatLine(line, options);
+		if (formatted_line.empty() && options.mdk_compatible)
+		{
+			continue;
+		}
+
+		out << formatted_line << '\n';
 		assert(out);
 	}
 }

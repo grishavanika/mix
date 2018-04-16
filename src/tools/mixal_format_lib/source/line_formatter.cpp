@@ -29,10 +29,8 @@ std::string_view LabelString(const LineParser& line_parser)
 	return {};
 }
 
-std::string BuildLine(const LineParser& line_parser, const FormatOptions& options)
+std::string BuildLineWithDefaultFormatiing(const LineParser& line_parser)
 {
-	(void)options;
-
 	std::ostringstream stream;
 
 	if (line_parser.has_only_comment())
@@ -77,12 +75,60 @@ std::string BuildLine(const LineParser& line_parser, const FormatOptions& option
 	return stream.str();
 }
 
+std::string BuildLineWithMDKFormatiing(const LineParser& line_parser)
+{
+	std::ostringstream stream;
+
+	if (line_parser.has_only_comment())
+	{
+		stream << core::RightTrim(*line_parser.comment());
+		return stream.str();
+	}
+
+	stream << LabelString(line_parser);
+	stream << '\t';
+
+	assert(line_parser.operation_parser());
+	const auto op_id = line_parser.operation_parser()->operation().id();
+	stream << OperationIdToString(op_id);
+	stream << '\t';
+
+	assert(line_parser.address());
+	if (op_id != OperationId::ALF)
+	{
+		stream << line_parser.address()->str();
+	}
+	else
+	{
+		stream << '"' << line_parser.address()->mixal()->alf_text->data() << '"';
+	}
+
+	if (line_parser.has_inline_comment())
+	{
+		stream << '\t' << core::RightTrim(*line_parser.comment());
+	}
+
+	return stream.str();
+}
+
+std::string BuildLine(const LineParser& line_parser, const FormatOptions& options)
+{
+	if (options.mdk_compatible)
+	{
+		return BuildLineWithMDKFormatiing(line_parser);
+	}
+	else
+	{
+		return BuildLineWithDefaultFormatiing(line_parser);
+	}
+}
+
 } // namespace
 
 std::string FormatLine(const std::string& line, const FormatOptions& options /*= {}*/)
 {
-	std::string_view line_view{line};
-	if (core::Trim(line_view).empty())
+	std::string_view line_view{core::Trim(line)};
+	if (line_view.empty())
 	{
 		return {};
 	}

@@ -6,7 +6,9 @@ namespace mixal_format {
 
 struct MIXAL_FORMAT_LIB_EXPORT FormatOptions
 {
-	
+	bool mdk_compatible = false;
+	bool make_all_uppercase = true;
+	std::string title_comment;
 };
 
 MIXAL_FORMAT_LIB_EXPORT
