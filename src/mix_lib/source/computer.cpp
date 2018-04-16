@@ -181,14 +181,33 @@ void Computer::set_comparison_state(ComparisonIndicator comparison)
 	internal::InvokeListener(listener_, &IComputerListener::on_comparison_state_set);
 }
 
-void Computer::run()
+int Computer::run(int commands_count /*= -1*/)
 {
-	while (!halted_)
+	int executed_commands_count = 0;
+	for (; (executed_commands_count < commands_count) || (commands_count < 0);
+		++executed_commands_count)
 	{
-		execute(Command{memory(current_address())});
-		set_next_address(next_address());
-		clear_jump_flag();
+		if (!run_one())
+		{
+			break;
+		}
 	}
+	return executed_commands_count;
+}
+
+bool Computer::run_one()
+{
+	if (halted_)
+	{
+		return false;
+	}
+
+	execute(Command{memory(current_address())});
+	set_next_address(next_address());
+
+	// Be sure to jump only once
+	clear_jump_flag();
+	return true;
 }
 
 void Computer::halt()

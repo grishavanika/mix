@@ -21,7 +21,14 @@ public:
 
 	void execute(const Command& command);
 
-	void run();
+	// Runs single, current command from memory
+	// (if not in halt() state)
+	bool run_one();
+	// Runs given `commands_count` (-1 means "run all")
+	// until the end (halt()), starting from current command
+	int run(int commands_count = -1);
+	// Stops Computer from processing any command.
+	// (Note: now there is now way to resume processing)
 	void halt();
 
 	int current_address() const;

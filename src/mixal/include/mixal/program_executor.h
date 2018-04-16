@@ -18,8 +18,7 @@ inline int ExecuteProgram(const TranslatedProgram& program)
 
 	mix::Computer computer;
 	LoadProgram(computer, program);
-	computer.run();
-	return 0;
+	return computer.run();
 }
 
 inline ProgramTranslator TranslateProgram(std::istream& in)
@@ -46,14 +45,14 @@ inline int RunProgram(Options options)
 		return -1;
 	}
 
-	int status = -1;
+	int commands_count = -1;
 	HandleAnyException([&]()
 	{
 		auto program_translator = TranslateProgram(*options.input_file);
-		status = ExecuteProgram(program_translator.program());
+		commands_count = ExecuteProgram(program_translator.program());
 	});
 
-	return status;
+	return commands_count;
 }
 
 } // namespace mixal

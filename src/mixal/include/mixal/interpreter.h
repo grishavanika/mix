@@ -31,6 +31,8 @@ public:
 
 	void translate_line(const std::string& str);
 
+	int printed_commands_count() const;
+
 private:
 	std::size_t lines_number() const;
 
@@ -62,6 +64,7 @@ private:
 	DelayedWords delayed_words_;
 
 	std::list<std::string> code_lines_;
+	int printed_commands_count_;
 };
 
 int RunInterpreter(Options options);
@@ -78,12 +81,18 @@ inline Interpreter::Interpreter(std::ostream& out, bool show_details)
 	, translator_{}
 	, delayed_words_{}
 	, code_lines_{}
+	, printed_commands_count_{0}
 {
 }
 
 inline std::size_t Interpreter::lines_number() const
 {
 	return code_lines_.size();
+}
+
+int Interpreter::printed_commands_count() const
+{
+	return printed_commands_count_;
 }
 
 inline void Interpreter::save_delayed_word(OperationId command,
@@ -203,6 +212,8 @@ inline void Interpreter::print_code(OperationId command, const TranslatedWord& w
 	}
 
 	out_.stream.fill(prev_fill);
+
+	++printed_commands_count_;
 }
 
 inline void Interpreter::print_details(const char* details_text)
@@ -268,7 +279,7 @@ inline int RunInterpreter(Options options)
 	Interpreter interpreter{std::cout, !options.hide_details};
 	std::istream& in = options.input_file ? *options.input_file : std::cin;
 	TranslateStream(interpreter, in);
-	return 0;
+	return interpreter.printed_commands_count();
 }
 
 } // namespace mixal
