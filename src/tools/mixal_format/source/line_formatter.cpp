@@ -29,7 +29,7 @@ std::string_view LabelString(const LineParser& line_parser)
 	return {};
 }
 
-std::string BuildLineWithDefaultFormatiing(const LineParser& line_parser)
+std::string BuildLineWithDefaultFormatring(const LineParser& line_parser)
 {
 	std::ostringstream stream;
 
@@ -75,7 +75,7 @@ std::string BuildLineWithDefaultFormatiing(const LineParser& line_parser)
 	return stream.str();
 }
 
-std::string BuildLineWithMDKFormatiing(const LineParser& line_parser)
+std::string BuildLineWithMDKFormatting(const LineParser& line_parser)
 {
 	std::ostringstream stream;
 
@@ -115,11 +115,11 @@ std::string BuildLine(const LineParser& line_parser, const FormatOptions& option
 {
 	if (options.mdk_compatible)
 	{
-		return BuildLineWithMDKFormatiing(line_parser);
+		return BuildLineWithMDKFormatting(line_parser);
 	}
 	else
 	{
-		return BuildLineWithDefaultFormatiing(line_parser);
+		return BuildLineWithDefaultFormatring(line_parser);
 	}
 }
 
