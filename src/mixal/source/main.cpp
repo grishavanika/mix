@@ -18,7 +18,7 @@ namespace
 			const int commands_count = RunProgram(std::move(options));
 			std::cout << "Executed commands count: " << commands_count << '\n';
 		}
-		else
+		else if (options.interactive_compile)
 		{
 			const int commands_count = RunInterpreter(std::move(options));
 			std::cout << "Commands count: " << commands_count << '\n';

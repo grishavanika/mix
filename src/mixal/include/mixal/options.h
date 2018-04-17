@@ -23,8 +23,8 @@ struct Options
 	bool hide_details{false};
 	bool show_help{false};
 	std::string file_name;
-
 	bool mdk_stream{false};
+	bool interactive_compile{false};
 
 	Options(cxxopts::Options options)
 		: raw_options{std::move(options)}
@@ -34,12 +34,13 @@ struct Options
 
 inline cxxopts::Options CreateOptions()
 {
-	cxxopts::Options options{"mixal", "MIX interpreter/emulator"};
+	cxxopts::Options options{"mixal", "MIX interpreter/emulator/compilator"};
 	options.add_options()
 		("h,help",			"Show this help and exit")
-		("x,hide-details",	"Hide additional information during translating")
-		("e,execute",		"Compile and execute file")
-		("f,file",			"File that contains MIXAL code", cxxopts::value<std::string>())
+		("e,execute",		"Compile and execute file with MIXAL code")
+		("i,interactive",	"Compile MIXAL code line by line and print formatted MIX byte-code")
+		("x,hide-details",	"Hide additional information during interactive compile")
+		("f,file",			"Input file (either MIXAL code or MIX byte-code)", cxxopts::value<std::string>())
 		("m,mdk",			"Interpret <file> as file with GNU MIX Development Kit (MDK) format");
 		return options;
 }
@@ -53,11 +54,16 @@ inline Options ParseOptions(int argc, char* argv[])
 	parsed.hide_details = (options.count("hide-details") > 0);
 	parsed.show_help = (options.count("help") > 0);
 	parsed.mdk_stream = (options.count("mdk") > 0);
+	parsed.interactive_compile = (options.count("interactive") > 0);
 	const auto& file_name_option = options["file"];
-
 	if (file_name_option.count() > 0)
 	{
 		parsed.file_name = file_name_option.as<std::string>();
+	}
+
+	if (!parsed.interactive_compile && !parsed.execute)
+	{
+		parsed.execute = true;
 	}
 	return parsed;
 }

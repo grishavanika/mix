@@ -6,7 +6,7 @@
 ##### Translating "FIRST FIVE HUNDRED PRIMES"
 
 ```
-mixal --hide-details --file src/tests/mixal_code/program_primes.mixal
+mixal --hide-details --interactive --file src/tests/mixal_code/program_primes.mixal
 ```
 
 ```
@@ -55,7 +55,7 @@ mixal --hide-details --file src/tests/mixal_code/program_primes.mixal
 ##### Executing "FIRST FIVE HUNDRED PRIMES" program from book
 
 ```
-mixal --execute --file src/tests/mixal_code/program_primes.mixal
+mixal --file src/tests/mixal_code/program_primes.mixal
 ```
 
 ![](docs/first_500_primes.png)
@@ -145,6 +145,23 @@ Third-party libraries (handled implicitly with CMake):
 
 [cxxopt]: https://github.com/jarro2783/cxxopts
 [googletest]: https://github.com/google/googletest
+
+###### mixal command-line help
+
+```
+MIX interpreter/emulator/compilator
+Usage:
+  mixal [OPTION...]
+
+  -h, --help          Show this help and exit
+  -e, --execute       Compile and execute file with MIXAL code
+  -i, --interactive   Compile MIXAL code line by line and print formatted MIX
+                      byte-code
+  -x, --hide-details  Hide additional information during interactive compile
+  -f, --file arg      Input file (either MIXAL code or MIX byte-code)
+  -m, --mdk           Interpret <file> as file with GNU MIX Development Kit
+                      (MDK) format
+```
 
 
 ###### TODO
