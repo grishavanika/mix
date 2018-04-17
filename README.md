@@ -60,6 +60,28 @@ mixal --execute --file src/tests/mixal_code/program_primes.mixal
 
 ![](docs/first_500_primes.png)
 
+##### Integration with GNU MIX Development Kit (MDK)
+
+There is much more powerful project, called "[MDK]" that can be viewed as IDE for MIX
+(no support for Windows).
+
+Now, you can compile MIXAL code into MIX byte-code using MDK compiler
+and then execute compiled program using interpreter from this project.
+
+Here is how:
+
+```
+# Compile MIXAL code on Linux, using MDK
+mixasm program_primes.mixal
+# or the same, but without debug symbols
+mixasm --ndebug program_primes.mixal
+# (this will output compiled code in program_primes.mix file)
+# now, execute it, using interpreter
+#
+mixal.exe --execute --mdk --file program_primes.mix
+```
+
+[MDK]: https://www.gnu.org/software/mdk/
 
 ##### Building
 

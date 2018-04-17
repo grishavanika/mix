@@ -52,6 +52,7 @@ public:
 	Status translate_line(const std::string& line);
 
 	const TranslatedProgram& program() const;
+	TranslatedProgram& program();
 
 private:
 	std::string_view prepare_line(const std::string& line);

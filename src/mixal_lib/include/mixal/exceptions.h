@@ -123,6 +123,15 @@ public:
 	}
 };
 
+class CorruptedMDKStream :
+	public MixalException
+{
+public:
+	CorruptedMDKStream(const char* reason)
+		: MixalException{"corrupted MDK stream" + std::string(reason)}
+	{
+	}
+};
 
 } // namespace mixal
 

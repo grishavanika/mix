@@ -19,6 +19,7 @@
 #include <list>
 #include <string>
 #include <iomanip>
+#include <fstream>
 
 namespace mixal {
 
@@ -277,8 +278,15 @@ inline void TranslateStream(Interpreter& interpreter, std::istream& in)
 inline int RunInterpreter(Options options)
 {
 	Interpreter interpreter{std::cout, !options.hide_details};
-	std::istream& in = options.input_file ? *options.input_file : std::cin;
-	TranslateStream(interpreter, in);
+	if (options.file_name.empty())
+	{
+		TranslateStream(interpreter, std::cin);
+	}
+	else
+	{
+		std::ifstream input_file(options.file_name);
+		TranslateStream(interpreter, input_file);
+	}
 	return interpreter.printed_commands_count();
 }
 

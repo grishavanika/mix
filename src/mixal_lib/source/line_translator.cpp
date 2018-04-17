@@ -150,6 +150,11 @@ const TranslatedProgram& ProgramTranslator::program() const
 	return program_;
 }
 
+TranslatedProgram& ProgramTranslator::program()
+{
+	return program_;
+}
+
 std::string_view ProgramTranslator::prepare_line(const std::string& line)
 {
 	// See `Interpreter::prepare_line()` note
