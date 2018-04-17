@@ -128,8 +128,8 @@ TranslatedProgram ParseProgramFromMDKStream(std::istream& stream)
 		throw CorruptedMDKStream("invalid signature");
 	}
 	// 2. Translated file path
-	std::string file_path(header.path_len + 1, '\0');
-	if (!stream.read(file_path.data(), header.path_len))
+	std::string file_path(static_cast<std::size_t>(header.path_len) + 1, '\0');
+	if (!stream.read(&(file_path[0]), header.path_len))
 	{
 		throw CorruptedMDKStream("failed to read file path");
 	}
