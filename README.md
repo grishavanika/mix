@@ -3,6 +3,13 @@
 [![Build Status (Windows)](https://ci.appveyor.com/api/projects/status/github/grishavanika/mix?svg=true)](https://ci.appveyor.com/project/grishavanika/mix)
 [![Build Status (Linux)](https://travis-ci.org/grishavanika/mix.svg)](https://travis-ci.org/grishavanika/mix)
 
+- [Translating "FIRST FIVE HUNDRED PRIMES"](#translating-first-five-hundred-primes)
+- [Executing "FIRST FIVE HUNDRED PRIMES"](#executing-first-five-hundred-primes)
+- [Integration with GNU MIX Development Kit (MDK)](#integration-with-gnu-mix-development-kit-mdk)
+- [Building](#building)
+- [Toolset & third-party libraries](#toolset--third-party-libraries)
+- [mixal command-line help](#mixal-command-line-help)
+
 ##### Translating "FIRST FIVE HUNDRED PRIMES"
 
 ```
@@ -52,7 +59,7 @@ mixal --hide-details --interactive --file src/tests/mixal_code/program_primes.mi
 2051: |+|             3|
 ```
 
-##### Executing "FIRST FIVE HUNDRED PRIMES" program from book
+##### Executing "FIRST FIVE HUNDRED PRIMES"
 
 ```
 mixal --file src/tests/mixal_code/program_primes.mixal
