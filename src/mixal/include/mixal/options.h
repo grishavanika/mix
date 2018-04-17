@@ -58,16 +58,6 @@ inline Options ParseOptions(int argc, char* argv[])
 	if (file_name_option.count() > 0)
 	{
 		parsed.file_name = file_name_option.as<std::string>();
-		//std::ios_base::openmode mode = std::ios_base::in;
-		//if (parsed.mdk_stream)
-		//{
-		//	mode |= std::ios_base::binary;
-		//}
-		//std::ifstream file_input{, mode};
-		//if (file_input)
-		//{
-		//	parsed.input_file = std::move(file_input);
-		//}
 	}
 	return parsed;
 }
