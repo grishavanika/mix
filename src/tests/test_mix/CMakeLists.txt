@@ -19,3 +19,9 @@ if (clang_on_msvc)
 	target_compile_options(${exe_name} PRIVATE
 		-Wno-non-virtual-dtor)
 endif()
+
+if (BUILD_SHARED_LIBS)
+	target_compile_options(${exe_name} PRIVATE
+		-DGTEST_LINKED_AS_SHARED_LIBRARY=1)
+endif()
+

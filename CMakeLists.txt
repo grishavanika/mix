@@ -15,9 +15,6 @@ set_cpp17_standard()
 # Remove unneeded configurations
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 
-# Set BUILD_SHARED_LIBS to build all libraries as DLLs
-set(bin_folders "tools;tests")
-
 if (clang_on_msvc)
 	make_clang_work_on_windows()
 endif()
@@ -31,6 +28,8 @@ endif()
 if (MSVC AND BUILD_SHARED_LIBS)
 	# class needs to have dll-interface to be used by clients of class
 	add_compile_options(/wd4251)
+	# non dll-interface class used as base for dll-interface class
+	add_compile_options(/wd4275)
 endif()
 
 # third party libraries

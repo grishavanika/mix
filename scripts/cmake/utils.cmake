@@ -54,13 +54,11 @@ endfunction()
 
 # Note: relies on ${bin_folders} global variable
 function(target_install_lib_binaries target)
-	if(${BUILD_SHARED_LIBS})	
+	if(${BUILD_SHARED_LIBS})
 		foreach(config ${CMAKE_CONFIGURATION_TYPES})
-			foreach(bin_folder ${bin_folders})
-				install(TARGETS ${target}
-					RUNTIME DESTINATION bin/${config}/${bin_folder}
-					CONFIGURATIONS ${config})
-			endforeach(bin_folder)
+			install(TARGETS ${target}
+				RUNTIME DESTINATION bin/${config}/${bin_folder}
+				CONFIGURATIONS ${config})
 		endforeach(config)
 	endif()
 endfunction()

@@ -12,3 +12,7 @@ target_link_libraries(${exe_name} PRIVATE gtest gmock gmock_main)
 
 target_install_binaries(${exe_name})
 
+if (BUILD_SHARED_LIBS)
+	target_compile_options(${exe_name} PRIVATE
+		-DGTEST_LINKED_AS_SHARED_LIBRARY=1)
+endif()
