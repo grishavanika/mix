@@ -35,7 +35,7 @@ const mix_word_t k_mdk_short_max = ((1L << 12) - 1);
 
 bool IsInstructionWord(mix_word_t tagged)
 {
-	return ((tagged & k_mdk_addr_tag) == 0);
+	return ((tagged & k_mdk_addr_tag) == k_mdk_word_zero);
 }
 
 bool IsAddressWord(mix_word_t tagged)
