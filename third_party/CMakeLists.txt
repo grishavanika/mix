@@ -35,7 +35,6 @@ macro(setup_gtest_lib lib_name)
 			-Wno-unused-member-function
 			-Wno-switch-enum
 			-Wno-deprecated)
-
 	endif()
 
 	set_target_properties(${lib_name} PROPERTIES FOLDER third_party)
@@ -46,9 +45,6 @@ setup_gtest_lib(gtest)
 setup_gtest_lib(gmock_main)
 setup_gtest_lib(gmock)
 
-
-
-
 # cxxopts integration
 set(CXXOPTS_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(cxxopts)
@@ -57,7 +53,9 @@ if (clang_on_msvc)
 	target_compile_options(cxxopts INTERFACE
 		-Wno-non-virtual-dtor
 		-Wno-exit-time-destructors
-		-Wno-covered-switch-default)
+		-Wno-covered-switch-default
+		-Wno-conversion
+		-Wno-deprecated)
 endif()
 
 if (GNU OR clang OR clang_on_msvc)
@@ -72,9 +70,3 @@ if (MSVC)
 		# '<': signed/unsigned mismatch
 		/wd4018)
 endif()
-
-if (clang_on_msvc)
-	target_compile_options(cxxopts INTERFACE
-		-Wno-conversion)
-endif()
-
