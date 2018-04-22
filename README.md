@@ -104,8 +104,11 @@ mixal.exe --execute --mdk --file program_primes.mix
 2. To use it with Clang on Windows you need to install latest one
 from http://llvm.org/builds/ (7.0.0 for the moment).
 
+    **(22 April, 2018) There are few issues with Clang & CMake integration into MSVC 2017.
+    Unfortunately, you need to fix them as described in this [CMake bug-report].**
+
     **Note:**
-    There is small issue with include directories and it should be fixed by hands.
+    There is also small issue with include directories and it should be fixed by hands.
 
     You need to change `msvc_version` variable to your's MSVC version
     (it can be detected by looking into ${MSVC}/2017/Community/VC/Tools/MSVC folder name).
@@ -115,7 +118,7 @@ from http://llvm.org/builds/ (7.0.0 for the moment).
 
     ```
     set(msvc_version "14.13.26128")
-    set(msvc_install_root "C:/Programs")
+    set(msvc_install_root "C:/Program Files (x86)")
     ```
 
     in `scripts/cmake/clang_msvc_integration.cmake` file.
@@ -124,6 +127,8 @@ from http://llvm.org/builds/ (7.0.0 for the moment).
     ```
     cmake -G "Visual Studio 14 2015 Win64" -T "LLVM-vs2014" ..
     ```
+
+[CMake bug-report]: https://gitlab.kitware.com/cmake/cmake/issues/17930
 
 3. Build with MSVC:
 
