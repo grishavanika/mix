@@ -3,9 +3,6 @@ macro(make_clang_work_on_windows)
 
 	add_compile_options(/EHa)
 
-	#INV: why this happens with Clang toolset ?
-	add_definitions(-D_HAS_CXX17=1)
-
 	# MSVC warnings in system headers
 	add_compile_options(
 		-Wno-deprecated-declarations
