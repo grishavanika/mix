@@ -5,9 +5,6 @@ macro(make_clang_work_on_windows)
 
 	#INV: why this happens with Clang toolset ?
 	add_definitions(-D_HAS_CXX17=1)
-	set(msvc_version "14.13.26128")
-	set(msvc_install_root "C:/Program Files (x86)")
-	include_directories(SYSTEM "${msvc_install_root}/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/${msvc_version}/include")
 
 	# MSVC warnings in system headers
 	add_compile_options(
