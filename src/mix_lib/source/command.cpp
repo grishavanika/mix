@@ -7,10 +7,10 @@ using namespace mix;
 
 namespace {
 
-const WordField k_address_field{0, 2};
-const std::size_t k_index_byte{3};
-const std::size_t k_field_byte{4};
-const std::size_t k_id_byte{5};
+const WordField k_address_field{0, 2}; // +- AA
+const std::size_t k_index_byte{3}; // I
+const std::size_t k_field_byte{4}; // F
+const std::size_t k_id_byte{5}; // C
 
 } // namespace
 

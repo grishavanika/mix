@@ -25,12 +25,19 @@ public:
 		std::size_t address_index,
 		const WordField& field);
 
-	std::size_t id() const;
-	const WordField& word_field() const;
-	std::size_t field() const;
-	int address() const;
-	std::size_t address_index() const;
-	Sign sign() const;
+	// Command: [0|1|2|3|4|5]
+	/* [0]       +-*/Sign sign() const;
+	/* [0,1,2] +-AA*/int address() const;
+	/* [3]        I*/std::size_t address_index() const;
+	/* [4]        F*/const WordField& word_field() const;
+	/* [4]        F*/std::size_t field() const;
+	/* [5]        C*/std::size_t id() const;
+
+	// Shortcuts as named in specs
+	int AA_with_sign() const { return address(); }
+	std::size_t I() const    { return address_index(); }
+	std::size_t F() const    { return field(); }
+	std::size_t C() const    { return id(); }
 
 	const Word& to_word() const;
 
