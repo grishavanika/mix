@@ -35,8 +35,8 @@ private:
 private:
 	Expression expression_;
 	std::string_view parse_str_;
-	std::size_t parse_pos_;
-	std::size_t last_parsed_token_pos_;
+	std::size_t parse_pos_ = 0;
+	std::size_t last_parsed_token_pos_ = 0;
 	Expression::Token current_token_;
 };
 

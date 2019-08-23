@@ -28,7 +28,7 @@ public:
 	struct EndCommandGeneratedCode
 	{
 		FlatMap<Symbol, TranslatedWord> defined_symbols;
-		int start_address;
+		int start_address = 0;
 	};
 
 public:

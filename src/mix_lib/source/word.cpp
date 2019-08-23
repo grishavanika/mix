@@ -114,7 +114,7 @@ void Word::set_value(WordValue value, const WordField& field, bool owerwrite_sig
 
 	const std::size_t abs_value = static_cast<std::size_t>(std::abs(value));
 
-	const std::size_t max_int_for_field = (1 << field_bits) - 1;
+	const std::size_t max_int_for_field = (std::size_t(1) << field_bits) - 1;
 
 	if (!field.has_only_sign() &&
 		(max_int_for_field < abs_value))

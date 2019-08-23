@@ -50,10 +50,10 @@ std::string Sprintf(const char* format, ...)
 	// format string is not a string literal
 #  pragma clang diagnostic ignored "-Wformat-nonliteral"
 #endif
-
+    const std::size_t count = static_cast<std::size_t>(length) + 1;
 	length = vsnprintf(
-		StringWriteInto(str, length + 1),
-		length + 1,
+		StringWriteInto(str, count),
+		count,
 		format,
 		args);
 

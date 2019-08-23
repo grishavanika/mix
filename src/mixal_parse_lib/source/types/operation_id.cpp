@@ -193,7 +193,7 @@ std::string_view OperationIdToString(OperationId id)
 		return k_operation_str_table[static_cast<std::size_t>(id)];
 	}
 
-	return nullptr;
+	return std::string_view();
 }
 
 OperationId OperationIdFromString(std::string_view str)
