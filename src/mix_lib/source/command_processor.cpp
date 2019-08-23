@@ -4,8 +4,6 @@
 #include <mix/io_device.h>
 #include <mix/char_table.h>
 
-#include "internal/valarray_register_helpers.h"
-
 #include <cassert>
 #include <cstdint>
 
@@ -801,26 +799,68 @@ void CommandProcessor::shift_group(const Command& command)
 
 void CommandProcessor::ra_shift(int shift)
 {
-	using namespace internal;
+	const unsigned n = static_cast<unsigned>(std::abs(shift));
+	auto bytes = mix_.ra().bytes();
+	auto do_shift = [n](auto b, auto e)
+	{
+		std::rotate(b, b + n, e);
+		std::fill(e - n, e, Byte());
+	};
+	if (shift >= 0)
+	{
+		do_shift(std::begin(bytes), std::end(bytes));
+	}
+	else
+	{
+		do_shift(std::rbegin(bytes), std::rend(bytes));
+	}
 
-	const auto result = ToBytes(mix_.ra()).shift(shift);
-	mix_.set_ra(ToRegister(mix_.ra().sign(), result));
+	mix_.set_ra(Register(std::move(bytes), mix_.ra().sign()));
 }
 
 void CommandProcessor::rax_shift(int shift, bool cyclic)
 {
-	using namespace internal;
+	using AllBytes = std::array<Byte, 2 * Register::k_bytes_count>;
+	AllBytes bytes;
+	{ // Merge RA and RX to single bytes array
+		std::copy(std::begin(mix_.ra().bytes()), std::end(mix_.ra().bytes())
+			, std::begin(bytes));
+		std::copy(std::begin(mix_.rx().bytes()), std::end(mix_.rx().bytes())
+			, std::begin(bytes) + Register::k_bytes_count);
+	}
 
-	std::valarray<Byte> bytes = ToBytes(mix_.ra(), mix_.rx());
+	const unsigned n = static_cast<unsigned>(std::abs(shift));
 
-	// #TODO: introduce "Extended Accumulator (rA)" thing
-	// that combines rA and rX together to avoid these ugly
-	// functions that work with 2 registers (rA and rX)
-	const auto rax = ToRegisters(mix_.ra().sign(), mix_.rx().sign(),
-		cyclic ? bytes.cshift(shift) : bytes.shift(shift));
+	auto do_shift = [n, cyclic](auto b, auto e)
+	{
+		std::rotate(b, b + n, e);
+		if (!cyclic)
+		{
+			std::fill(e - n, e, Byte());
+		}
+	};
 
-	mix_.set_ra(rax.first);
-	mix_.set_rx(rax.second);
+	if (shift >= 0)
+	{
+		do_shift(std::begin(bytes), std::end(bytes));
+	}
+	else
+	{
+		do_shift(std::rbegin(bytes), std::rend(bytes));
+	}
+
+	{ // Reconstruct RA from first half
+		Register::BytesArray ra;
+		std::copy(std::begin(bytes), std::begin(bytes) + Register::k_bytes_count
+			, std::begin(ra));
+		mix_.set_ra(Register(std::move(ra), mix_.ra().sign()));
+	}
+	{ // Reconstruct RX from second half
+		Register::BytesArray rx;
+		std::copy(std::begin(bytes) + Register::k_bytes_count, std::end(bytes)
+			, std::begin(rx));
+		mix_.set_rx(Register(std::move(rx), mix_.rx().sign()));
+	}
 }
 
 void CommandProcessor::move(const Command& command)

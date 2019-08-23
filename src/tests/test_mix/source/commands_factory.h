@@ -207,5 +207,35 @@ inline Command MakeCMPX(int address, WordField field = Word::MaxField(), std::si
 	return Command{63, address, index_register, field};
 }
 
+inline Command MakeSLA(std::size_t shift, std::size_t index_register = 0)
+{
+	return Command{6, static_cast<int>(shift), index_register, WordField::FromByte(0)};
+}
+
+inline Command MakeSRA(std::size_t shift, std::size_t index_register = 0)
+{
+	return Command{6, static_cast<int>(shift), index_register, WordField::FromByte(1)};
+}
+
+inline Command MakeSLAX(std::size_t shift, std::size_t index_register = 0)
+{
+	return Command{6, static_cast<int>(shift), index_register, WordField::FromByte(2)};
+}
+
+inline Command MakeSRAX(std::size_t shift, std::size_t index_register = 0)
+{
+	return Command{6, static_cast<int>(shift), index_register, WordField::FromByte(3)};
+}
+
+inline Command MakeSLC(std::size_t shift, std::size_t index_register = 0)
+{
+	return Command{6, static_cast<int>(shift), index_register, WordField::FromByte(4)};
+}
+
+inline Command MakeSRC(std::size_t shift, std::size_t index_register = 0)
+{
+	return Command{6, static_cast<int>(shift), index_register, WordField::FromByte(5)};
+}
+
 } // namespace mix
 
