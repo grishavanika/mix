@@ -15,7 +15,8 @@ FutureTranslatedWordRef MakeFutureWord(const TranslatedWord& word)
 {
 	auto ref = std::make_shared<FutureTranslatedWord>(word.original_address);
 	ref->value = word.value;
-	return ref;
+	// Help Clang: -Wreturn-std-move-in-c++11 
+	return std::move(ref);
 }
 
 FutureTranslatedWordRef MakeNullFutureWord()
@@ -118,7 +119,7 @@ TranslatedLine TranslateLine(
 			mix.field_parser.field(),
 			label);
 	}
-	};
+	}
 }
 
 } // namespace mixal
@@ -176,7 +177,8 @@ std::optional<LineParser> ProgramTranslator::parse_line(const std::string_view& 
 		// #TODO: introduce ParseError with details
 		throw std::runtime_error{"parse error"};
 	}
-	return parser;
+	// Help Clang: -Wreturn-std-move-in-c++11 
+	return std::move(parser);
 }
 
 void ProgramTranslator::update_code(const Translator::EndCommandGeneratedCode& end_code)

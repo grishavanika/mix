@@ -80,7 +80,7 @@ WordField WordField::shift_bytes_right() const
 	}
 
 	assert(right_byte_index() <= Word::k_bytes_count);
-	assert(right_ >= left_);;
+	assert(right_ >= left_);
 
 	const auto shift_right = Word::k_bytes_count - right_byte_index();
 	return WordField{left_byte_index() + shift_right, Word::k_bytes_count};

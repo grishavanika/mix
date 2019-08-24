@@ -34,13 +34,13 @@ goto:eof
 	)
 
 	if "%generator%" == "clang" (
-		set generator="Visual Studio 15 2017 Win64" -T LLVM-vs2014
+		set generator="Visual Studio 16 2019" -A x64 -T llvm
 		set build_root=%build_root%_clang
 	) else if "%generator%" == "gcc" (
 		set generator="MinGW Makefiles"
 		set build_root=%build_root%_gcc
 	) else if "%generator%" == "msvc" (
-		set generator="Visual Studio 15 2017 Win64"
+		set generator="Visual Studio 16 2019" -A x64
 		set build_root=%build_root%_msvc
 	)
 goto:eof

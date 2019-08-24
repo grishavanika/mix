@@ -84,18 +84,7 @@ macro(target_collect_sources target)
 endmacro()
 
 macro(new_test name command)
-	get_filename_component(base_install_folder ${CMAKE_INSTALL_PREFIX} ABSOLUTE)
-
-	foreach(config ${CMAKE_CONFIGURATION_TYPES})
-		set(install_folder ${base_install_folder}/bin/${config}/tests)
-
-		add_test(NAME
-			${name}_${config}
-			COMMAND ${command}
-			CONFIGURATIONS ${config}
-			WORKING_DIRECTORY ${install_folder})
-	endforeach()
-
+	add_test(NAME ${command} COMMAND $<TARGET_FILE:${command}>)
 endmacro()
 
 

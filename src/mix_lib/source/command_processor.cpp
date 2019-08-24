@@ -4,8 +4,11 @@
 #include <mix/io_device.h>
 #include <mix/char_table.h>
 
+#include <algorithm>
+
 #include <cassert>
 #include <cstdint>
+#include <cmath>
 
 using namespace mix;
 
@@ -681,7 +684,7 @@ void CommandProcessor::jmp_flags_group(const Command& command)
 		break;
 	default:
 		throw UnknownCommandField{field};
-	};
+	}
 
 	if (do_jump)
 	{
