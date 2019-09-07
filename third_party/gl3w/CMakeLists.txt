@@ -39,4 +39,4 @@ target_include_directories(gl3w PUBLIC ${gl3w_root}/include)
 target_include_directories(gl3w PUBLIC ${OPENGL_INCLUDE_DIR})
 target_link_libraries(gl3w PUBLIC ${OPENGL_LIBRARIES} ${CMAKE_DL_LIBS})
 
-set_target_properties(${gl3w} PROPERTIES FOLDER third_party)
+set_target_properties(gl3w PROPERTIES FOLDER third_party)
