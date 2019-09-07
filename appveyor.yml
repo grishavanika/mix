@@ -19,7 +19,7 @@ configuration:
   - Release
 
 platform:
-  - x86
+  - Win32
   - x64
 
 cache: c:\tools\vcpkg\installed\
@@ -36,6 +36,7 @@ install:
 clone_folder: c:\projects\mix
 
 build_script:
+  - cmake --version
   - cd /d %APPVEYOR_BUILD_FOLDER%
   - set build_folder=build_msvc_%platform%
   - mkdir %build_folder%
