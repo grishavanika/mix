@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 2.8.2)
+
+project(gl3w-download NONE)
+
+include(ExternalProject)
+ExternalProject_Add(gl3w
+  GIT_REPOSITORY    https://github.com/skaslev/gl3w.git
+  GIT_TAG           master
+  SOURCE_DIR        "${CMAKE_BINARY_DIR}/gl3w-src"
+  BINARY_DIR        ""
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND   ""
+  TEST_COMMAND      "")

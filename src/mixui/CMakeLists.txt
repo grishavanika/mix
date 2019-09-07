@@ -4,7 +4,7 @@ target_collect_sources(${exe_name})
 
 add_executable(${exe_name} WIN32 ${${exe_name}_files})
 target_compile_definitions(${exe_name} PRIVATE UNICODE _UNICODE)
-if (${gcc})
+if (${gcc_on_msvc})
 	# Make GCC aware about wmain()
 	set_target_properties(${exe_name} PROPERTIES LINK_FLAGS -municode)
 endif()
