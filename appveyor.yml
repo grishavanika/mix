@@ -10,9 +10,9 @@ environment:
     - compiler: msvc-19
       generator: "Visual Studio 16 2019"
       cmake_args: ""
-    - compiler: clang-msvc-19
-      generator: "Visual Studio 16 2019"
-      cmake_args: "-T LLVM"
+    # - compiler: clang-msvc-19
+    #   generator: "Visual Studio 16 2019"
+    #   cmake_args: "-T LLVM"
 
 configuration:
   - Debug
