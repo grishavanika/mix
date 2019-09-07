@@ -43,7 +43,7 @@ build_script:
   - mkdir %build_folder%
   - cd %build_folder%
   - set vcpkg=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
-  - cmake -G "%CMake_Generator%" -A %platform% -DCMAKE_TOOLCHAIN_FILE=%vcpkg% -DCMAKE_INSTALL_PREFIX=deploy ..
+  - cmake -G %generator% -A %platform% %cmake_args% -DCMAKE_TOOLCHAIN_FILE=%vcpkg% -DCMAKE_INSTALL_PREFIX=deploy ..
   - cmake --build . --config %configuration%
   - cmake --build . --config %configuration% --target install
 
