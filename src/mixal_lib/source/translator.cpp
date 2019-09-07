@@ -544,7 +544,7 @@ bool Translator::Impl::is_defined_local_symbol(const Symbol& symbol, int near_ad
 	case LocalSymbolKind::Forward:
 		return (find_local_symbol(symbol, near_address) != nullptr);
 	default: break;
-	};
+	}
 	
 	return false;
 }
@@ -779,13 +779,13 @@ FutureTranslatedWordRef Translator::Impl::process_mix_translation(
 	{
 		partial_result->value = make_mix_command(
 			evaluate_address(address), I, F, C);
-		return partial_result;
+		return std::move(partial_result);
 	}
 
 	partial_result->value = make_mix_command(0, I, F, C);
 	partial_result->unresolved_address = address;
 	unresolved_words_.push_back(partial_result);
-	return partial_result;
+	return std::move(partial_result);
 }
 
 void Translator::Impl::update_unresolved_references()

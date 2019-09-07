@@ -1,9 +1,14 @@
 version: 1.0.{build}
-image: Visual Studio 2017
+image:
+  - Visual Studio 2017
+  - Visual Studio 2019
 
 environment:
   matrix:
-    - msvc_ver: Visual Studio 15 2017
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      CMake_Generator: "Visual Studio 16 2019"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      CMake_Generator: "Visual Studio 15 2017"
 
 configuration:
   - Debug
@@ -15,14 +20,26 @@ platform:
 
 clone_folder: c:\projects\mix
 
+cache: c:\tools\vcpkg\installed\
+
+install:
+  - cd /d c:\tools\vcpkg
+  - vcpkg install gl3w:x64-window
+  - vcpkg install gl3w:x86-window
+  - vcpkg install sdl2:x64-window
+  - vcpkg install sdl2:x86-window
+  - vcpkg install gtest:x64-window
+  - vcpkg install gtest:x86-window
+
 build_script:
+  - cd /d %APPVEYOR_BUILD_FOLDER%
   - set build_folder=build_msvc_%platform%
   - mkdir %build_folder%
   - cd %build_folder%
-  - if "%platform%"=="x86" (set generator="%msvc_ver%")
-  - if "%platform%"=="x64" (set generator="%msvc_ver% Win64")
-  - cmake -G %generator% ..
+  - set vcpkg=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
+  - cmake -G "%CMake_Generator%" -A %platform% -DCMAKE_TOOLCHAIN_FILE=%vcpkg% -DCMAKE_INSTALL_PREFIX=deploy ..
   - cmake --build . --config %configuration%
+  - cmake --build . --config %configuration% --target install
 
 test_script:
   - ctest -C %configuration% --verbose

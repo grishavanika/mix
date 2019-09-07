@@ -10,7 +10,7 @@ set_all_warnings(${exe_name} PRIVATE)
 set_target_precompiled_header(${exe_name} precompiled.h precompiled.cpp)
 
 target_link_libraries(${exe_name} PRIVATE mix_lib)
-target_link_libraries(${exe_name} PRIVATE gtest gmock gmock_main)
+target_link_libraries(${exe_name} PRIVATE GTest_Integrated)
 
 target_install_binaries(${exe_name})
 

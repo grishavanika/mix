@@ -4,8 +4,8 @@ project(mix)
 include(CheckCXXCompilerFlag)
 include(GenerateExportHeader)
 include(CTest)
-include(scripts/cmake/utils.cmake)
-include(scripts/cmake/clang_msvc_integration.cmake)
+include(tools/cmake/utils.cmake)
+include(tools/cmake/clang_msvc_integration.cmake)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -47,8 +47,10 @@ set_target_properties(mixal_parse_lib PROPERTIES FOLDER libs)
 
 # exe
 add_subdirectory(src/mixal)
+add_subdirectory(src/mixui)
 add_subdirectory(src/tools/mixal_format)
 set_target_properties(mixal PROPERTIES FOLDER "app")
+set_target_properties(mixui PROPERTIES FOLDER "app")
 set_target_properties(mixal_format PROPERTIES FOLDER "app/tools")
 
 # tests

@@ -9,38 +9,62 @@ macro(set_cpp17_standard)
 	# (for proper detection of _HAS_CXX17 in std headers)
 	if (clang_on_msvc)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z /std:c++17")
-	endif()
-
+	endif ()
 endmacro()
 
 macro(detect_compilers)
 	set(clang_on_msvc OFF)
+	set(gcc_on_msvc OFF)
 	set(clang OFF)
-	set(only_msvc ${MSVC})
-	set(gcc ${GNU})
-
+	set(only_msvc OFF)
+	set(gcc OFF)
+	set(windows OFF)
+	if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+		set(gcc ON)
+	endif ()
+	if (WIN32)
+		set(windows ON)
+	endif ()
+	if (MSVC)
+		set(only_msvc ON)
+	endif ()
 	if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		set(clang ON)
-		set(clang_on_msvc ${MSVC})
+		set(clang_on_msvc ${only_msvc})
 		set(only_msvc OFF)
-	endif()
+	endif ()
+	if (gcc AND windows)
+		set(gcc_on_msvc ON)
+	endif ()
+
+	cmake_print_variables(clang_on_msvc clang only_msvc gcc windows gcc_on_msvc)
+endmacro()
+
+macro(detect_compiler_features)
+	set(has_coro_support ${only_msvc})
+
+	cmake_print_variables(has_coro_support clang only_msvc gcc)
 endmacro()
 
 macro(set_all_warnings target visibility)
 	if (only_msvc)
 		target_compile_options(${target} ${visibility}
 			/W4 /WX)
-	endif()
+
+		# Be more close to Standard. Enable two-phase lookup
+		target_compile_options(${target} ${visibility}
+			/permissive-)
+	endif ()
 
 	if (NOT MSVC)
 		target_compile_options(${target} ${visibility}
 			-Wall -Wextra -Wpedantic -Werror)
-	endif()
+	endif ()
 
 	if (clang_on_msvc)
 		target_compile_options(${target} ${visibility}
 			-Wall -Wextra -Werror)
-	endif()
+	endif ()
 endmacro()
 
 # set PCH for VS project
@@ -62,7 +86,7 @@ function(target_install_lib_binaries target)
 				RUNTIME DESTINATION bin/${config}/${bin_folder}
 				CONFIGURATIONS ${config})
 		endforeach(config)
-	endif()
+	endif ()
 endfunction()
 
 function(target_install_binaries target)
