@@ -3,12 +3,27 @@ image:
   - Visual Studio 2017
   - Visual Studio 2019
 
+matrix:
+  fast_finish: true
+
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      CMake_Generator: "Visual Studio 16 2019"
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      CMake_Generator: "Visual Studio 15 2017"
+    - compiler: msvc-17
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      generator: "Visual Studio 15 2017"
+      cmake_args: ""
+    - compiler: msvc-19
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      generator: "Visual Studio 16 2019"
+      cmake_args: ""
+    - compiler: clang-msvc-17
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      generator: "Visual Studio 15 2017"
+      cmake_args: "-T LLVM"
+    - compiler: clang-msvc-19
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      generator: "Visual Studio 16 2019"
+      cmake_args: "-T LLVM"
 
 configuration:
   - Debug
@@ -18,18 +33,18 @@ platform:
   - x86
   - x64
 
-clone_folder: c:\projects\mix
-
 cache: c:\tools\vcpkg\installed\
 
 install:
   - cd /d c:\tools\vcpkg
-  - vcpkg install gl3w:x64-window
-  - vcpkg install gl3w:x86-window
-  - vcpkg install sdl2:x64-window
-  - vcpkg install sdl2:x86-window
-  - vcpkg install gtest:x64-window
-  - vcpkg install gtest:x86-window
+  - vcpkg install gl3w:x64-windows
+  - vcpkg install gl3w:x86-windows
+  - vcpkg install sdl2:x64-windows
+  - vcpkg install sdl2:x86-windows
+  - vcpkg install gtest:x64-windows
+  - vcpkg install gtest:x86-windows
+
+clone_folder: c:\projects\mix
 
 build_script:
   - cd /d %APPVEYOR_BUILD_FOLDER%
