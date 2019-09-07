@@ -8,11 +8,9 @@ matrix:
 environment:
   matrix:
     - compiler: msvc-19
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       generator: "Visual Studio 16 2019"
       cmake_args: ""
     - compiler: clang-msvc-19
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       generator: "Visual Studio 16 2019"
       cmake_args: "-T LLVM"
 
@@ -43,7 +41,7 @@ build_script:
   - mkdir %build_folder%
   - cd %build_folder%
   - set vcpkg=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
-  - cmake -G %generator% -A %platform% %cmake_args% -DCMAKE_TOOLCHAIN_FILE=%vcpkg% -DCMAKE_INSTALL_PREFIX=deploy ..
+  - cmake -G "%generator%" -A %platform% %cmake_args% -DCMAKE_TOOLCHAIN_FILE=%vcpkg% -DCMAKE_INSTALL_PREFIX=deploy ..
   - cmake --build . --config %configuration%
   - cmake --build . --config %configuration% --target install
 
