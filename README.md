@@ -7,8 +7,9 @@
 - [Executing "FIRST FIVE HUNDRED PRIMES"](#executing-first-five-hundred-primes)
 - [Integration with GNU MIX Development Kit (MDK)](#integration-with-gnu-mix-development-kit-mdk)
 - [Building](#building)
-- [Toolset & third-party libraries](#toolset--third-party-libraries)
+- [Dependencies](#dependencies)
 - [mixal command-line help](#mixal-command-line-help)
+- [TODO](#todo)
 
 ##### Translating "FIRST FIVE HUNDRED PRIMES"
 
@@ -92,55 +93,73 @@ mixal.exe --execute --mdk --file program_primes.mix
 
 ##### Building
 
-1. To use it with MinGW please install STL's port from https://nuwen.net/mingw.html.
-    Latest checked version is GCC 7.3.0.
+|         Name        | Version | Actual compiler |    Version    |        CMake command                      |
+|-------------------- |---------|-----------------|---------------|-------------------------------------------|
+| Visual Studio 2019  | 16.2.3  |     cl.exe      | 19.22.27905   | -G "Visual Studio 16 2019" -A x64         |
+| Clang (VS 2019)     | 16.2.3  |   clang-cl.exe  | 8.0.0         | -G "Visual Studio 16 2019" -A x64 -T LLVM |
+| GCC (STL/nuwen.net) | 7.3.0   |   gcc.exe       | 7.3.0         | -G "Unix Makefiles"                       |
+| GCC (WSL)           | 7.3.0   |   gcc           | 7.3.0         | -G "Unix Makefiles"                       |
 
-    And then:
-    ```
-    set path=%path%;C:\Programs\mingw\bin
-    cmake -G "MinGW Makefiles" ..
-    ```
+Third-party dependencies will be downloaded and compiled during the build 
+if they are missing.  
 
-2. To use it with Clang on Windows you need to install latest one
-from http://llvm.org/builds/ (7.0.0 for the moment).
+I.e, you can install them to speed-up usual edit/compile/run cycle using Vcpkg:
 
-    **(22 April, 2018) There are few issues with Clang & CMake integration into MSVC 2017.
-    Unfortunately, you need to fix them as described in this [CMake bug-report].**
+```
+vcpkg install gl3w
+vcpkg install sdl2
+vcpkg install gtest
+```
 
-    And then:
-    ```
-    cmake -G "Visual Studio 14 2015 Win64" -T "LLVM-vs2014" ..
-    ```
+[Vcpkg]: https://github.com/microsoft/vcpkg
 
-[CMake bug-report]: https://gitlab.kitware.com/cmake/cmake/issues/17930
+Examples:
 
-3. Build with MSVC:
+```
+:: Usual MSVC/x64
+cmake -G "Visual Studio 16 2019" ^
+  -DCMAKE_INSTALL_PREFIX=install ^
+  -A x64 ^
+  ..
+:: Clang on Windows/x64
+cmake -G "Visual Studio 16 2019" ^
+  -A x64 ^
+  -T LLVM ^
+  ..
+:: MSVC/x64 with Vcpkg dependencies
+:: (Vcpkg installed to C:/libs/vcpkg)
+cmake -G "Visual Studio 16 2019" ^
+  -A x64 ^
+  -DCMAKE_TOOLCHAIN_FILE=C:/libs/vcpkg/scripts/buildsystems/vcpkg.cmake ^
+  ..
+:: MinGW with custom install folder, Release configuration
+:: (MinGW installed to C:\Programs\mingw_gcc_7.3.0)
+set path=%path%;C:\Programs\mingw_gcc_7.3.0\bin
+cmake -G "Unix Makefiles" ^
+  -DCMAKE_BUILD_TYPE=Release ^
+  -DCMAKE_INSTALL_PREFIX=install ^
+  ..
+```
 
-    ```
-    mkdir build && cd build
-    cmake -G "Visual Studio 15 2017 Win64" ..
-    cmake --build . --config Release
-    ```
+To build use either generated .sln file or CMake:
 
-4. See also `scripts/generate_proj.bat` and `scripts/build.*(sh|bat)`
+```
+cmake --build . --config Release
+:: ... and additionally install all targets
+cmake --build . --config Release --target install
+```
 
-###### Toolset & third-party libraries
+###### Dependencies
 
-Latest working build was done with next toolset:
+Core stuff (MIX VM, interpreter, parser, assembler) have no dependencies.  
+Other things (tools, UI, tests) dependencies listed in third_party/ folder:
 
-- Clang 7.0.0 (Windows)
-- GCC 7.3.0 (MinGW, Windows)
-- MSVC 15.6.6
-- CMake 3.10.1
-
-
-Third-party libraries (handled implicitly with CMake):
-
-- [cxxopt]: version 2.1.0
-- [googletest]: version 1.9.0
-
-[cxxopt]: https://github.com/jarro2783/cxxopts
-[googletest]: https://github.com/google/googletest
+* (for command line tools) cxxopts: https://github.com/jarro2783/cxxopts.git
+* (for, obviously, tests)  gtest  : https://github.com/google/googletest.git
+* (for debugger UI)        imgui  : https://github.com/ocornut/imgui.git
+* (for imgui)              gl3w   : https://github.com/skaslev/gl3w.git
+* (for imgui)              sdl2   : https://github.com/SDL-mirror/SDL.git
+* (for imgui, implicitly)  opengl
 
 ###### mixal command-line help
 
@@ -159,14 +178,18 @@ Usage:
                       (MDK) format
 ```
 
-
 ###### TODO
 
-1. add index register influence to LD/ST/ADD/SUB and similar tests:
-    * `LDA 2000,3(1:3)`
-3. add Travis CI build support for **Clang**
-4. port interpreter to JavaScript (with **[emscripten](http://kripken.github.io/emscripten-site/)**)
-to play with it in web-page
-5. use WSL to build & debug linux version with Visual Studio
-6. build with Clang on linux. Probably there will be warnings.
-    Need to go thru all if (clang_on_msvc) and fix them to also include native Clang
+* write debugger/UI, see MDK for reference
+* fix static/shared libraries build (with & without Vcpkg):
+  ```
+  cmake -G "Visual Studio 16 2019" ^
+    -DBUILD_SHARED_LIBS=ON ^
+    -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=ON ..
+  ```
+  `CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS` should not be there (?)
+* use Rx & ImGui to build debugger UI
+* add index register influence to LD/ST/ADD/SUB and similar tests: `LDA 2000,3(1:3)`
+* add Travis CI build support for **Clang**
+* port everything to WASM (Emscripten)
+* clean-up CMake scripts
