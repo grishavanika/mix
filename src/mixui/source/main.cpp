@@ -36,36 +36,67 @@ static void ImGuiCheck(bool status)
     }
 }
 
-#include <mixui/ui_register.h>
+#include <mix/computer.h>
+#include <mixui/ui_word.h>
+
+#include <cstdio>
+
+struct UIMix
+{
+    static constexpr int k_ri_count =
+        static_cast<int>(mix::Computer::k_index_registers_count);
+
+    UIWord ra_;
+    UIWord rx_;
+    UIWord rj_; // non-negative, bytes [4, 5]
+    UIWord ri_[k_ri_count]; // bytes [4, 5]
+};
+
+static void RegistersInputWindow(UIMix& ui_mix)
+{
+    if (!ImGui::Begin("Registers"))
+    {
+        ImGui::End();
+        return;
+    }
+    // ImGui::Separator();
+    ImGui::Columns(3, nullptr, true);
+    ImGui::PushItemWidth(150);
+    (void)UIWordInput("A", ui_mix.ra_);
+    (void)UIWordInput("X", ui_mix.rx_);
+    (void)UIAddressRegisterInput("J", ui_mix.rj_);
+    ImGui::NextColumn();
+
+    auto handle_ri = [&ui_mix](int i)
+    {
+        char name[32]{};
+        (void)snprintf(name, sizeof(name), "I%i", i);
+        (void)UIIndexRegisterInput(name, ui_mix.ri_[i - 1]);
+    };
+
+    for (int i = 1; i <= 3; ++i)
+    {
+        handle_ri(i);
+    }
+    ImGui::NextColumn();
+
+    for (int i = 4; i <= UIMix::k_ri_count; ++i)
+    {
+        handle_ri(i);
+    }
+
+    ImGui::PopItemWidth();
+    // ImGui::Separator();
+    
+    ImGui::End();
+}
 
 static void RenderAll()
 {
     // ImGui::ShowDemoWindow(nullptr);
 
-    static UIRegister ra;
-    static UIRegister rb;
-    static int changed_times = 0;
-
-    ImGui::PushItemWidth(200);
-    if (UIRegisterInput("ra", ra))
-    {
-        ++changed_times;
-    }
-    ImGui::PopItemWidth();
-
-    (void)UIRegisterInput("rb", rb);
-
-    const mix::Register mix_ra = ra.get();
-    ImGui::Text("Value: %s %i. Changed %i times"
-        , SignText(mix_ra.sign())
-        , static_cast<int>(mix_ra.abs_value())
-        , changed_times);
-
-    if (ImGui::Button("Reset"))
-    {
-        changed_times = 0;
-        ra.set(mix::Register());
-    }
+    static UIMix ui_mix;
+    RegistersInputWindow(ui_mix);
 }
 
 #if defined(_WIN32)

@@ -1,9 +1,10 @@
-#include <mixui/ui_register.h>
+#include <mixui/ui_word.h>
 
 #include <imgui_internal.h>
 
 #include <algorithm>
 
+#include <cassert>
 #include <cstring>
 
 const char* SignText(mix::Sign sign)
@@ -16,35 +17,34 @@ const char* SignText(mix::Sign sign)
     return "";
 }
 
-void UIRegister::set(const mix::Register& r)
+void UIWord::set(const mix::Word& w)
 {
-    sign_ = r.sign();
-    for (std::size_t i = 1; i <= mix::Register::k_bytes_count; ++i)
+    sign_ = w.sign();
+    for (std::size_t i = 1; i <= mix::Word::k_bytes_count; ++i)
     {
-        bytes_[i - 1] = r.byte(i).cast_to<int>();
+        bytes_[i - 1] = w.byte(i).cast_to<int>();
     }
-    value_ = r.value();
+    value_ = w.value();
 }
 
-mix::Register UIRegister::get() const
+mix::Word UIWord::get() const
 {
-    mix::Register r;
-    r.set_sign(sign_);
-    for (std::size_t i = 1; i <= mix::Register::k_bytes_count; ++i)
+    mix::Word w;
+    w.set_sign(sign_);
+    for (std::size_t i = 1; i <= mix::Word::k_bytes_count; ++i)
     {
-        r.set_byte(i, bytes_[i - 1]);
+        w.set_byte(i, bytes_[i - 1]);
     }
-    return r;
+    return w;
 }
 
-static bool UISignInput(const char* label, mix::Sign* sign)
+static bool UISignInput(const char* label, mix::Sign* sign = nullptr)
 {
-    mix::Sign selected_sign = *sign;
+    mix::Sign selected_sign = sign ? *sign : mix::Sign::Positive;
 
-    auto do_sign = [&selected_sign
-        , current_sign = *sign](mix::Sign draw_sign)
+    auto do_sign = [&selected_sign, sign](mix::Sign draw_sign)
     {
-        const bool active = (current_sign == draw_sign);
+        const bool active = sign && (draw_sign == *sign);
         if (!active)
         {
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha
@@ -70,7 +70,7 @@ static bool UISignInput(const char* label, mix::Sign* sign)
     ImGui::PopID();
     ImGui::EndGroup();
 
-    if (selected_sign != *sign)
+    if (sign && (selected_sign != *sign))
     {
         *sign = selected_sign;
         return true;
@@ -78,27 +78,53 @@ static bool UISignInput(const char* label, mix::Sign* sign)
     return false;
 }
 
-bool UIRegisterInput(const char* title, UIRegister& state)
+static constexpr int MaxValueInMixBytes(int bytes_count)
 {
+    const std::size_t field_bits = static_cast<std::size_t>(bytes_count) * mix::Byte::k_bits_count;
+    assert(field_bits <= (sizeof(int) * CHAR_BIT));
+    return static_cast<int>((std::size_t(1) << field_bits) - 1);
+}
+
+// #XXX: AddressRegister should disallow sign (always positive)
+bool UIWordInput(const char* title, UIWord& state
+    , int start /*= 1*/, int stop /*= UIWord::k_bytes_count*/
+    , bool allow_negative /*= true*/)
+{
+    assert(start >= 1);
+    assert(stop <= UIWord::k_bytes_count);
+    assert(start <= stop);
+
+    const int bytes_count = (stop - start + 1);
+    assert(bytes_count <= IM_ARRAYSIZE(state.bytes_));
+
     bool changed = false;
-    UIRegister::AllBytes old_bytes;
+    UIWord::AllBytes old_bytes;
     std::memcpy(old_bytes, state.bytes_, sizeof(old_bytes));
 
     ImGui::BeginGroup();
     ImGui::PushID(title);
 
     // 1. Draw sign (+ and -)
+    if (!allow_negative)
+    {
+        state.sign_ = mix::Sign::Positive;
+    }
     const float x_begin = ImGui::GetCursorPosX();
-    changed |= UISignInput(title, &state.sign_);
+    changed |= UISignInput(title, allow_negative
+        ? &state.sign_
+        : nullptr);
     ImGui::SameLine();
     const float x_sign_end = ImGui::GetCursorPosX();
 
     // 2. Draw 5 bytes text input.
     // Using S32 to enable ImGui arithmetic (/2, *4).
-    if (ImGui::InputScalarN(title, ImGuiDataType_S32, state.bytes_, IM_ARRAYSIZE(state.bytes_)))
+    if (ImGui::InputScalarN(title, ImGuiDataType_S32
+        , state.bytes_ + start - 1
+        , bytes_count))
     {
-        for (int& byte : state.bytes_)
+        for (int i = start; i <= stop; ++i)
         {
+            int& byte = state.bytes_[i - 1];
             byte = std::clamp<int>(byte
                 , mix::Byte::k_min_value
                 , mix::Byte::k_max_value);
@@ -116,20 +142,20 @@ bool UIRegisterInput(const char* title, UIRegister& state)
     ImGui::TextUnformatted(SignText(state.sign_));
     ImGui::SameLine();
 
-    // 4. Draw big input text to change all the register.
+    // 4. Draw big input text to change all the word.
     // Allow to set negative and positive values intentionally.
     // (Draw current sign to show the difference between -0 and +0).
+    const int max_value = 1 * MaxValueInMixBytes(bytes_count);
+    const int min_value = (allow_negative ? -1 : 0)* max_value;
     const ImS64 old_value = state.value_;
     ImGui::SetCursorPosX(x_sign_end);
     if (ImGui::InputScalar("##Value", ImGuiDataType_S64, &state.value_))
     {
-        state.value_ = std::clamp<ImS64>(state.value_
-            , -1 * static_cast<ImS64>(mix::Register::k_max_abs_value)
-            , +1 * static_cast<ImS64>(mix::Register::k_max_abs_value));
+        state.value_ = std::clamp<ImS64>(state.value_, min_value, max_value);
         if (old_value != state.value_)
         {
             changed = true;
-            state.set(mix::Register(static_cast<mix::WordValue::Type>(state.value_)));
+            state.set(mix::Word(static_cast<mix::WordValue::Type>(state.value_)));
         }
     }
 
