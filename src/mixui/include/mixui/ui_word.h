@@ -23,28 +23,43 @@ public:
     mix::Word get() const;
 };
 
-bool UIWordInput(const char* name, UIWord& state
-    , int start = 1, int stop = UIWord::k_bytes_count
-    , bool allow_negative = true);
+// `start` and `stop` represent WordFiedl,
+// i.e, [1, 5] - whole word, [4, 5] - last 2 bytes
+bool UIWordInputEx(const char* name, UIWord& state
+    , int start, int stop, bool allow_negative);
+
+inline bool UIWordInput(const char* name, UIWord& state)
+{
+    return UIWordInputEx(name, state
+        , 1/*start byte*/
+        , UIWord::k_bytes_count/*end byte*/
+        , true/*allow negative values*/);
+}
 
 inline bool UIRegisterInput(const char* name, UIWord& state)
 {
-    return UIWordInput(name, state);
+    return UIWordInputEx(name, state
+        , 1/*start byte*/
+        , UIWord::k_bytes_count/*end byte*/
+        , true/*allow negative values*/);
 }
 
 inline bool UIIndexRegisterInput(const char* name, UIWord& state)
 {
-    return UIWordInput(name, state
+    static_assert(UIWord::k_bytes_count >= 4);
+    return UIWordInputEx(name, state
         , 4/*start byte*/
-        , 5/*end byte*/);
+        , UIWord::k_bytes_count/*end byte*/
+        , true/*allow negative values*/);
 }
 
 inline bool UIAddressRegisterInput(const char* name, UIWord& state)
 {
-    return UIWordInput(name, state
+    static_assert(UIWord::k_bytes_count >= 4);
+    return UIWordInputEx(name, state
         , 4/*start byte*/
-        , 5/*end byte*/
-        , false/*allow non-negative values only*/);
+        , UIWord::k_bytes_count/*end byte*/
+        , false/*disable negative values*/);
 }
 
 const char* SignText(mix::Sign sign);

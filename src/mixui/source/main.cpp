@@ -62,8 +62,8 @@ static void RegistersInputWindow(UIMix& ui_mix)
     // ImGui::Separator();
     ImGui::Columns(3, nullptr, true);
     ImGui::PushItemWidth(150);
-    (void)UIWordInput("A", ui_mix.ra_);
-    (void)UIWordInput("X", ui_mix.rx_);
+    (void)UIRegisterInput("A", ui_mix.ra_);
+    (void)UIRegisterInput("X", ui_mix.rx_);
     (void)UIAddressRegisterInput("J", ui_mix.rj_);
     ImGui::NextColumn();
 

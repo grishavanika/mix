@@ -85,9 +85,8 @@ static constexpr int MaxValueInMixBytes(int bytes_count)
     return static_cast<int>((std::size_t(1) << field_bits) - 1);
 }
 
-bool UIWordInput(const char* title, UIWord& state
-    , int start /*= 1*/, int stop /*= UIWord::k_bytes_count*/
-    , bool allow_negative /*= true*/)
+bool UIWordInputEx(const char* title, UIWord& state
+    , int start, int stop, bool allow_negative)
 {
     assert(start >= 1);
     assert(stop <= UIWord::k_bytes_count);
