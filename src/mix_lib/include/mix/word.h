@@ -33,7 +33,7 @@ public:
 	int sign_value() const;
 	void set_sign(Sign sign);
 
-	// Starting from 1:
+	// Starts from 1 (not zero-based):
 	// [ +- | 1 | 2 | 3 | 4 | 5 ]
 	const Byte& byte(std::size_t index) const;
 	void set_byte(std::size_t index, const Byte& byte);

@@ -36,13 +36,36 @@ static void ImGuiCheck(bool status)
     }
 }
 
+#include <mixui/ui_register.h>
+
 static void RenderAll()
 {
     // ImGui::ShowDemoWindow(nullptr);
 
-    ImGui::Begin("Window");
-    ImGui::Text("Text");
-    ImGui::End();
+    static UIRegister ra;
+    static UIRegister rb;
+    static int changed_times = 0;
+
+    ImGui::PushItemWidth(200);
+    if (UIRegisterInput("ra", ra))
+    {
+        ++changed_times;
+    }
+    ImGui::PopItemWidth();
+
+    (void)UIRegisterInput("rb", rb);
+
+    const mix::Register mix_ra = ra.get();
+    ImGui::Text("Value: %s %i. Changed %i times"
+        , SignText(mix_ra.sign())
+        , static_cast<int>(mix_ra.abs_value())
+        , changed_times);
+
+    if (ImGui::Button("Reset"))
+    {
+        changed_times = 0;
+        ra.set(mix::Register());
+    }
 }
 
 #if defined(_WIN32)
@@ -126,7 +149,7 @@ int main(int, char**)
         glViewport(0, 0
             , static_cast<int>(io.DisplaySize.x)
             , static_cast<int>(io.DisplaySize.y));
-        glClearColor(1.f, 1.f, 1.f, 1.f);
+        glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(window);
