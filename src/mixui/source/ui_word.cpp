@@ -85,7 +85,6 @@ static constexpr int MaxValueInMixBytes(int bytes_count)
     return static_cast<int>((std::size_t(1) << field_bits) - 1);
 }
 
-// #XXX: AddressRegister should disallow sign (always positive)
 bool UIWordInput(const char* title, UIWord& state
     , int start /*= 1*/, int stop /*= UIWord::k_bytes_count*/
     , bool allow_negative /*= true*/)
@@ -146,7 +145,7 @@ bool UIWordInput(const char* title, UIWord& state
     // Allow to set negative and positive values intentionally.
     // (Draw current sign to show the difference between -0 and +0).
     const int max_value = 1 * MaxValueInMixBytes(bytes_count);
-    const int min_value = (allow_negative ? -1 : 0)* max_value;
+    const int min_value = (allow_negative ? -1 : 0) * max_value;
     const ImS64 old_value = state.value_;
     ImGui::SetCursorPosX(x_sign_end);
     if (ImGui::InputScalar("##Value", ImGuiDataType_S64, &state.value_))
@@ -155,7 +154,9 @@ bool UIWordInput(const char* title, UIWord& state
         if (old_value != state.value_)
         {
             changed = true;
-            state.set(mix::Word(static_cast<mix::WordValue::Type>(state.value_)));
+            state.set(mix::Word(
+                static_cast<mix::WordValue::Type>(state.value_)
+                , mix::WordField(start, stop)));
         }
     }
 
