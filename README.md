@@ -3,6 +3,7 @@
 [![Build Status (Windows)](https://ci.appveyor.com/api/projects/status/github/grishavanika/mix?svg=true)](https://ci.appveyor.com/project/grishavanika/mix)
 [![Build Status (Linux)](https://travis-ci.org/grishavanika/mix.svg)](https://travis-ci.org/grishavanika/mix)
 
+- [MIX UI (debugger) progress](#mix-ui-debugger-progress)
 - [Translating "FIRST FIVE HUNDRED PRIMES"](#translating-first-five-hundred-primes)
 - [Executing "FIRST FIVE HUNDRED PRIMES"](#executing-first-five-hundred-primes)
 - [Integration with GNU MIX Development Kit (MDK)](#integration-with-gnu-mix-development-kit-mdk)
@@ -10,6 +11,10 @@
 - [Dependencies](#dependencies)
 - [mixal command-line help](#mixal-command-line-help)
 - [TODO](#todo)
+
+##### MIX UI (debugger) progress
+
+![](docs/mix_ui_progress.png)
 
 ##### Translating "FIRST FIVE HUNDRED PRIMES"
 
