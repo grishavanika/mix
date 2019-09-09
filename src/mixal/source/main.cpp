@@ -1,10 +1,44 @@
 #include <mixal/interpreter.h>
 #include <mixal/program_executor.h>
+#include <mixal/exceptions_handler.h>
+#include <mixal/mdk_program_loader.h>
+
+#include <fstream>
 
 using namespace mixal;
 
 namespace
 {
+    int RunProgram(Options options)
+    {
+        if (options.file_name.empty())
+        {
+            return -1;
+        }
+
+        int commands_count = -1;
+        HandleAnyException([&]()
+        {
+            TranslatedProgram program;
+            if (options.mdk_stream)
+            {
+                std::ifstream input(options.file_name, std::ios_base::binary);
+                auto mdk_program = ParseProgramFromMDKStream(input);
+                program = std::move(mdk_program);
+            }
+            else
+            {
+                std::ifstream input(options.file_name);
+                auto program_translator = TranslateProgram(input);
+                program = std::move(program_translator.program());
+            }
+
+            commands_count = ExecuteProgram(program);
+        });
+
+        return commands_count;
+    }
+
 	void RunWithOptions(Options options)
 	{
 		if (options.show_help)

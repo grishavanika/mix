@@ -1,3 +1,11 @@
+#include <mix/computer.h>
+#include <mix/command.h>
+#include <mixal/program_executor.h>
+#include <mixal_parse/types/operation_id.h>
+#include <mixui/ui_word.h>
+#include <fstream>
+#include <cstdio>
+
 #include <imgui.h>
 #include <imgui_impl_sdl.h>
 #include <imgui_impl_opengl3.h>
@@ -36,20 +44,67 @@ static void ImGuiCheck(bool status)
     }
 }
 
-#include <mix/computer.h>
-#include <mixui/ui_word.h>
+bool LoadProgramFromSourceFile(const std::string& file, mix::Computer& mix)
+{
+    std::ifstream in(file);
+    if (!in)
+    {
+        return false;
+    }
 
-#include <cstdio>
+    try
+    {
+        mixal::ProgramTranslator bytecode = mixal::TranslateProgram(in);
+        mixal::LoadProgram(mix, bytecode.program());
+    }
+    catch (const std::exception&)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+struct UIFlags
+{
+    int comparison_ = 0;
+    bool overflow_ = false;
+
+    static int ComparisonFrom(mix::ComparisonIndicator state)
+    {
+        switch (state)
+        {
+        case mix::ComparisonIndicator::Less: return 1;
+        case mix::ComparisonIndicator::Greater: return 2;
+        case mix::ComparisonIndicator::Equal: return 0;
+        }
+        return 0;
+    }
+
+    void set(mix::ComparisonIndicator state, mix::OverflowFlag overflow)
+    {
+        comparison_ = ComparisonFrom(state);
+        overflow_ = (overflow == mix::OverflowFlag::Overflow);
+    }
+};
 
 struct UIMix
 {
     static constexpr int k_ri_count =
         static_cast<int>(mix::Computer::k_index_registers_count);
 
+    UIMix(mix::Computer& mix)
+        : mix_(mix)
+    {
+    }
+
+    mix::Computer& mix_;
     UIWord ra_;
     UIWord rx_;
     UIWord rj_; // non-negative, bytes [4, 5]
     UIWord ri_[k_ri_count]; // bytes [4, 5]
+    int address_ = 0;
+    UIFlags flags_;
 };
 
 static void RegistersInputWindow(UIMix& ui_mix)
@@ -91,12 +146,112 @@ static void RegistersInputWindow(UIMix& ui_mix)
     ImGui::End();
 }
 
+static bool UIFlagsInput(UIFlags& state)
+{
+    ImGui::BeginGroup();
+    ImGui::PushID("");
+
+    bool changed = false;
+    changed |= ImGui::RadioButton("Less", &state.comparison_
+        , UIFlags::ComparisonFrom(mix::ComparisonIndicator::Less));
+    ImGui::SameLine();
+    changed |= ImGui::RadioButton("Equal", &state.comparison_
+        , UIFlags::ComparisonFrom(mix::ComparisonIndicator::Equal));
+    ImGui::SameLine();
+    changed |= ImGui::RadioButton("Greater", &state.comparison_
+        , UIFlags::ComparisonFrom(mix::ComparisonIndicator::Greater));
+    ImGui::SameLine();
+    ImGui::Checkbox("Overflow", &state.overflow_);
+
+    ImGui::PopID();
+    ImGui::EndGroup();
+
+    return changed;
+}
+
+static bool UIAddressInput(const char* title, int& address)
+{
+    const int old_address = address;
+    if (ImGui::InputInt(title, &address, 0))
+    {
+        address = std::clamp(address, 0
+            , static_cast<int>(mix::Computer::k_memory_words_count));
+        return (old_address != address);
+    }
+    return false;
+}
+
+static void UIMenuInput(UIMix& ui_mix)
+{
+    bool open_file = false;
+
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            if (ImGui::MenuItem("Open", "Ctrl+O"))
+            {
+                open_file = true;
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+    }
+
+    if (open_file)
+    {
+        (void)LoadProgramFromSourceFile(
+            R"(C:\dev\mix\src\tests\mixal_code\program_primes.mixal)"
+            , ui_mix.mix_);
+    }
+}
+
+static void UpdateUIFromMixState(UIMix& ui, const mix::Computer& mix)
+{
+    ui.address_ = mix.current_address();
+    ui.flags_.set(mix.comparison_state(), mix.overflow_flag());
+    ui.ra_.set(mix.ra());
+    ui.rx_.set(mix.rx());
+    ui.rj_.set(mix.rj());
+    for (std::size_t i = 1; i <= mix::Computer::k_index_registers_count; ++i)
+    {
+        ui.ri_[i - 1].set(mix.ri(i));
+    }
+}
+
 static void RenderAll()
 {
     // ImGui::ShowDemoWindow(nullptr);
 
-    static UIMix ui_mix;
+    static mix::Computer mix;
+    static UIMix ui_mix(mix);
+
+    UpdateUIFromMixState(ui_mix, mix);
+
     RegistersInputWindow(ui_mix);
+
+    if (ImGui::Begin("Rest"))
+    {
+        (void)UIFlagsInput(ui_mix.flags_);
+        (void)UIAddressInput("Address", ui_mix.address_);
+    }
+    ImGui::End();
+
+    if (ImGui::Begin("Editor", nullptr, ImGuiWindowFlags_MenuBar))
+    {
+        UIMenuInput(ui_mix);
+        if (ImGui::Button("Step (F5)"))
+        {
+            (void)mix.run_one();
+        }
+    }
+
+    mix::Command command(mix.memory(mix.current_address()));
+    const auto id = static_cast<mixal_parse::OperationId>(command.id());
+    const std::string_view name = mixal_parse::OperationIdToString(id);
+    ImGui::TextUnformatted(name.data(), name.data() + name.size());
+
+    ImGui::End();
 }
 
 #if defined(_WIN32)
