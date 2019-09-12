@@ -65,16 +65,23 @@ OperationAddressParser QueryAddress(const LineParser& line)
 
 } // namespace
 
-TranslatedLine::TranslatedLine(FutureTranslatedWordRef&& ref)
-	: word_ref{std::move(ref)}
-	, end_code{}
+/*explicit*/ TranslatedLine::TranslatedLine()
+    : word_ref()
+    , end_code()
+    , operation_id(OperationId::Unknown)
 {
 }
 
-TranslatedLine::TranslatedLine(EndCommandGeneratedCode&& end_code_)
-	: word_ref{}
-	, end_code{std::move(end_code_)}
+TranslatedLine::TranslatedLine(FutureTranslatedWordRef&& ref)
+	: TranslatedLine()
 {
+    word_ref = std::move(ref);
+}
+
+TranslatedLine::TranslatedLine(EndCommandGeneratedCode&& end_code_)
+	: TranslatedLine()
+{
+    end_code = std::move(end_code_);
 }
 
 TranslatedLine TranslateLine(
@@ -124,46 +131,35 @@ TranslatedLine TranslateLine(
 
 } // namespace mixal
 
-ProgramTranslator::ProgramTranslator(Translator& translator)
+LinesTranslator::LinesTranslator(Translator& translator)
 	: translator_{translator}
-	, program_{}
+    , cached_lines_{}
 {
 }
 
-ProgramTranslator::Status ProgramTranslator::translate_line(const std::string& line)
+TranslatedLine LinesTranslator::translate(const std::string& line)
 {
-	if (program_.completed)
-	{
-		return Status::Completed;
-	}
-
 	auto parser = parse_line(prepare_line(line));
-	if (parser)
-	{
-		update_code(TranslateLine(translator_, *parser));
-	}
-
-	return program_.completed ? Status::Completed : Status::PartiallyTranslated;
+    if (!parser)
+    {
+        return TranslatedLine();
+    }
+    auto translated = TranslateLine(translator_, *parser);
+    if (const auto op_parser = parser->operation_parser())
+    {
+        translated.operation_id = op_parser->operation().id();
+    }
+    return translated;
 }
 
-const TranslatedProgram& ProgramTranslator::program() const
-{
-	return program_;
-}
-
-TranslatedProgram& ProgramTranslator::program()
-{
-	return program_;
-}
-
-std::string_view ProgramTranslator::prepare_line(const std::string& line)
+std::string_view LinesTranslator::prepare_line(const std::string& line)
 {
 	// See `Interpreter::prepare_line()` note
 	cached_lines_.push_back(line);
 	return cached_lines_.back();
 }
 
-std::optional<LineParser> ProgramTranslator::parse_line(const std::string_view& line) const
+std::optional<LineParser> LinesTranslator::parse_line(const std::string_view& line) const
 {
 	if (core::Trim(line).empty())
 	{
@@ -180,59 +176,3 @@ std::optional<LineParser> ProgramTranslator::parse_line(const std::string_view& 
 	// Help Clang: -Wreturn-std-move-in-c++11 
 	return std::move(parser);
 }
-
-void ProgramTranslator::update_code(const Translator::EndCommandGeneratedCode& end_code)
-{
-	for (auto unresolved_ref : unresolved_words_)
-	{
-		assert(unresolved_ref->is_ready());
-		program_.commands.push_back(unresolved_ref->translated_word());
-	}
-
-	for (auto end_symbols : end_code.defined_symbols)
-	{
-		program_.commands.push_back(end_symbols.second);
-	}
-}
-
-void ProgramTranslator::update_code(TranslatedLine&& translated)
-{
-	if (translated.word_ref)
-	{
-		if (translated.word_ref->is_ready())
-		{
-			program_.commands.push_back(translated.word_ref->translated_word());
-		}
-		else
-		{
-			unresolved_words_.push_back(translated.word_ref);
-		}
-	}
-	else if (translated.end_code)
-	{
-		update_code(*translated.end_code);
-		finilize_program(translated.end_code->start_address);
-	}
-}
-
-void ProgramTranslator::finilize_program(int start_address)
-{
-	sort(program_.commands.begin(), program_.commands.end(),
-		[](const TranslatedWord& lhs, const TranslatedWord& rhs)
-	{
-		return (lhs.original_address < rhs.original_address);
-	});
-
-	program_.start_address = start_address;
-	program_.completed = true;
-
-	clear_state();
-}
-
-void ProgramTranslator::clear_state()
-{
-	cached_lines_.clear();
-	unresolved_words_.clear();
-	unresolved_words_.shrink_to_fit();
-}
-

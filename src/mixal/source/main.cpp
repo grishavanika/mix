@@ -23,14 +23,12 @@ namespace
             if (options.mdk_stream)
             {
                 std::ifstream input(options.file_name, std::ios_base::binary);
-                auto mdk_program = ParseProgramFromMDKStream(input);
-                program = std::move(mdk_program);
+                program = ParseProgramFromMDKStream(input);
             }
             else
             {
                 std::ifstream input(options.file_name);
-                auto program_translator = TranslateProgram(input);
-                program = std::move(program_translator.program());
+                program = TranslateProgram(input);
             }
 
             commands_count = ExecuteProgram(program);

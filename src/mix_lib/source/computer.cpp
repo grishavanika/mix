@@ -201,18 +201,32 @@ bool Computer::run_one()
 	{
 		return false;
 	}
+    
+    // #XXX: kill try/catch
+    try
+    {
+        execute(Command{memory(current_address())});
+        set_next_address(next_address());
+        // Be sure to jump only once
+        clear_jump_flag();
+    }
+    catch (const std::exception&)
+    {
+        halt();
+        return false;
+    }
 
-	execute(Command{memory(current_address())});
-	set_next_address(next_address());
-
-	// Be sure to jump only once
-	clear_jump_flag();
 	return true;
 }
 
 void Computer::halt()
 {
 	halted_ = true;
+}
+
+bool Computer::is_halted() const
+{
+    return halted_;
 }
 
 void Computer::clear_jump_flag()

@@ -18,6 +18,9 @@ public:
 	DeviceController(IIODeviceListener* listener = nullptr);
 	~DeviceController();
 
+    DeviceController(DeviceController&& rhs);
+    DeviceController& operator=(DeviceController&& rhs);
+
 	void set_listener(IIODeviceListener* listener);
 
 	IIODevice& device(DeviceId id);

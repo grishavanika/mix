@@ -18,6 +18,13 @@ add_library(ImGui_Core
 
 target_include_directories(ImGui_Core PUBLIC ${imgui_dir})
 
+add_library(ImGui_Cpp
+	${imgui_dir}/misc/cpp/imgui_stdlib.h
+	${imgui_dir}/misc/cpp/imgui_stdlib.cpp)
+
+target_include_directories(ImGui_Cpp PUBLIC ${imgui_dir}/misc/cpp)
+target_link_libraries(ImGui_Cpp PRIVATE ImGui_Core)
+
 # sdl/opengl3/GL3W
 add_library(ImGui_Impl
 	${imgui_dir}/examples/imgui_impl_sdl.h
@@ -31,7 +38,10 @@ target_link_libraries(ImGui_Impl PRIVATE ImGui_Core)
 target_link_libraries(ImGui_Impl PUBLIC SDL2_Integrated gl3w_Integrated)
 
 add_library(ImGui_Integrated INTERFACE)
-target_link_libraries(ImGui_Integrated INTERFACE ImGui_Core ImGui_Impl)
+target_link_libraries(ImGui_Integrated INTERFACE
+	ImGui_Core
+	ImGui_Impl
+	ImGui_Cpp)
 
 set_target_properties(ImGui_Core PROPERTIES FOLDER third_party)
 set_target_properties(ImGui_Impl PROPERTIES FOLDER third_party)

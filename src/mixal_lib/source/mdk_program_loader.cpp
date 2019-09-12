@@ -159,7 +159,6 @@ TranslatedProgram ParseProgramFromMDKStream(std::istream& stream)
 	}
 
 	mdk_program.start_address = header.start;
-	mdk_program.completed = true;
 	return mdk_program;
 }
 

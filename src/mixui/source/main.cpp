@@ -1,10 +1,15 @@
 #include <mix/computer.h>
 #include <mix/command.h>
+#include <mix/default_device.h>
 #include <mixal/program_executor.h>
 #include <mixal_parse/types/operation_id.h>
 #include <mixui/ui_word.h>
-#include <fstream>
+#include <imgui_stdlib.h>
+
 #include <cstdio>
+
+#include <fstream>
+#include <iomanip>
 
 #include <imgui.h>
 #include <imgui_impl_sdl.h>
@@ -44,25 +49,98 @@ static void ImGuiCheck(bool status)
     }
 }
 
-bool LoadProgramFromSourceFile(const std::string& file, mix::Computer& mix)
+struct WordWithSource
 {
-    std::ifstream in(file);
-    if (!in)
+    mixal::TranslatedWord translated;
+    int line_id = -1;
+    mixal::OperationId operation_id = mixal::OperationId::Unknown;
+};
+
+struct ProgramWithSource
+{
+    std::vector<WordWithSource> commands;
+    int start_address = -1;
+};
+
+static void LoadProgram(mix::Computer& computer, const ProgramWithSource& program)
+{
+    for (const auto& word : program.commands)
     {
-        return false;
+        const int address = word.translated.original_address;
+        if (address >= 0)
+        {
+            computer.set_memory(
+                word.translated.original_address
+                , word.translated.value);
+        }
     }
+    computer.set_next_address(program.start_address);
+}
+
+static ProgramWithSource LoadProgramFromSourceFile(
+    const std::string& content, mix::Computer& mix)
+{
+    std::istringstream in(content);
+    mixal::Translator translator;
+    mixal::LinesTranslator lines_translator(translator);
+    std::vector<mixal::TranslatedLine> lines;
 
     try
     {
-        mixal::ProgramTranslator bytecode = mixal::TranslateProgram(in);
-        mixal::LoadProgram(mix, bytecode.program());
+        std::string str;
+        while (getline(in, str))
+        {
+            lines.push_back(lines_translator.translate(str));
+            if (lines.back().end_code)
+            {
+                break;
+            }
+        }
     }
     catch (const std::exception&)
     {
-        return false;
+        return ProgramWithSource();
     }
 
-    return true;
+    ProgramWithSource program;
+
+    for (int line_id = 0, count = static_cast<int>(lines.size()); line_id < count; ++line_id)
+    {
+        auto word_ref = lines[line_id].word_ref;
+        auto end_code = lines[line_id].end_code;
+        auto id = lines[line_id].operation_id;
+        if (word_ref)
+        {
+            assert(word_ref->is_ready());
+            WordWithSource word;
+            word.translated = word_ref->translated_word();
+            word.line_id = line_id + 1;
+            word.operation_id = id;
+            program.commands.push_back(word);
+        }
+        else if (end_code)
+        {
+            program.start_address = end_code->start_address;
+            for (auto& end_symbols : end_code->defined_symbols)
+            {
+                WordWithSource word;
+                word.translated = end_symbols.second;
+                word.line_id = line_id + 1;
+                word.operation_id = id;
+                program.commands.push_back(word);
+            }
+        }
+        else
+        {
+            WordWithSource word;
+            word.line_id = line_id + 1;
+            word.operation_id = id;
+            program.commands.push_back(word);
+        }
+    }
+
+    LoadProgram(mix, program);
+    return program;
 }
 
 struct UIFlags
@@ -105,7 +183,69 @@ struct UIMix
     UIWord ri_[k_ri_count]; // bytes [4, 5]
     int address_ = 0;
     UIFlags flags_;
+
+    std::string bytecode_;
+    std::string source_;
+
+    std::stringstream device0_;
+    std::string output_;
 };
+
+static void PrepareMix(UIMix& ui_mix)
+{
+    ui_mix.device0_.str(std::string());
+    ui_mix.mix_ = mix::Computer();
+    ui_mix.mix_.replace_device(18
+        , std::make_unique<mix::SymbolDevice>(
+            24/*block size*/,
+            ui_mix.device0_,
+            ui_mix.device0_,
+            false));
+}
+
+static void PrintCode(const WordWithSource& word, std::ostream& out_)
+{
+    out_ << std::setw(3) << word.line_id << "| ";
+
+    if (word.translated.original_address < 0)
+    {
+        out_ << "\n";
+        return;
+    }
+
+    out_ << std::setw(4) << std::right << word.translated.original_address << ": ";
+
+    const auto prev_fill = out_.fill('0');
+
+    switch (word.operation_id)
+    {
+    case mixal::OperationId::CON:
+    case mixal::OperationId::END:
+        out_.fill(' ');
+        out_<< '|' << word.translated.value.sign() << '|' << std::setw(14)
+            << std::right << word.translated.value.abs_value() << '|' << "\n";
+        break;
+    case mixal::OperationId::ALF:
+        out_ << word.translated.value << "\n";
+        break;
+    default:
+        out_ << mix::Command(word.translated.value) << "\n";
+        break;
+    }
+
+    out_.fill(prev_fill);
+}
+
+static void PrettyPrintBytecode(const ProgramWithSource& program
+    , std::string& bytecode)
+{
+    std::ostringstream out;
+    for (const WordWithSource& w : program.commands)
+    {
+        PrintCode(w, out);
+    }
+    bytecode = out.str();
+}
 
 static void RegistersInputWindow(UIMix& ui_mix)
 {
@@ -200,9 +340,15 @@ static void UIMenuInput(UIMix& ui_mix)
 
     if (open_file)
     {
-        (void)LoadProgramFromSourceFile(
-            R"(C:\dev\mix\src\tests\mixal_code\program_primes.mixal)"
-            , ui_mix.mix_);
+        {
+            std::ostringstream ss;
+            std::ifstream in(R"(C:\dev\mix\src\tests\mixal_code\program_primes.mixal)");
+            ss << in.rdbuf();
+            ui_mix.source_ = ss.str();
+        }
+        PrepareMix(ui_mix);
+        const auto program = LoadProgramFromSourceFile(ui_mix.source_, ui_mix.mix_);
+        PrettyPrintBytecode(program, ui_mix.bytecode_);
     }
 }
 
@@ -240,16 +386,53 @@ static void RenderAll()
     if (ImGui::Begin("Editor", nullptr, ImGuiWindowFlags_MenuBar))
     {
         UIMenuInput(ui_mix);
-        if (ImGui::Button("Step (F5)"))
+        if (!mix.is_halted())
         {
-            (void)mix.run_one();
+            if (ImGui::Button("Step (F5)"))
+            {
+                (void)mix.run_one();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Run to the end(F5)"))
+            {
+                (void)mix.run();
+            }
         }
     }
 
-    mix::Command command(mix.memory(mix.current_address()));
-    const auto id = static_cast<mixal_parse::OperationId>(command.id());
-    const std::string_view name = mixal_parse::OperationIdToString(id);
-    ImGui::TextUnformatted(name.data(), name.data() + name.size());
+    const int address = mix.current_address();
+    if ((address >= 0) && (address <= mix::Computer::k_memory_words_count))
+    {
+        mix::Command command(mix.memory(mix.current_address()));
+        const auto id = static_cast<mixal_parse::OperationId>(command.id());
+        const std::string_view name = mixal_parse::OperationIdToString(id);
+        ImGui::TextUnformatted(name.data(), name.data() + name.size());
+    }
+
+    (void)ImGui::InputTextMultiline("##Bytecode", &ui_mix.bytecode_
+        , ImVec2(220.f, -1.f), ImGuiInputTextFlags_ReadOnly);
+
+    ImGui::SameLine();
+
+    if (ImGui::InputTextMultiline("##Editor", &ui_mix.source_, ImVec2(-1.f, -1.f)))
+    {
+        PrepareMix(ui_mix);
+        const auto program = LoadProgramFromSourceFile(ui_mix.source_, mix);
+        PrettyPrintBytecode(program, ui_mix.bytecode_);
+        ui_mix.device0_.str("");
+        ui_mix.output_.clear();
+    }
+
+    ui_mix.output_ = ui_mix.device0_.str();
+    if (!ui_mix.output_.empty())
+    {
+        if (ImGui::Begin("Output"))
+        {
+            (void)ImGui::InputTextMultiline("##Output", &ui_mix.output_
+                , ImVec2(-1., -1.), ImGuiInputTextFlags_ReadOnly);
+        }
+        ImGui::End();
+    }
 
     ImGui::End();
 }

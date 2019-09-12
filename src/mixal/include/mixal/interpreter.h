@@ -25,6 +25,7 @@ namespace mixal {
 
 namespace parse = mixal_parse;
 
+// #XXX: simplify, use LineTranslator
 class Interpreter
 {
 public:

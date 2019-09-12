@@ -30,6 +30,7 @@ public:
 	// Stops Computer from processing any command.
 	// (Note: now there is now way to resume processing)
 	void halt();
+    bool is_halted() const;
 
 	int current_address() const;
 	int next_address() const;

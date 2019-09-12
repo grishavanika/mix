@@ -103,6 +103,8 @@ DeviceController::DeviceController(IIODeviceListener* listener /*= nullptr*/)
 }
 
 DeviceController::~DeviceController() = default;
+DeviceController::DeviceController(DeviceController&& rhs) = default;
+DeviceController& DeviceController::operator=(DeviceController&& rhs) = default;
 
 void DeviceController::set_listener(IIODeviceListener* listener)
 {
