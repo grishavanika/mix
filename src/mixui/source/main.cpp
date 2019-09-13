@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS 1
+
 #include <mix/computer.h>
 #include <mix/command.h>
 #include <mix/default_device.h>
@@ -6,12 +8,18 @@
 #include <mixui/ui_word.h>
 #include <imgui_stdlib.h>
 
+#include <vector>
+#include <algorithm>
+
+#include <D:\Downloads\imgui_memory_editor.h>
+
 #include <cstdio>
 
 #include <fstream>
 #include <iomanip>
 
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <imgui_impl_sdl.h>
 #include <imgui_impl_opengl3.h>
 
@@ -54,6 +62,7 @@ struct WordWithSource
     mixal::TranslatedWord translated;
     int line_id = -1;
     mixal::OperationId operation_id = mixal::OperationId::Unknown;
+    std::string line;
 };
 
 struct ProgramWithSource
@@ -84,6 +93,7 @@ static ProgramWithSource LoadProgramFromSourceFile(
     mixal::Translator translator;
     mixal::LinesTranslator lines_translator(translator);
     std::vector<mixal::TranslatedLine> lines;
+    std::vector<std::string> strs;
 
     try
     {
@@ -91,6 +101,7 @@ static ProgramWithSource LoadProgramFromSourceFile(
         while (getline(in, str))
         {
             lines.push_back(lines_translator.translate(str));
+            strs.push_back(std::move(str));
             if (lines.back().end_code)
             {
                 break;
@@ -109,6 +120,7 @@ static ProgramWithSource LoadProgramFromSourceFile(
         auto word_ref = lines[line_id].word_ref;
         auto end_code = lines[line_id].end_code;
         auto id = lines[line_id].operation_id;
+        auto str = strs[line_id];
         if (word_ref)
         {
             assert(word_ref->is_ready());
@@ -116,6 +128,7 @@ static ProgramWithSource LoadProgramFromSourceFile(
             word.translated = word_ref->translated_word();
             word.line_id = line_id + 1;
             word.operation_id = id;
+            word.line = str;
             program.commands.push_back(word);
         }
         else if (end_code)
@@ -127,6 +140,7 @@ static ProgramWithSource LoadProgramFromSourceFile(
                 word.translated = end_symbols.second;
                 word.line_id = line_id + 1;
                 word.operation_id = id;
+                word.line = str;
                 program.commands.push_back(word);
             }
         }
@@ -135,6 +149,7 @@ static ProgramWithSource LoadProgramFromSourceFile(
             WordWithSource word;
             word.line_id = line_id + 1;
             word.operation_id = id;
+            word.line = str;
             program.commands.push_back(word);
         }
     }
@@ -184,11 +199,17 @@ struct UIMix
     int address_ = 0;
     UIFlags flags_;
 
-    std::string bytecode_;
-    std::string source_;
+    ProgramWithSource program_;
 
     std::stringstream device0_;
     std::string output_;
+    std::vector<int> breakpoints_;
+
+    bool run_one_ = false;
+    bool run_to_breakpoint_ = false;
+    int executed_instructions_count = 0;
+
+    std::string source_file_ = R"(C:\dev\mix\src\tests\mixal_code\program_primes.mixal)";
 };
 
 static void PrepareMix(UIMix& ui_mix)
@@ -205,15 +226,11 @@ static void PrepareMix(UIMix& ui_mix)
 
 static void PrintCode(const WordWithSource& word, std::ostream& out_)
 {
-    out_ << std::setw(3) << word.line_id << "| ";
-
     if (word.translated.original_address < 0)
     {
-        out_ << "\n";
+        out_ << std::setw(18) << ' ';
         return;
     }
-
-    out_ << std::setw(4) << std::right << word.translated.original_address << ": ";
 
     const auto prev_fill = out_.fill('0');
 
@@ -236,15 +253,11 @@ static void PrintCode(const WordWithSource& word, std::ostream& out_)
     out_.fill(prev_fill);
 }
 
-static void PrettyPrintBytecode(const ProgramWithSource& program
-    , std::string& bytecode)
+static std::string PrintCode(const WordWithSource& word)
 {
     std::ostringstream out;
-    for (const WordWithSource& w : program.commands)
-    {
-        PrintCode(w, out);
-    }
-    bytecode = out.str();
+    PrintCode(word, out);
+    return std::move(out).str();
 }
 
 static void RegistersInputWindow(UIMix& ui_mix)
@@ -329,7 +342,7 @@ static void UIMenuInput(UIMix& ui_mix)
     {
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::MenuItem("Open", "Ctrl+O"))
+            if (ImGui::MenuItem("Open"))
             {
                 open_file = true;
             }
@@ -340,15 +353,17 @@ static void UIMenuInput(UIMix& ui_mix)
 
     if (open_file)
     {
-        {
-            std::ostringstream ss;
-            std::ifstream in(R"(C:\dev\mix\src\tests\mixal_code\program_primes.mixal)");
-            ss << in.rdbuf();
-            ui_mix.source_ = ss.str();
-        }
+        std::ostringstream ss;
+        std::ifstream in(ui_mix.source_file_);
+        ss << in.rdbuf();
+        const std::string source = std::move(ss).str();
+
         PrepareMix(ui_mix);
-        const auto program = LoadProgramFromSourceFile(ui_mix.source_, ui_mix.mix_);
-        PrettyPrintBytecode(program, ui_mix.bytecode_);
+        ui_mix.program_ = LoadProgramFromSourceFile(source, ui_mix.mix_);
+        ui_mix.breakpoints_.clear();
+        ui_mix.executed_instructions_count = 0;
+        ui_mix.run_one_ = false;
+        ui_mix.run_to_breakpoint_ = false;
     }
 }
 
@@ -365,9 +380,151 @@ static void UpdateUIFromMixState(UIMix& ui, const mix::Computer& mix)
     }
 }
 
+static int GetDigitsCount(int n)
+{
+    return static_cast<int>(std::floor(std::log10(n) + 1));
+}
+
+static void RenderBreakpoint(const ImVec2& pos, const ImVec2& size)
+{
+    const float radius = ((std::min)(size.x, size.y) / 2.f) - 1;
+    ImGui::GetWindowDrawList()->AddCircleFilled(
+        ImVec2(pos.x + size.x / 2, pos.y + size.y / 2)
+        , radius
+        , IM_COL32(255, 0, 0, 255));
+}
+
+static void RenderCurrentStep(const ImVec2& pos, const ImVec2& size)
+{
+    const ImU32 color = IM_COL32(255, 128, 0, 255);
+    ImGui::GetWindowDrawList()->AddRectFilled(
+          ImVec2(pos.x, pos.y + size.y / 3)
+        , ImVec2(pos.x + size.x / 2, pos.y + 2 * (size.y / 3))
+        , color);
+    ImGui::GetWindowDrawList()->AddTriangleFilled(
+          ImVec2(pos.x + size.x / 2, pos.y + 1)
+        , ImVec2(pos.x + size.x / 2, pos.y + size.y)
+        , ImVec2(pos.x + size.x - 1, pos.y + size.y / 2 - 1)
+        , color);
+}
+
+static void RenderLineByLine(UIMix& ui_mix, int current_address)
+{
+    ImGui::BeginChild("##scrolling", ImVec2(0, -1.f), false/*border*/, ImGuiWindowFlags_NoMove);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
+    ImDrawList& draw_list = *ImGui::GetWindowDrawList();
+    (void)draw_list;
+
+    const float line_height = ImGui::GetTextLineHeight();
+    const int total_lines = static_cast<int>(ui_mix.program_.commands.size());
+    const int line_number_width = GetDigitsCount(total_lines);
+    const int address_width = GetDigitsCount(
+        static_cast<int>(mix::Computer::k_memory_words_count));
+
+#if (0)
+    const auto pos = ImGui::GetCursorScreenPos();
+    const float GlyphWidth = ImGui::CalcTextSize("0").x + 1;
+    draw_list.AddLine(
+          ImVec2(pos.x + line_number_width + 2 * GlyphWidth, pos.y)
+        , ImVec2(pos.x + line_number_width + 2 * GlyphWidth, pos.y + 9999)
+        , ImGui::GetColorU32(ImGuiCol_Border));
+#endif
+
+    auto find_breakpoint = [&](int address)
+    {
+        return std::find(std::begin(ui_mix.breakpoints_)
+            , std::end(ui_mix.breakpoints_)
+            , address);
+    };
+    auto is_valid_breakpoint = [&](auto bp_it)
+    {
+        return (bp_it != std::cend(ui_mix.breakpoints_));
+    };
+
+    ImGuiListClipper clipper(total_lines, line_height);
+    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+    {
+        ImGui::PushID(i);
+        const WordWithSource& word = ui_mix.program_.commands[i];
+        const int address = word.translated.original_address;
+        const std::string& line = word.line;
+
+        const bool is_active_address = (address >= 0)
+            && (current_address >= 0)
+            && (current_address == address);
+        auto breakpoint_it = find_breakpoint(address);
+
+        const ImVec2 pos = ImGui::GetCursorScreenPos();
+        const ImVec2 action_size(line_height, line_height);
+        if (ImGui::InvisibleButton("##action", action_size))
+        {
+            if (is_valid_breakpoint(breakpoint_it))
+            {
+                ui_mix.breakpoints_.erase(breakpoint_it);
+                breakpoint_it = ui_mix.breakpoints_.end();
+            }
+            else if (address >= 0)
+            {
+                ui_mix.breakpoints_.push_back(address);
+                breakpoint_it = (ui_mix.breakpoints_.end() - 1);
+            }
+        }
+        if (is_active_address)
+        {
+            RenderCurrentStep(pos, action_size);
+        }
+        else if (is_valid_breakpoint(breakpoint_it))
+        {
+            RenderBreakpoint(pos, action_size);
+        }
+
+        ImGui::SameLine();
+        ImGui::Text("%0*i| ", line_number_width, i + 1);
+        ImGui::SameLine();
+
+        if (is_active_address)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.5f, 0.1f, 1.0f));
+        }
+
+        if (address < 0)
+        {
+            ImGui::Text("% *c", address_width, ' ');
+        }
+        else
+        {
+            ImGui::Text("%0*i", address_width, address);
+        }
+        ImGui::SameLine();
+        const auto bytecode_str = PrintCode(word);
+        ImGui::TextUnformatted(bytecode_str.c_str()
+            , bytecode_str.c_str() + bytecode_str.size());
+        ImGui::SameLine();
+        ImGui::Text("    %s", line.c_str());
+
+        if (is_active_address)
+        {
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::PopID();
+    }
+    clipper.End();
+    ImGui::PopStyleVar(2);
+    ImGui::EndChild();
+}
+
 static void RenderAll()
 {
-    // ImGui::ShowDemoWindow(nullptr);
+#if (0)
+    static MemoryEditor mem_edit_2;
+    static char data[1000];
+    mem_edit_2.DrawWindow("Test", data, sizeof(data));
+    ImGui::ShowDemoWindow(nullptr);
+#endif
 
     static mix::Computer mix;
     static UIMix ui_mix(mix);
@@ -386,42 +543,67 @@ static void RenderAll()
     if (ImGui::Begin("Editor", nullptr, ImGuiWindowFlags_MenuBar))
     {
         UIMenuInput(ui_mix);
-        if (!mix.is_halted())
+
+        (void)ImGui::InputText("Source file", &ui_mix.source_file_);
+
+        ImGui::Text("Executed instructions: %i."
+            , ui_mix.executed_instructions_count);
+        ImGui::SameLine();
+        ImGui::Text("Status: %s.", mix.is_halted() ? "Halted" : "Running");
+
+        if (ImGui::Button("Step"))
         {
-            if (ImGui::Button("Step (F5)"))
-            {
-                (void)mix.run_one();
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Run to the end(F5)"))
-            {
-                (void)mix.run();
-            }
+            ui_mix.run_one_ = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Run"))
+        {
+            ui_mix.run_to_breakpoint_ = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Clear breakpoints"))
+        {
+            ui_mix.breakpoints_.clear();
         }
     }
 
-    const int address = mix.current_address();
-    if ((address >= 0) && (address <= mix::Computer::k_memory_words_count))
+    auto is_on_breakpoint = [&]()
     {
-        mix::Command command(mix.memory(mix.current_address()));
-        const auto id = static_cast<mixal_parse::OperationId>(command.id());
-        const std::string_view name = mixal_parse::OperationIdToString(id);
-        ImGui::TextUnformatted(name.data(), name.data() + name.size());
+        const int address = mix.current_address();
+        const auto it = std::find(std::cbegin(ui_mix.breakpoints_)
+            , std::cend(ui_mix.breakpoints_)
+            , address);
+        return (it != std::cend(ui_mix.breakpoints_));
+    };
+
+    if (ui_mix.run_one_)
+    {
+        ui_mix.executed_instructions_count += mix.run_one();
+        ui_mix.run_one_ = false;
+    }
+    else if (ui_mix.run_to_breakpoint_)
+    {
+        ui_mix.run_to_breakpoint_ = false;
+        if (ui_mix.breakpoints_.empty())
+        {
+            ui_mix.executed_instructions_count += mix.run();
+        }
+        else
+        {
+            do
+            {
+                ui_mix.executed_instructions_count += mix.run_one();
+            }
+            while (!mix.is_halted() && !is_on_breakpoint());
+        }
+        ui_mix.run_to_breakpoint_ = false;
     }
 
-    (void)ImGui::InputTextMultiline("##Bytecode", &ui_mix.bytecode_
-        , ImVec2(220.f, -1.f), ImGuiInputTextFlags_ReadOnly);
-
-    ImGui::SameLine();
-
-    if (ImGui::InputTextMultiline("##Editor", &ui_mix.source_, ImVec2(-1.f, -1.f)))
+    if (ImGui::Begin("LineByLine"))
     {
-        PrepareMix(ui_mix);
-        const auto program = LoadProgramFromSourceFile(ui_mix.source_, mix);
-        PrettyPrintBytecode(program, ui_mix.bytecode_);
-        ui_mix.device0_.str("");
-        ui_mix.output_.clear();
+        RenderLineByLine(ui_mix, mix.current_address());
     }
+    ImGui::End();
 
     ui_mix.output_ = ui_mix.device0_.str();
     if (!ui_mix.output_.empty())
@@ -429,7 +611,7 @@ static void RenderAll()
         if (ImGui::Begin("Output"))
         {
             (void)ImGui::InputTextMultiline("##Output", &ui_mix.output_
-                , ImVec2(-1., -1.), ImGuiInputTextFlags_ReadOnly);
+                , ImVec2(-1.f, -1.f), ImGuiInputTextFlags_ReadOnly);
         }
         ImGui::End();
     }
