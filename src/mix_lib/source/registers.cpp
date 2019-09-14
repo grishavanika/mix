@@ -69,6 +69,11 @@ IndexRegister::IndexRegister(const Register& r)
 	zero_unspecified_bytes();
 }
 
+IndexRegister::IndexRegister(const Word& w)
+    : IndexRegister(Register(w))
+{
+}
+
 WordValue IndexRegister::value() const
 {
 	return Register::value(

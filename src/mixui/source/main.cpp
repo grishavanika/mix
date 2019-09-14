@@ -11,8 +11,6 @@
 #include <vector>
 #include <algorithm>
 
-#include <D:\Downloads\imgui_memory_editor.h>
-
 #include <cstdio>
 
 #include <fstream>
@@ -163,21 +161,79 @@ struct UIFlags
     int comparison_ = 0;
     bool overflow_ = false;
 
-    static int ComparisonFrom(mix::ComparisonIndicator state)
+    static int FromComparisonIndicator(mix::ComparisonIndicator state)
     {
         switch (state)
         {
-        case mix::ComparisonIndicator::Less: return 1;
+        case mix::ComparisonIndicator::Less   : return 1;
         case mix::ComparisonIndicator::Greater: return 2;
-        case mix::ComparisonIndicator::Equal: return 0;
+        case mix::ComparisonIndicator::Equal  : return 0;
         }
         return 0;
     }
 
+    mix::ComparisonIndicator to_comparison_indicator() const
+    {
+        switch (comparison_)
+        {
+        case 1: return mix::ComparisonIndicator::Less;
+        case 2: return mix::ComparisonIndicator::Greater;
+        case 0: return mix::ComparisonIndicator::Equal;
+        }
+        return mix::ComparisonIndicator::Less;
+    }
+
+    mix::OverflowFlag to_overflow_flag() const
+    {
+        return overflow_
+            ? mix::OverflowFlag::Overflow
+            : mix::OverflowFlag::NoOverflow;
+    }
+
     void set(mix::ComparisonIndicator state, mix::OverflowFlag overflow)
     {
-        comparison_ = ComparisonFrom(state);
+        comparison_ = FromComparisonIndicator(state);
         overflow_ = (overflow == mix::OverflowFlag::Overflow);
+    }
+};
+
+
+struct DebuggerState
+{
+    using Breakpoints = std::vector<int>;
+
+    ProgramWithSource program_;
+
+    std::stringstream device18_;
+    Breakpoints breakpoints_;
+    int executed_instructions_count = 0;
+
+    bool has_breakpoint(int address) const
+    {
+        const auto it = std::find(
+            std::cbegin(breakpoints_)
+            , std::cend(breakpoints_)
+            , address);
+        return (it != std::cend(breakpoints_));
+    }
+
+    void add_breakpoint(int address)
+    {
+        assert(address >= 0);
+        breakpoints_.push_back(address);
+    }
+
+    void remove_breakpoint(int address)
+    {
+        assert(address >= 0);
+        const auto it = std::find(
+            std::begin(breakpoints_)
+            , std::end(breakpoints_)
+            , address);
+        if (it != std::end(breakpoints_))
+        {
+            breakpoints_.erase(it);
+        }
     }
 };
 
@@ -186,12 +242,14 @@ struct UIMix
     static constexpr int k_ri_count =
         static_cast<int>(mix::Computer::k_index_registers_count);
 
-    UIMix(mix::Computer& mix)
+    UIMix(mix::Computer& mix, DebuggerState& debugger)
         : mix_(mix)
+        , debugger_(debugger)
     {
     }
 
     mix::Computer& mix_;
+    DebuggerState& debugger_;
     UIWord ra_;
     UIWord rx_;
     UIWord rj_; // non-negative, bytes [4, 5]
@@ -199,37 +257,30 @@ struct UIMix
     int address_ = 0;
     UIFlags flags_;
 
-    ProgramWithSource program_;
-
-    std::stringstream device0_;
     std::string output_;
-    std::vector<int> breakpoints_;
-
-    bool run_one_ = false;
-    bool run_to_breakpoint_ = false;
-    int executed_instructions_count = 0;
-
     std::string source_file_ = R"(C:\dev\mix\src\tests\mixal_code\program_primes.mixal)";
 };
 
-static void PrepareMix(UIMix& ui_mix)
+static void SetupIODevice(UIMix& ui_mix)
 {
-    ui_mix.device0_.str(std::string());
     ui_mix.mix_ = mix::Computer();
+    ui_mix.debugger_.device18_.str(std::string());
     ui_mix.mix_.replace_device(18
         , std::make_unique<mix::SymbolDevice>(
             24/*block size*/,
-            ui_mix.device0_,
-            ui_mix.device0_,
+            ui_mix.debugger_.device18_,
+            ui_mix.debugger_.device18_,
             false));
 }
 
-static void PrintCode(const WordWithSource& word, std::ostream& out_)
+static std::string PrintCode(const WordWithSource& word)
 {
+    std::ostringstream out_;
+
     if (word.translated.original_address < 0)
     {
         out_ << std::setw(18) << ' ';
-        return;
+        return out_.str();
     }
 
     const auto prev_fill = out_.fill('0');
@@ -251,13 +302,7 @@ static void PrintCode(const WordWithSource& word, std::ostream& out_)
     }
 
     out_.fill(prev_fill);
-}
-
-static std::string PrintCode(const WordWithSource& word)
-{
-    std::ostringstream out;
-    PrintCode(word, out);
-    return std::move(out).str();
+    return out_.str();
 }
 
 static void RegistersInputWindow(UIMix& ui_mix)
@@ -270,16 +315,29 @@ static void RegistersInputWindow(UIMix& ui_mix)
     // ImGui::Separator();
     ImGui::Columns(3, nullptr, true);
     ImGui::PushItemWidth(150);
-    (void)UIRegisterInput("A", ui_mix.ra_);
-    (void)UIRegisterInput("X", ui_mix.rx_);
-    (void)UIAddressRegisterInput("J", ui_mix.rj_);
+    if (UIRegisterInput("A", ui_mix.ra_))
+    {
+        ui_mix.mix_.set_ra(mix::Register(ui_mix.ra_.get()));
+    }
+    if (UIRegisterInput("X", ui_mix.rx_))
+    {
+        ui_mix.mix_.set_rx(mix::Register(ui_mix.rx_.get()));
+    }
+    if (UIAddressRegisterInput("J", ui_mix.rj_))
+    {
+        ui_mix.mix_.jump(ui_mix.rj_.get().value());
+    }
     ImGui::NextColumn();
 
     auto handle_ri = [&ui_mix](int i)
     {
         char name[32]{};
         (void)snprintf(name, sizeof(name), "I%i", i);
-        (void)UIIndexRegisterInput(name, ui_mix.ri_[i - 1]);
+        if (UIIndexRegisterInput(name, ui_mix.ri_[i - 1]))
+        {
+            const auto word = ui_mix.ri_[i - 1].get();
+            ui_mix.mix_.set_ri(i, mix::IndexRegister(word));
+        }
     };
 
     for (int i = 1; i <= 3; ++i)
@@ -306,15 +364,15 @@ static bool UIFlagsInput(UIFlags& state)
 
     bool changed = false;
     changed |= ImGui::RadioButton("Less", &state.comparison_
-        , UIFlags::ComparisonFrom(mix::ComparisonIndicator::Less));
+        , UIFlags::FromComparisonIndicator(mix::ComparisonIndicator::Less));
     ImGui::SameLine();
     changed |= ImGui::RadioButton("Equal", &state.comparison_
-        , UIFlags::ComparisonFrom(mix::ComparisonIndicator::Equal));
+        , UIFlags::FromComparisonIndicator(mix::ComparisonIndicator::Equal));
     ImGui::SameLine();
     changed |= ImGui::RadioButton("Greater", &state.comparison_
-        , UIFlags::ComparisonFrom(mix::ComparisonIndicator::Greater));
+        , UIFlags::FromComparisonIndicator(mix::ComparisonIndicator::Greater));
     ImGui::SameLine();
-    ImGui::Checkbox("Overflow", &state.overflow_);
+    changed |= ImGui::Checkbox("Overflow", &state.overflow_);
 
     ImGui::PopID();
     ImGui::EndGroup();
@@ -358,12 +416,10 @@ static void UIMenuInput(UIMix& ui_mix)
         ss << in.rdbuf();
         const std::string source = std::move(ss).str();
 
-        PrepareMix(ui_mix);
-        ui_mix.program_ = LoadProgramFromSourceFile(source, ui_mix.mix_);
-        ui_mix.breakpoints_.clear();
-        ui_mix.executed_instructions_count = 0;
-        ui_mix.run_one_ = false;
-        ui_mix.run_to_breakpoint_ = false;
+        SetupIODevice(ui_mix);
+        ui_mix.debugger_.program_ = LoadProgramFromSourceFile(source, ui_mix.mix_);
+        ui_mix.debugger_.breakpoints_.clear();
+        ui_mix.debugger_.executed_instructions_count = 0;
     }
 }
 
@@ -394,35 +450,108 @@ static void RenderBreakpoint(const ImVec2& pos, const ImVec2& size)
         , IM_COL32(255, 0, 0, 255));
 }
 
-static void RenderCurrentStep(const ImVec2& pos, const ImVec2& size)
+static void RenderAddressCursor(const ImVec2& pos, const ImVec2& size, bool draw_filled = true)
 {
-    const ImU32 color = IM_COL32(255, 128, 0, 255);
-    ImGui::GetWindowDrawList()->AddRectFilled(
-          ImVec2(pos.x, pos.y + size.y / 3)
-        , ImVec2(pos.x + size.x / 2, pos.y + 2 * (size.y / 3))
-        , color);
-    ImGui::GetWindowDrawList()->AddTriangleFilled(
-          ImVec2(pos.x + size.x / 2, pos.y + 1)
-        , ImVec2(pos.x + size.x / 2, pos.y + size.y)
-        , ImVec2(pos.x + size.x - 1, pos.y + size.y / 2 - 1)
-        , color);
+    const ImVec2 rect[2] =
+    {
+        ImVec2(pos.x, pos.y + size.y / 4 + 1),
+        ImVec2(pos.x + size.x / 2, pos.y + (3 * size.y) / 4 - 1)
+    };
+    const ImVec2 triangle[3] =
+    {
+        ImVec2(pos.x + size.x / 2 - 1, pos.y + 1),
+        ImVec2(pos.x + size.x / 2 - 1, pos.y + size.y - 1),
+        ImVec2(pos.x + size.x - 1, pos.y + size.y / 2)
+    };
+    const ImVec2 lines[] =
+    {
+        rect[0], ImVec2(rect[0].x, rect[1].y),
+        rect[0], ImVec2(rect[1].x, rect[0].y),
+        ImVec2(rect[0].x, rect[1].y), rect[1],
+        triangle[0], ImVec2(rect[1].x, rect[0].y),
+        triangle[0], triangle[2],
+        triangle[1], ImVec2(rect[1].x, rect[1].y),
+        triangle[1], triangle[2],
+    };
+
+    const ImU32 color1 = IM_COL32(255, 216, 55, 255);
+    const ImU32 color2 = IM_COL32(94, 94, 94, 255);
+    if (draw_filled)
+    {
+        ImGui::GetWindowDrawList()->AddRectFilled(
+              rect[0], rect[1], color1);
+        ImGui::GetWindowDrawList()->AddTriangleFilled(
+              triangle[0], triangle[1], triangle[2], color1);
+    }
+    for (int i = 0; i < IM_ARRAYSIZE(lines); i += 2)
+    {
+        ImGui::GetWindowDrawList()->AddLine(lines[i], lines[i + 1], color2);
+    }
 }
 
-static void RenderLineByLine(UIMix& ui_mix, int current_address)
+struct DebuggerUIState
+{
+    float drag_dy_ = 0.f;
+    ImVec2 drag_shadow_pos_ = ImVec2(-1.f, -1.f);
+    ImVec2 drag_pos_ = ImVec2(-1.f, -1.f);
+
+    int new_address_ = -1;
+    int breakpoint_to_add_ = -1;
+    int breakpoint_to_remove_ = -1;
+
+    bool is_dragging_active() const
+    {
+        return (drag_pos_.y >= 0);
+    }
+
+    void start_dragging(const ImVec2& item_pos
+        , float mouse_y = ImGui::GetIO().MousePos.y)
+    {
+        drag_dy_ = mouse_y - item_pos.y;
+        drag_pos_ = item_pos;
+        drag_shadow_pos_ = item_pos;
+    }
+
+    void stop_dragging()
+    {
+        drag_dy_ = 0.f;
+        drag_pos_ = ImVec2(-1.f, -1.f);
+        drag_shadow_pos_ = ImVec2(-1.f, -1.f);
+    }
+
+    bool update_dragging(float mouse_y = ImGui::GetIO().MousePos.y)
+    {
+        if (!is_dragging_active())
+        {
+            return false;
+        }
+        if (ImGui::GetIO().MouseDown[0])
+        {
+            drag_pos_.y = (mouse_y - drag_dy_);
+            return false;
+        }
+
+        stop_dragging();
+        return true;
+    }
+};
+
+static void RenderLineByLine(UIMix& ui_mix, int current_address, DebuggerUIState& state)
 {
     ImGui::BeginChild("##scrolling", ImVec2(0, -1.f), false/*border*/, ImGuiWindowFlags_NoMove);
 
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
-    ImDrawList& draw_list = *ImGui::GetWindowDrawList();
-    (void)draw_list;
-
     const float line_height = ImGui::GetTextLineHeight();
-    const int total_lines = static_cast<int>(ui_mix.program_.commands.size());
+    const int total_lines = static_cast<int>(ui_mix.debugger_.program_.commands.size());
     const int line_number_width = GetDigitsCount(total_lines);
     const int address_width = GetDigitsCount(
         static_cast<int>(mix::Computer::k_memory_words_count));
+
+    state.new_address_ = -1;
+    state.breakpoint_to_add_ = -1;
+    state.breakpoint_to_remove_ = -1;
 
 #if (0)
     const auto pos = ImGui::GetCursorScreenPos();
@@ -433,52 +562,52 @@ static void RenderLineByLine(UIMix& ui_mix, int current_address)
         , ImGui::GetColorU32(ImGuiCol_Border));
 #endif
 
-    auto find_breakpoint = [&](int address)
-    {
-        return std::find(std::begin(ui_mix.breakpoints_)
-            , std::end(ui_mix.breakpoints_)
-            , address);
-    };
-    auto is_valid_breakpoint = [&](auto bp_it)
-    {
-        return (bp_it != std::cend(ui_mix.breakpoints_));
-    };
+    const bool was_dragging_stopped = state.update_dragging();
 
     ImGuiListClipper clipper(total_lines, line_height);
+    const ImVec2 action_size(line_height, line_height);
     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
     {
         ImGui::PushID(i);
-        const WordWithSource& word = ui_mix.program_.commands[i];
-        const int address = word.translated.original_address;
-        const std::string& line = word.line;
 
-        const bool is_active_address = (address >= 0)
-            && (current_address >= 0)
-            && (current_address == address);
-        auto breakpoint_it = find_breakpoint(address);
+        // #XXX: bytecode value should be read from MIX's
+        // memory directly for programs that modify its
+        // own sources
+        const WordWithSource& word = ui_mix.debugger_.program_.commands[i];
+        const int address = word.translated.original_address;
+        std::string line = word.line;
 
         const ImVec2 pos = ImGui::GetCursorScreenPos();
-        const ImVec2 action_size(line_height, line_height);
-        if (ImGui::InvisibleButton("##action", action_size))
+        // Draw hidden button for "actions" column.
+        const bool on_action_press = ImGui::InvisibleButton("##action", action_size);
+        const ImVec2 action_rect_min = ImGui::GetItemRectMin();
+        const ImVec2 action_rect_max = ImGui::GetItemRectMax();
+        const bool is_action_hovered = ImGui::IsItemHovered();
+
+        // Toggle (add/remove) breakpoint
+        const bool is_on_breakpoint = ui_mix.debugger_.has_breakpoint(address);
+        // To disable breakpoints add/remove when
+        // we drop dragged cursor
+        if (!was_dragging_stopped
+            && on_action_press
+            && (address >= 0))
         {
-            if (is_valid_breakpoint(breakpoint_it))
-            {
-                ui_mix.breakpoints_.erase(breakpoint_it);
-                breakpoint_it = ui_mix.breakpoints_.end();
-            }
-            else if (address >= 0)
-            {
-                ui_mix.breakpoints_.push_back(address);
-                breakpoint_it = (ui_mix.breakpoints_.end() - 1);
-            }
+            int& bp = is_on_breakpoint
+                ? state.breakpoint_to_remove_
+                : state.breakpoint_to_add_;
+            bp = address;
         }
-        if (is_active_address)
-        {
-            RenderCurrentStep(pos, action_size);
-        }
-        else if (is_valid_breakpoint(breakpoint_it))
+
+        if (is_on_breakpoint)
         {
             RenderBreakpoint(pos, action_size);
+        }
+
+        const bool is_active_address = (address >= 0)
+            && (current_address == address);
+        if (is_active_address && !state.is_dragging_active())
+        {
+            RenderAddressCursor(pos, action_size);
         }
 
         ImGui::SameLine();
@@ -487,7 +616,7 @@ static void RenderLineByLine(UIMix& ui_mix, int current_address)
 
         if (is_active_address)
         {
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.5f, 0.1f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.5f, 0.25f, 1.0f));
         }
 
         if (address < 0)
@@ -511,7 +640,35 @@ static void RenderLineByLine(UIMix& ui_mix, int current_address)
         }
 
         ImGui::PopID();
+
+        // Handle dragging part.
+        if (is_active_address
+            && is_action_hovered
+            && !state.is_dragging_active()
+            && ImGui::GetIO().MouseDown[0])
+        {
+            state.start_dragging(action_rect_min);
+        }
+        if (state.is_dragging_active()
+            && (address >= 0)
+            && !is_active_address)
+        {
+            const float y_min = action_rect_min.y;
+            const float y_max = action_rect_max.y;
+            const float drag_y = state.drag_pos_.y + (line_height / 2);
+            if ((drag_y >= y_min) && (drag_y <= y_max))
+            {
+                state.new_address_ = address;
+            }
+        }
     }
+
+    if (state.is_dragging_active())
+    {
+        RenderAddressCursor(state.drag_shadow_pos_, action_size, false/*not filled*/);
+        RenderAddressCursor(state.drag_pos_, action_size);
+    }
+
     clipper.End();
     ImGui::PopStyleVar(2);
     ImGui::EndChild();
@@ -519,15 +676,11 @@ static void RenderLineByLine(UIMix& ui_mix, int current_address)
 
 static void RenderAll()
 {
-#if (0)
-    static MemoryEditor mem_edit_2;
-    static char data[1000];
-    mem_edit_2.DrawWindow("Test", data, sizeof(data));
-    ImGui::ShowDemoWindow(nullptr);
-#endif
+    // ImGui::ShowDemoWindow(nullptr);
 
     static mix::Computer mix;
-    static UIMix ui_mix(mix);
+    static DebuggerState debugger;
+    static UIMix ui_mix(mix, debugger);
 
     UpdateUIFromMixState(ui_mix, mix);
 
@@ -535,11 +688,22 @@ static void RenderAll()
 
     if (ImGui::Begin("Rest"))
     {
-        (void)UIFlagsInput(ui_mix.flags_);
-        (void)UIAddressInput("Address", ui_mix.address_);
+        if (UIFlagsInput(ui_mix.flags_))
+        {
+            ui_mix.mix_.set_comparison_state(
+                ui_mix.flags_.to_comparison_indicator());
+            ui_mix.mix_.set_overflow_flag(
+                ui_mix.flags_.to_overflow_flag());
+        }
+        if (UIAddressInput("Address", ui_mix.address_))
+        {
+            ui_mix.mix_.set_next_address(ui_mix.address_);
+        }
     }
     ImGui::End();
 
+    bool run_one = false;
+    bool run_to_breakpoint = false;
     if (ImGui::Begin("Editor", nullptr, ImGuiWindowFlags_MenuBar))
     {
         UIMenuInput(ui_mix);
@@ -547,65 +711,71 @@ static void RenderAll()
         (void)ImGui::InputText("Source file", &ui_mix.source_file_);
 
         ImGui::Text("Executed instructions: %i."
-            , ui_mix.executed_instructions_count);
+            , ui_mix.debugger_.executed_instructions_count);
         ImGui::SameLine();
-        ImGui::Text("Status: %s.", mix.is_halted() ? "Halted" : "Running");
+        ImGui::Text("Status: %s.", ui_mix.mix_.is_halted() ? "Halted" : "Running");
 
         if (ImGui::Button("Step"))
         {
-            ui_mix.run_one_ = true;
+            run_one = true;
         }
         ImGui::SameLine();
         if (ImGui::Button("Run"))
         {
-            ui_mix.run_to_breakpoint_ = true;
+            run_to_breakpoint = true;
         }
         ImGui::SameLine();
         if (ImGui::Button("Clear breakpoints"))
         {
-            ui_mix.breakpoints_.clear();
+            ui_mix.debugger_.breakpoints_.clear();
         }
     }
 
-    auto is_on_breakpoint = [&]()
+    int instructions = 0;
+    if (run_one)
     {
-        const int address = mix.current_address();
-        const auto it = std::find(std::cbegin(ui_mix.breakpoints_)
-            , std::cend(ui_mix.breakpoints_)
-            , address);
-        return (it != std::cend(ui_mix.breakpoints_));
-    };
-
-    if (ui_mix.run_one_)
-    {
-        ui_mix.executed_instructions_count += mix.run_one();
-        ui_mix.run_one_ = false;
+        instructions += mix.run_one();
     }
-    else if (ui_mix.run_to_breakpoint_)
+    else if (run_to_breakpoint)
     {
-        ui_mix.run_to_breakpoint_ = false;
-        if (ui_mix.breakpoints_.empty())
+        if (ui_mix.debugger_.breakpoints_.empty())
         {
-            ui_mix.executed_instructions_count += mix.run();
+            // No breakpoints, just run to the end
+            instructions += mix.run();
         }
         else
         {
+            // Run until breakpoint or end
             do
             {
-                ui_mix.executed_instructions_count += mix.run_one();
+                instructions += mix.run_one();
             }
-            while (!mix.is_halted() && !is_on_breakpoint());
+            while (!mix.is_halted()
+                && !debugger.has_breakpoint(mix.current_address()));
         }
-        ui_mix.run_to_breakpoint_ = false;
     }
+    ui_mix.debugger_.executed_instructions_count += instructions;
 
     if (ImGui::Begin("LineByLine"))
     {
-        RenderLineByLine(ui_mix, mix.current_address());
+        static DebuggerUIState state;
+        RenderLineByLine(ui_mix, mix.current_address(), state);
+        if (state.new_address_ >= 0)
+        {
+            ui_mix.mix_.set_next_address(state.new_address_);
+        }
+        if (state.breakpoint_to_add_ >= 0)
+        {
+            ui_mix.debugger_.add_breakpoint(state.breakpoint_to_add_);
+        }
+        if (state.breakpoint_to_remove_ >= 0)
+        {
+            ui_mix.debugger_.remove_breakpoint(state.breakpoint_to_remove_);
+        }
     }
     ImGui::End();
 
-    ui_mix.output_ = ui_mix.device0_.str();
+    ui_mix.output_ = ui_mix.debugger_.device18_.str();
     if (!ui_mix.output_.empty())
     {
         if (ImGui::Begin("Output"))
@@ -686,7 +856,17 @@ int main(int, char**)
         return !done;
     };
 
-    auto start_frame = [window]
+    // #XXX: add some free, monospace font to resources
+    ImFont* default_font = ImGui::GetIO().Fonts->AddFontFromFileTTF(
+        R"(C:\Windows\Fonts\consola.ttf)"
+        , 18.0);
+    if (default_font)
+    {
+        ImGui::GetIO().Fonts->Build();
+        ImGui::GetIO().FontDefault = nullptr;
+    }
+
+    auto start_frame = [window, default_font]
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame(window);

@@ -36,7 +36,8 @@ public:
 	int next_address() const;
 	void set_next_address(int address);
 
-	void jump(int address);
+    const AddressRegister& rj() const;
+    void jump(int address);
 
 	void set_memory(int, const Word& value);
 	const Word& memory(int address) const;
@@ -50,12 +51,8 @@ public:
 	const IndexRegister& ri(std::size_t index) const;
 	void set_ri(std::size_t index, const IndexRegister& ri);
 
-	const AddressRegister& rj() const;
-
 	OverflowFlag overflow_flag() const;
-	bool has_overflow() const;
-	void set_overflow();
-	void clear_overflow();
+    void set_overflow_flag(OverflowFlag flag);
 
 	ComparisonIndicator comparison_state() const;
 	void set_comparison_state(ComparisonIndicator comparison);
@@ -66,7 +63,6 @@ public:
 
 private:
 	void setup_default_devices();
-	void clear_jump_flag();
 
 private:
 	Register ra_;
@@ -84,7 +80,7 @@ private:
 
 	IComputerListener* listener_;
 	bool halted_;
-	bool was_jump_;
+	bool had_jump_;
 };
 
 

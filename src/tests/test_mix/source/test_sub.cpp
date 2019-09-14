@@ -72,7 +72,7 @@ TEST(Sub, RA_Sign_Is_Not_Changed_If_Sum_Is_Zero)
 
 	ASSERT_EQ(0, mix.ra().value());
 	ASSERT_EQ(Sign::Negative, mix.ra().sign());
-	ASSERT_FALSE(mix.has_overflow());
+	ASSERT_EQ(OverflowFlag::NoOverflow, mix.overflow_flag());
 }
 
 TEST_P(SubTest, Substracts_Memory_Cell_From_RA)
@@ -84,7 +84,8 @@ TEST_P(SubTest, Substracts_Memory_Cell_From_RA)
 	mix.execute(MakeSUB(param.address, param.field));
 
 	ASSERT_EQ(param.expected_value, mix.ra().value());
-	ASSERT_EQ(param.should_be_overflow, mix.has_overflow());
+	ASSERT_EQ(param.should_be_overflow
+        , mix.overflow_flag() == OverflowFlag::Overflow);
 }
 
 DEF_INSTANTIATE_TEST_CASE_P(Sub_With_Overflow,

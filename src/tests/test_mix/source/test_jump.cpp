@@ -52,10 +52,10 @@ TEST(JOV, Jumps_If_Overflow_Resets_Overflow_Flag)
 	mix.execute(MakeJOV(2000));
 	ASSERT_EQ(3000, mix.current_address());
 
-	mix.set_overflow();
+	mix.set_overflow_flag(OverflowFlag::Overflow);
 	mix.execute(MakeJOV(1000));
 
-	ASSERT_FALSE(mix.has_overflow());
+	ASSERT_EQ(OverflowFlag::NoOverflow, mix.overflow_flag());
 	ASSERT_EQ(1000, mix.current_address());
 	ASSERT_EQ(3001, mix.rj().value());
 }
@@ -70,14 +70,14 @@ TEST(JNOV, Jumps_If_NO_Overflow)
 	Computer mix{&listener};
 	mix.set_next_address(3000);
 
-	mix.set_overflow();
+	mix.set_overflow_flag(OverflowFlag::Overflow);
 	mix.execute(MakeJNOV(2000));
 	ASSERT_EQ(3000, mix.current_address());
 
-	mix.clear_overflow();
+    mix.set_overflow_flag(OverflowFlag::NoOverflow);
 	mix.execute(MakeJNOV(1000));
 
-	ASSERT_FALSE(mix.has_overflow());
+	ASSERT_EQ(OverflowFlag::NoOverflow, mix.overflow_flag());
 	ASSERT_EQ(1000, mix.current_address());
 	ASSERT_EQ(3001, mix.rj().value());
 }

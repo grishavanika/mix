@@ -398,7 +398,7 @@ Register CommandProcessor::do_add(Register r, const WordValue& value)
 		int overflow_result = 0;
 		if (CalculateWordAddOverflow(value, prev_value, overflow_result))
 		{
-			mix_.set_overflow();
+			mix_.set_overflow_flag(OverflowFlag::Overflow);
 			r.set_value(overflow_result);
 #if (0) // #INV (Clang): why "redundant move in return statement" ?
 			return std::move(r);
@@ -448,7 +448,7 @@ void CommandProcessor::div(const Command& command)
 	const auto abs_value = value.abs_value();
 	if ((abs_value == 0) || (abs_ra >= abs_value))
 	{
-		mix_.set_overflow();
+        mix_.set_overflow_flag(OverflowFlag::Overflow);
 		return;
 	}
 
@@ -640,7 +640,7 @@ void CommandProcessor::jmp_flags_group(const Command& command)
 {
 	const int next_address = indexed_address(command);
 	const ComparisonIndicator comparison_flag = mix_.comparison_state();
-	const bool has_overflow = mix_.has_overflow();
+	const bool has_overflow = (mix_.overflow_flag() == OverflowFlag::Overflow);
 	const auto field = command.field();
 
 	bool do_jump = false;
@@ -655,7 +655,7 @@ void CommandProcessor::jmp_flags_group(const Command& command)
 	case 2: // JOV
 		if (has_overflow)
 		{
-			mix_.clear_overflow();
+            mix_.set_overflow_flag(OverflowFlag::NoOverflow);
 			do_jump = true;
 		}
 		break;
@@ -907,7 +907,7 @@ Register CommandProcessor::num() const
 	if (result > Word::k_max_abs_value)
 	{
 		result %= Word::k_max_abs_value;
-		mix_.set_overflow();
+        mix_.set_overflow_flag(OverflowFlag::Overflow);
 	}
 
 	return Register{WordValue{mix_.ra().sign(), static_cast<int>(result)}};

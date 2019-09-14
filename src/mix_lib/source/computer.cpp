@@ -18,12 +18,12 @@ Computer::Computer(IComputerListener* listener /*= nullptr*/)
 	, rj_{}
 	, rip_{}
 	, comparison_state_{ComparisonIndicator::Less}
-	, overflow_flag_{OverflowFlag::NoOverdlow}
+	, overflow_flag_{OverflowFlag::NoOverflow}
 	, memory_()
 	, devices_{listener}
 	, listener_{listener}
 	, halted_{false}
-	, was_jump_{false}
+	, had_jump_{false}
 {
 	setup_default_devices();
 }
@@ -48,7 +48,7 @@ void Computer::jump(int address)
 	const auto next = next_address();
 	set_next_address(address);
 	rj_.set_value(next);
-	was_jump_ = true;
+	had_jump_ = true;
 	internal::InvokeListener(listener_, &IComputerListener::on_jump, next);
 }
 
@@ -69,7 +69,7 @@ int Computer::current_address() const
 
 int Computer::next_address() const
 {
-	if (was_jump_)
+	if (had_jump_)
 	{
 		return current_address();
 	}
@@ -147,21 +147,10 @@ OverflowFlag Computer::overflow_flag() const
 	return overflow_flag_;
 }
 
-bool Computer::has_overflow() const
+void Computer::set_overflow_flag(OverflowFlag flag)
 {
-	return (overflow_flag_ == OverflowFlag::Overflow);
-}
-
-void Computer::set_overflow()
-{
-	overflow_flag_ = OverflowFlag::Overflow;
-	internal::InvokeListener(listener_, &IComputerListener::on_overflow_flag_set);
-}
-
-void Computer::clear_overflow()
-{
-	overflow_flag_ = OverflowFlag::NoOverdlow;
-	internal::InvokeListener(listener_, &IComputerListener::on_overflow_flag_set);
+    overflow_flag_ = flag;
+    internal::InvokeListener(listener_, &IComputerListener::on_overflow_flag_set);
 }
 
 void Computer::set_listener(IComputerListener* listener)
@@ -208,7 +197,7 @@ bool Computer::run_one()
         execute(Command{memory(current_address())});
         set_next_address(next_address());
         // Be sure to jump only once
-        clear_jump_flag();
+        had_jump_ = false;
     }
     catch (const std::exception&)
     {
@@ -227,11 +216,6 @@ void Computer::halt()
 bool Computer::is_halted() const
 {
     return halted_;
-}
-
-void Computer::clear_jump_flag()
-{
-	was_jump_ = false;
 }
 
 IIODevice& Computer::device(DeviceId id)

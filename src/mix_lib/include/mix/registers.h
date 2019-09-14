@@ -10,6 +10,10 @@ class MIX_LIB_EXPORT Register : public Word
 {
 public:
 	using Word::Word;
+    explicit Register(const Word& word)
+        : Word(word)
+    {
+    }
 };
 
 // #TODO: use composition over inheritance
@@ -20,7 +24,8 @@ public:
 	explicit IndexRegister(int two_bytes_with_sign);
 	explicit IndexRegister(const Byte& b4, const Byte& b5);
 	explicit IndexRegister(Sign sign, const Byte& b4, const Byte& b5);
-	explicit IndexRegister(const Register& r);
+    explicit IndexRegister(const Register& r);
+    explicit IndexRegister(const Word& w);
 
 	void set_byte(std::size_t index, const Byte& byte);
 	

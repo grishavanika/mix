@@ -25,7 +25,7 @@ TEST(INCA, Adds_Value_To_RA_With_Overflow_As_For_ADD_When_Overflow_Happens)
 	mix.execute(MakeINCA(1));
 
 	ASSERT_EQ(0, mix.ra().value());
-	ASSERT_TRUE(mix.has_overflow());
+	ASSERT_EQ(OverflowFlag::Overflow, mix.overflow_flag());
 }
 
 TEST(INCX, Adds_Value_To_RX_With_Overflow_Flag_Set_When_Overflow_Happens)
@@ -41,7 +41,7 @@ TEST(INCX, Adds_Value_To_RX_With_Overflow_Flag_Set_When_Overflow_Happens)
 	mix.execute(MakeINCX(11));
 
 	ASSERT_EQ(10, mix.rx().value());
-	ASSERT_TRUE(mix.has_overflow());
+	ASSERT_EQ(OverflowFlag::Overflow, mix.overflow_flag());
 }
 
 TEST(INCI, Overflow_Is_Not_Possible_For_Index_Registers)
@@ -59,7 +59,7 @@ TEST(INCI, Overflow_Is_Not_Possible_For_Index_Registers)
 	// into account value of R2 (4'095)
 	mix.execute(MakeINCI(1, 4'095, 2));
 
-	ASSERT_FALSE(mix.has_overflow());
+    ASSERT_EQ(OverflowFlag::NoOverflow, mix.overflow_flag());
 
 	Register expected_register;
 	expected_register.set_value(3 * 4'095);

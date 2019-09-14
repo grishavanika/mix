@@ -18,7 +18,7 @@ enum class ComparisonIndicator
 
 enum class OverflowFlag
 {
-	NoOverdlow	= 0,
+	NoOverflow	= 0,
 	Overflow	= 1
 };
 
