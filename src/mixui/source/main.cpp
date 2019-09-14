@@ -273,36 +273,37 @@ static void SetupIODevice(UIMix& ui_mix)
             false));
 }
 
-static std::string PrintCode(const WordWithSource& word)
+// #XXX: hard-code bytes formatting to 18 symbols.
+// UI should be changed to really render bytes
+// instead converting to string & render string
+static std::string k_no_code(18, ' ');
+
+static std::string PrintCode(const mix::Word& w, mixal::OperationId operation_id)
 {
     std::ostringstream out_;
 
-    if (word.translated.original_address < 0)
-    {
-        out_ << std::setw(18) << ' ';
-        return out_.str();
-    }
-
     const auto prev_fill = out_.fill('0');
 
-    switch (word.operation_id)
+    switch (operation_id)
     {
     case mixal::OperationId::CON:
     case mixal::OperationId::END:
         out_.fill(' ');
-        out_<< '|' << word.translated.value.sign() << '|' << std::setw(14)
-            << std::right << word.translated.value.abs_value() << '|' << "\n";
+        out_<< '|' << w.sign() << '|' << std::setw(14)
+            << std::right << w.abs_value() << '|';
         break;
     case mixal::OperationId::ALF:
-        out_ << word.translated.value << "\n";
+        out_ << w;
         break;
     default:
-        out_ << mix::Command(word.translated.value) << "\n";
+        out_ << mix::Command(w);
         break;
     }
 
     out_.fill(prev_fill);
-    return out_.str();
+    std::string str = std::move(out_).str();
+    assert(str.size() == k_no_code.size());
+    return str;
 }
 
 static void RegistersInputWindow(UIMix& ui_mix)
@@ -570,9 +571,6 @@ static void RenderLineByLine(UIMix& ui_mix, int current_address, DebuggerUIState
     {
         ImGui::PushID(i);
 
-        // #XXX: bytecode value should be read from MIX's
-        // memory directly for programs that modify its
-        // own sources
         const WordWithSource& word = ui_mix.debugger_.program_.commands[i];
         const int address = word.translated.original_address;
         std::string line = word.line;
@@ -628,9 +626,36 @@ static void RenderLineByLine(UIMix& ui_mix, int current_address, DebuggerUIState
             ImGui::Text("%0*i", address_width, address);
         }
         ImGui::SameLine();
-        const auto bytecode_str = PrintCode(word);
-        ImGui::TextUnformatted(bytecode_str.c_str()
-            , bytecode_str.c_str() + bytecode_str.size());
+
+        if (address >= 0)
+        {
+            const mix::Word memory = ui_mix.mix_.memory(address);
+            const bool modified = (word.translated.value != memory);
+            const auto bytecode_str = PrintCode(memory, modified
+                ? word.operation_id
+                // In case the code was changed - we don't know
+                // the format anymore, print as generic command
+                // (#XXX: it may make sense to read command id
+                // from the word and use it)
+                : mixal::OperationId::Unknown);
+            if (modified)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.0f));
+            }
+            ImGui::TextUnformatted(bytecode_str.c_str()
+                , bytecode_str.c_str() + bytecode_str.size());
+            if (modified)
+            {
+                ImGui::PopStyleColor();
+            }
+        }
+        else
+        {
+            ImGui::TextUnformatted(k_no_code.c_str()
+                , k_no_code.c_str() + k_no_code.size());
+        }
+
+
         ImGui::SameLine();
         ImGui::Text("    %s", line.c_str());
 

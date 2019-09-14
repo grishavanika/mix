@@ -68,6 +68,11 @@ private:
 MIX_LIB_EXPORT
 bool operator==(const Word& lhs, const Word& rhs);
 
+inline bool operator!=(const Word& lhs, const Word& rhs)
+{
+    return !(lhs == rhs);
+}
+
 MIX_LIB_EXPORT
 std::ostream& operator<<(std::ostream& o, const Word& w);
 
