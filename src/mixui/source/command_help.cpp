@@ -125,7 +125,7 @@ CommandHelp::CommandHelp(const CommandProcessor& processor)
 {
 }
 
-void CommandHelp::describe_command(const Command& command, std::ostream& out)
+void CommandHelp::describe_command(const Command& command, std::ostream& out) const
 {
     auto callback = k_command_actions[command.id()];
     assert(callback && "Invalid/not implemented command help");
@@ -134,20 +134,22 @@ void CommandHelp::describe_command(const Command& command, std::ostream& out)
         mixal::QueryOperationInfo(command).id);
     out << name << ": " << command << "\n";
 
-    (this->*callback)(command, out);
+    // #XXX: temporary. Callbacks need to be const.
+    // Lazy to mark them all now
+    (const_cast<CommandHelp*>(this)->*callback)(command, out);
 }
 
-std::string CommandHelp::describe_command(const Command& command)
+std::string CommandHelp::describe_command(const Command& command) const
 {
     std::ostringstream ss;
     describe_command(command, ss);
     return std::move(ss).str();
 }
 
-void CommandHelp::describe_address(int address, std::ostream& out)
+void CommandHelp::describe_address(int address, std::ostream& out) const
 {
     if ((address < 0)
-        || (address > static_cast<int>(mix::Computer::k_memory_words_count)))
+        || (address >= static_cast<int>(mix::Computer::k_memory_words_count)))
     {
         return;
     }
@@ -155,7 +157,7 @@ void CommandHelp::describe_address(int address, std::ostream& out)
     describe_command(cmd, out);
 }
 
-std::string CommandHelp::describe_address(int address)
+std::string CommandHelp::describe_address(int address) const
 {
     std::ostringstream ss;
     describe_address(address, ss);

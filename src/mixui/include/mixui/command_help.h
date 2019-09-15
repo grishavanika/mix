@@ -18,11 +18,11 @@ namespace mix
     public:
         explicit CommandHelp(const CommandProcessor& processor);
 
-        void describe_command(const Command& command, std::ostream& out);
-        std::string describe_command(const Command& command);
+        void describe_command(const Command& command, std::ostream& out) const;
+        std::string describe_command(const Command& command) const;
 
-        void describe_address(int address, std::ostream& out);
-        std::string describe_address(int address);
+        void describe_address(int address, std::ostream& out) const;
+        std::string describe_address(int address) const;
 
     private:
         int indexed_address(const Command& command) const;
