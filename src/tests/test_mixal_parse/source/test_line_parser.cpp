@@ -111,7 +111,7 @@ TEST_F(LineParserTest, Splits_Label_Op_Address_And_Comment_Into_Separate_Parts_W
 	parse("START   IN      BUF (TERM)   read a block (70 chars)");
 
 	has_label("START");
-	has_operation(OperationId::IN);
+	has_operation(OperationId::IN_);
 	has_address_str("BUF (TERM)");
 	has_comment("read a block (70 chars)");
 }
@@ -121,7 +121,7 @@ TEST_F(LineParserTest, When_Label_Name_Is_Valid_Operation_And_Line_Has_Valid_Ope
 	parse("IN OUT 1");
 
 	has_label("IN");
-	has_operation(OperationId::OUT);
+	has_operation(OperationId::OUT_);
 	has_address_str("1");
 }
 
@@ -130,7 +130,7 @@ TEST_F(LineParserTest, When_Label_Name_Is_Valid_Operation_And_Line_Has_Valid_Ope
 	parse("OUT IN");
 
 	has_no_label();
-	has_operation(OperationId::OUT);
+	has_operation(OperationId::OUT_);
 	has_address_str("IN");
 }
 
