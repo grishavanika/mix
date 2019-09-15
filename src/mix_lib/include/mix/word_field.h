@@ -41,6 +41,11 @@ private:
 MIX_LIB_EXPORT
 bool operator==(const WordField& lhs, const WordField& rhs);
 
+inline bool operator!=(const WordField& lhs, const WordField& rhs)
+{
+    return !(lhs == rhs);
+}
+
 MIX_LIB_EXPORT
 std::ostream& operator<<(std::ostream& o, const WordField& wf);
 

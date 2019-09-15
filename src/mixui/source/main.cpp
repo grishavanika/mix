@@ -2,9 +2,12 @@
 
 #include <mix/computer.h>
 #include <mix/command.h>
+#include <mix/command_processor.h>
 #include <mix/default_device.h>
 #include <mixal/program_executor.h>
 #include <mixal_parse/types/operation_id.h>
+#include <mixal/operation_info.h>
+#include <mixui/command_help.h>
 #include <mixui/ui_word.h>
 #include <imgui_stdlib.h>
 
@@ -258,7 +261,7 @@ struct UIMix
     UIFlags flags_;
 
     std::string output_;
-    std::string source_file_ = R"(C:\dev\mix\src\tests\mixal_code\program_primes.mixal)";
+    std::string source_file_ = R"(C:\dev\mix\src\tests\mixal_code\program_maximum.mixal)";
 };
 
 static void SetupIODevice(UIMix& ui_mix)
@@ -410,7 +413,8 @@ static void UIMenuInput(UIMix& ui_mix)
         ImGui::EndMenuBar();
     }
 
-    if (open_file)
+    // #XXX: temporary load at start our hard-coded source file
+    if (open_file || ui_mix.debugger_.program_.commands.empty())
     {
         std::ostringstream ss;
         std::ifstream in(ui_mix.source_file_);
@@ -632,12 +636,8 @@ static void RenderLineByLine(UIMix& ui_mix, int current_address, DebuggerUIState
             const mix::Word memory = ui_mix.mix_.memory(address);
             const bool modified = (word.translated.value != memory);
             const auto bytecode_str = PrintCode(memory, modified
-                ? word.operation_id
-                // In case the code was changed - we don't know
-                // the format anymore, print as generic command
-                // (#XXX: it may make sense to read command id
-                // from the word and use it)
-                : mixal::OperationId::Unknown);
+                ? mixal::QueryOperationInfo(memory).id
+                : word.operation_id);
             if (modified)
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.0f));
@@ -704,6 +704,8 @@ static void RenderAll()
     // ImGui::ShowDemoWindow(nullptr);
 
     static mix::Computer mix;
+    static mix::CommandProcessor mix_processor(mix);
+    static mix::CommandHelp mix_help(mix_processor);
     static DebuggerState debugger;
     static UIMix ui_mix(mix, debugger);
 
@@ -724,6 +726,17 @@ static void RenderAll()
         {
             ui_mix.mix_.set_next_address(ui_mix.address_);
         }
+    }
+    ImGui::End();
+
+    if (ImGui::Begin("Help"))
+    {
+        const std::string help = mix_help.describe_address(
+            mix.current_address());
+        ImGui::PushTextWrapPos(0);
+        ImGui::TextUnformatted(help.c_str()
+            , help.c_str() + help.size());
+        ImGui::PopTextWrapPos();
     }
     ImGui::End();
 

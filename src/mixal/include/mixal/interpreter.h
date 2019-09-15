@@ -206,7 +206,7 @@ inline void Interpreter::print_code(OperationId command, const TranslatedWord& w
 			<< std::right << word.value.abs_value() << '|' << "\n";
 		break;
 	case OperationId::ALF:
-		out_.stream << word.value << "\n";
+        out_.stream << word.value << "\n";
 		break;
 	default:
 		out_.stream << mix::Command{word.value} << "\n";

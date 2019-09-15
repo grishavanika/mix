@@ -42,7 +42,7 @@ TEST_F(LineTranslatorTest, EQU_With_Label_Defines_Symbol_With_Label_Name)
 	auto word = translate("X EQU 1000");
 
 	ASSERT_EQ(nullptr, word);
-	ASSERT_EQ(1000, translator_.query_defined_symbol("X"));
+	ASSERT_EQ(Word(1000), translator_.query_defined_symbol("X"));
 	ASSERT_EQ(400, translator_.current_address());
 }
 
@@ -70,7 +70,7 @@ TEST_F(LineTranslatorTest, ORIG_Defines_Label_Symbol_Before_Changing_The_Current
 	auto word = translate("TABLE ORIG *+100");
 
 	ASSERT_EQ(nullptr, word);
-	ASSERT_EQ(400, translator_.query_defined_symbol("TABLE"));
+	ASSERT_EQ(Word(400), translator_.query_defined_symbol("TABLE"));
 	ASSERT_EQ(500, translator_.current_address());
 }
 

@@ -14,6 +14,10 @@ public:
         : Word(word)
     {
     }
+    explicit Register(WordValue::Type value)
+        : Register(Word(value))
+    {
+    }
 };
 
 // #TODO: use composition over inheritance

@@ -34,6 +34,11 @@ protected:
 		ASSERT_EQ(value, translator_.evaluate(parser.expression()));
 	}
 
+    void expression_is(int value, const char* expr_str)
+    {
+        expression_is(Word(value), expr_str);
+    }
+
 	void wvalue_is(Word value, const char* expr_str)
 	{
 		WValueParser parser;
@@ -44,6 +49,11 @@ protected:
 		ASSERT_EQ(value, translator_.evaluate(parser.value()));
 	}
 
+    void wvalue_is(int value, const char* expr_str)
+    {
+        wvalue_is(Word(value), expr_str);
+    }
+
 protected:
 	Translator translator_;
 };
@@ -53,7 +63,7 @@ protected:
 TEST(TranslatorTest, Evaluates_Number_To_Word_With_Same_Integer_Value)
 {
 	Translator t;
-	ASSERT_EQ(111111, t.evaluate(Number{"111111"}));
+	ASSERT_EQ(Word(111111), t.evaluate(Number{"111111"}));
 }
 
 TEST(TranslatorTest, Throws_TooBigWordValueError_When_Number_Can_Not_Be_Hold_By_Word)
@@ -115,15 +125,15 @@ TEST_F(ExpressionEvaluateTest, Unary_Minus_Negates_Number)
 
 TEST_F(ExpressionEvaluateTest, Unary_Plus_Does_Nothing)
 {
-	translator_.define_symbol("X", -7);
+	translator_.define_symbol("X", Word(-7));
 
 	expression_is(-7, "+X");
 }
 
 TEST_F(ExpressionEvaluateTest, Too_Big_Binary_Plus_Result_Throws_TooBigWorldValue)
 {
-	translator_.define_symbol("X", int{Word::k_max_abs_value});
-	translator_.define_symbol("Y", 1);
+	translator_.define_symbol("X", Word(int(Word::k_max_abs_value)));
+	translator_.define_symbol("Y", Word(1));
 
 	ASSERT_THROW({
 		expression_is({}, "X + Y");
@@ -143,8 +153,8 @@ TEST_F(ExpressionEvaluateTest, Binary_Plus_Result_Is_The_Same_As_Knuth_Specifica
 		MakeADD(BB),
 		MakeSTA(CC),
 	};
-	computer.set_memory(AA, -1);
-	computer.set_memory(BB, 5);
+	computer.set_memory(AA, Word(-1));
+	computer.set_memory(BB, Word(5));
 
 	for (const auto& command : k_add_code)
 	{
@@ -167,8 +177,8 @@ TEST_F(ExpressionEvaluateTest, Binary_Minus_Result_Is_The_Same_As_Knuth_Specific
 		MakeSUB(BB),
 		MakeSTA(CC),
 	};
-	computer.set_memory(AA, 100);
-	computer.set_memory(BB, 3);
+	computer.set_memory(AA, Word(100));
+	computer.set_memory(BB, Word(3));
 
 	for (const auto& command : k_sub_code)
 	{
@@ -192,8 +202,8 @@ TEST_F(ExpressionEvaluateTest, Binary_Multiply_Result_Is_The_Same_As_Knuth_Speci
 		MakeMUL(BB),
 		MakeSTX(CC),
 	};
-	computer.set_memory(AA, 10);
-	computer.set_memory(BB, 10);
+	computer.set_memory(AA, Word(10));
+	computer.set_memory(BB, Word(10));
 
 	for (const auto& command : k_mul_code)
 	{
@@ -218,8 +228,8 @@ TEST_F(ExpressionEvaluateTest, Binary_Divide_Result_Is_The_Same_As_Knuth_Specifi
 		MakeDIV(BB),
 		MakeSTA(CC),
 	};
-	computer.set_memory(AA, -42);
-	computer.set_memory(BB, 3);
+	computer.set_memory(AA, Word(-42));
+	computer.set_memory(BB, Word(3));
 
 	for (const auto& command : k_mul_code)
 	{
@@ -243,8 +253,8 @@ TEST_F(ExpressionEvaluateTest, Binary_DoubleDivide_Result_Is_The_Same_As_Knuth_S
 		MakeDIV(BB),
 		MakeSTA(CC),
 	};
-	computer.set_memory(AA, 1);
-	computer.set_memory(BB, 3);
+	computer.set_memory(AA, Word(1));
+	computer.set_memory(BB, Word(3));
 
 	for (const auto& command : k_mul_code)
 	{
@@ -270,9 +280,9 @@ TEST_F(ExpressionEvaluateTest, Binary_Field_Result_Is_The_Same_As_Knuth_Specific
 		MakeADD(BB),
 		MakeSTA(CC),
 	};
-	computer.set_memory(AA, 1);
-	computer.set_memory(BB, 3);
-	computer.set_memory(KK, 8);
+	computer.set_memory(AA, Word(1));
+	computer.set_memory(BB, Word(3));
+	computer.set_memory(KK, Word(8));
 
 	for (const auto& command : k_mul_code)
 	{
@@ -289,17 +299,17 @@ TEST_F(ExpressionEvaluateTest, Operations_Are_Evaluated_From_Left_To_Right_Witho
 
 TEST_F(ExpressionEvaluateTest, Negative_Zero_Is_Unchanged_If_Second_Operand_Is_Zero_For_Plus_And_Minus)
 {
-	translator_.define_symbol("Y", WordValue{Sign::Negative, 0});
+	translator_.define_symbol("Y", Word(WordValue(Sign::Negative, 0)));
 
-	expression_is(WordValue{Sign::Negative, 0}, "-0 + 0"); // -0 +  0
-	expression_is(WordValue{Sign::Negative, 0}, "-0 + Y"); // -0 + -0
-	expression_is(WordValue{Sign::Negative, 0}, "-0 - 0"); // -0 -  0
-	expression_is(WordValue{Sign::Negative, 0}, "-0 - Y"); // -0 - -0
+	expression_is(Word(WordValue(Sign::Negative, 0)), "-0 + 0"); // -0 +  0
+	expression_is(Word(WordValue(Sign::Negative, 0)), "-0 + Y"); // -0 + -0
+	expression_is(Word(WordValue(Sign::Negative, 0)), "-0 - 0"); // -0 -  0
+	expression_is(Word(WordValue(Sign::Negative, 0)), "-0 - Y"); // -0 - -0
 }
 
 TEST_F(ExpressionEvaluateTest, Multiply_By_Zero_Is_Always_Positive_Zero)
 {
-	translator_.define_symbol("Y", WordValue{Sign::Negative, 0});
+	translator_.define_symbol("Y", Word(WordValue(Sign::Negative, 0)));
 
 	expression_is(0, "-0 * 0"); // -0 *  0
 	expression_is(0, "-0 * Y"); // -0 * -0
@@ -307,7 +317,7 @@ TEST_F(ExpressionEvaluateTest, Multiply_By_Zero_Is_Always_Positive_Zero)
 
 TEST_F(ExpressionEvaluateTest, Division_By_Zero_Throws_DivisionByZero)
 {
-	translator_.define_symbol("Y", WordValue{Sign::Negative, 0});
+	translator_.define_symbol("Y", Word(WordValue(Sign::Negative, 0)));
 
 	ASSERT_THROW({
 		expression_is({}, "1 / 0");

@@ -48,11 +48,11 @@ Word ExtractInstruction(mix_word_t tagged)
 	const bool has_sign = ((tagged & k_mdk_word_sign_bit) == k_mdk_word_sign_bit);
 	if (has_sign)
 	{
-		return WordValue(mix::Sign::Negative
-			, static_cast<WordValue::Type>(tagged & ~k_mdk_word_sign_bit));
+		return Word(WordValue(mix::Sign::Negative
+			, static_cast<WordValue::Type>(tagged & ~k_mdk_word_sign_bit)));
 	}
 
-	return static_cast<WordValue::Type>(tagged);
+	return Word(static_cast<WordValue::Type>(tagged));
 }
 
 int ExtractAddress(mix_word_t tagged)

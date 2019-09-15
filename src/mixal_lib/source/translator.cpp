@@ -278,7 +278,7 @@ Word Translator::Impl::evaluate(const Text& text) const
 		return process_ALF_text_char(ch);
 	});
 
-	return bytes;
+	return Word(std::move(bytes));
 }
 
 Byte Translator::Impl::process_ALF_text_char(char ch) const
@@ -296,7 +296,7 @@ Word Translator::Impl::evaluate(const BasicExpression& expr) const
 {
 	if (expr.is_current_address())
 	{
-		return current_address();
+		return Word(current_address());
 	}
 	else if (expr.is_number())
 	{
@@ -309,7 +309,7 @@ Word Translator::Impl::evaluate(const BasicExpression& expr) const
 
 	// #TODO: add UNREACHABLE() or similar macro
 	assert(false);
-	return {};
+	return Word();
 }
 
 Word Translator::Impl::evaluate(const WValue& wvalue) const
@@ -384,7 +384,7 @@ Word Translator::Impl::evaluate(const Number& n) const
 		throw TooBigWordValueError{n};
 	}
 
-	return static_cast<int>(v);
+	return Word(static_cast<int>(v));
 }
 
 Word Translator::Impl::evaluate(const Symbol& symbol) const
@@ -492,7 +492,7 @@ Word Translator::Impl::query_local_symbol(const Symbol& symbol, int near_address
 		throw InvalidLocalSymbolReference{symbol};
 	}
 
-	return *value;
+	return Word(*value);
 }
 
 const int* Translator::Impl::find_local_symbol(const Symbol& symbol, int near_address) const
@@ -565,7 +565,7 @@ void Translator::Impl::translate_EQU(const WValue& value, const Label& label)
 void Translator::Impl::translate_ORIG(const WValue& value, const Label& label)
 {
 	const auto address = evaluate(value);
-	define_label_if_valid(label, current_address());
+	define_label_if_valid(label, Word(current_address()));
 	set_current_address(address.value());
 }
 
@@ -577,7 +577,7 @@ TranslatedWord Translator::Impl::translate_CON(const WValue& wvalue, const Label
 TranslatedWord Translator::Impl::translate_CON(const Word& value, const Label& label)
 {
 	const auto address = current_address();
-	define_label_if_valid(label, address);
+	define_label_if_valid(label, Word(address));
 
 	TranslatedWord result{address, value};
 	increase_current_address();
@@ -587,7 +587,7 @@ TranslatedWord Translator::Impl::translate_CON(const Word& value, const Label& l
 TranslatedWord Translator::Impl::translate_ALF(const Text& text, const Label& label)
 {
 	const auto address = current_address();
-	define_label_if_valid(label, address);
+	define_label_if_valid(label, Word(address));
 
 	TranslatedWord result{address, evaluate(text)};
 	increase_current_address();
@@ -619,7 +619,7 @@ Translator::EndCommandGeneratedCode Translator::Impl::translate_END(
 	constant_to_value_.clear();
 	unresolved_words_.clear();
 
-	define_label_if_valid(label, current_address());
+	define_label_if_valid(label, Word(current_address()));
 	return code;
 }
 
@@ -639,7 +639,7 @@ FutureTranslatedWordRef Translator::Impl::translate_MIX(
 		original_address,
 		transformation.forward_references);
 
-	define_label_if_valid(label, original_address);
+	define_label_if_valid(label, Word(original_address));
 
 	auto result = process_mix_translation(
 		std::move(future_word), transformation.address, I, F, C);

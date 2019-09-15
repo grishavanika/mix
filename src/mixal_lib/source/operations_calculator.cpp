@@ -38,9 +38,9 @@ Word BinaryOperation_Plus(Word lhs, Word rhs)
 		// -0 +  0	== -0
 		// -0 + -0	== -0
 		// Note: 0 + -0	== 0
-		return WordValue{Sign::Negative, 0};
+		return Word(WordValue(Sign::Negative, 0));
 	}
-	return lhs.value() + rhs.value();
+	return Word(lhs.value() + rhs.value());
 }
 
 Word BinaryOperation_Minus(Word lhs, Word rhs)
@@ -52,14 +52,14 @@ Word BinaryOperation_Minus(Word lhs, Word rhs)
 		// -0 -  0	== -0
 		// -0 - -0	== -0
 		// Note: 0 - -0	== 0
-		return WordValue{Sign::Negative, 0};
+		return Word(WordValue(Sign::Negative, 0));
 	}
-	return lhs.value() - rhs.value();
+	return Word(lhs.value() - rhs.value());
 }
 
 Word BinaryOperation_Multiply(Word lhs, Word rhs)
 {
-	return lhs.value() * rhs.value();
+	return Word(lhs.value() * rhs.value());
 }
 
 Word BinaryOperation_Divide(Word lhs, Word rhs)
@@ -69,7 +69,7 @@ Word BinaryOperation_Divide(Word lhs, Word rhs)
 		throw DivisionByZero{};
 	}
 
-	return lhs.value() / rhs.value();
+	return Word(lhs.value() / rhs.value());
 }
 
 Word BinaryOperation_DoubleDivide(Word lhs, Word rhs)
@@ -86,7 +86,7 @@ Word BinaryOperation_DoubleDivide(Word lhs, Word rhs)
 	const auto abs_result = v / rhs.abs_value();
 	const auto sign = (lhs.sign() == rhs.sign()) ? Sign::Positive : Sign::Negative;
 
-	return WordValue{sign, static_cast<int>(abs_result)};
+	return Word(WordValue(sign, static_cast<int>(abs_result)));
 }
 
 Word BinaryOperation_Field(Word lhs, Word rhs)
@@ -94,7 +94,7 @@ Word BinaryOperation_Field(Word lhs, Word rhs)
 	// Note: in theory, we can use `mix::WordField` to do calculations below
 	// (to avoid duplications), but since values can be negative - this will not
 	// work (because `WordField` works with non-negative values only)
-	return 8 * lhs.value() + rhs.value();
+	return Word(8 * lhs.value() + rhs.value());
 }
 
 const NamedOperation<UnaryOperationHandler> k_unary_operations[] =

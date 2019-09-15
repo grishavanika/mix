@@ -131,7 +131,7 @@ Word SymbolDevice::word_with_all_spaces() const
 {
 	Word::BytesArray bytes;
 	bytes.fill(CharToByte(' '));
-	return bytes;
+	return Word(std::move(bytes));
 }
 
 BinaryDevice::BinaryDevice(int block_size, std::ostream& out, std::istream& in)
@@ -185,6 +185,6 @@ Word BinaryDevice::read_word()
 {
 	int value = 0;
 	in_ >> value;
-	return value;
+	return Word(value);
 }
 

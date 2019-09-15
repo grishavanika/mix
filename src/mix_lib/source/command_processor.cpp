@@ -163,25 +163,16 @@ void CommandProcessor::nop(const Command& /*command*/)
 {
 }
 
-Register CommandProcessor::do_load(
-	Register prev_value,
-	const Command& command,
-	bool reverse_sorce_sign /*= false*/) const
+Word CommandProcessor::do_load(const Command& command
+    , bool reverse_sorce_sign /*= false*/) const
 {
 	const auto& word = memory(command);
 	const auto& source_field = command.word_field();
 	const auto dest_field = source_field.shift_bytes_right();
-
-	auto value = word.value(source_field);
-	
-	prev_value.set_zero_abs_value();
-	prev_value.set_value(reverse_sorce_sign ? value.reverse_sign() : value, dest_field);
-	
-#if (0) // #INV (Clang): why "redundant move in return statement" ?
-	return std::move(prev_value);
-#else
-	return prev_value;
-#endif
+    const auto value = reverse_sorce_sign
+        ? word.value(source_field).reverse_sign()
+        : word.value(source_field);
+    return Word(value, dest_field);
 }
 
 int CommandProcessor::indexed_address(int address, std::size_t index) const
@@ -238,82 +229,82 @@ void CommandProcessor::do_store(const Register& r, const Command& command)
 
 void CommandProcessor::lda(const Command& command)
 {
-	mix_.set_ra(do_load(mix_.ra(), command));
+	mix_.set_ra(Register(do_load(command)));
 }
 
 void CommandProcessor::ldx(const Command& command)
 {
-	mix_.set_rx(do_load(mix_.rx(), command));
+	mix_.set_rx(Register(do_load(command)));
 }
 
 void CommandProcessor::ld1(const Command& command)
 {
-	mix_.set_ri(1, IndexRegister{do_load(mix_.ri(1), command)});
+	mix_.set_ri(1, IndexRegister{do_load(command)});
 }
 
 void CommandProcessor::ld2(const Command& command)
 {
-	mix_.set_ri(2, IndexRegister{do_load(mix_.ri(2), command)});
+	mix_.set_ri(2, IndexRegister{do_load(command)});
 }
 
 void CommandProcessor::ld3(const Command& command)
 {
-	mix_.set_ri(3, IndexRegister{do_load(mix_.ri(3), command)});
+	mix_.set_ri(3, IndexRegister{do_load(command)});
 }
 
 void CommandProcessor::ld4(const Command& command)
 {
-	mix_.set_ri(4, IndexRegister{do_load(mix_.ri(4), command)});
+	mix_.set_ri(4, IndexRegister{do_load(command)});
 }
 
 void CommandProcessor::ld5(const Command& command)
 {
-	mix_.set_ri(5, IndexRegister{do_load(mix_.ri(5), command)});
+	mix_.set_ri(5, IndexRegister{do_load(command)});
 }
 
 void CommandProcessor::ld6(const Command& command)
 {
-	mix_.set_ri(6, IndexRegister{do_load(mix_.ri(6), command)});
+	mix_.set_ri(6, IndexRegister{do_load(command)});
 }
 
 void CommandProcessor::ldan(const Command& command)
 {
-	mix_.set_ra(do_load(mix_.ra(), command, true/*reverse*/));
+	mix_.set_ra(Register(do_load(command, true/*reverse*/)));
 }
 
 void CommandProcessor::ldxn(const Command& command)
 {
-	mix_.set_rx(do_load(mix_.rx(), command, true/*reverse*/));
+	mix_.set_rx(Register(do_load(command, true/*reverse*/)));
 }
 
 void CommandProcessor::ld1n(const Command& command)
 {
-	mix_.set_ri(1, IndexRegister{do_load(mix_.ri(1), command, true/*reverse*/)});
+	mix_.set_ri(1, IndexRegister{do_load(command, true/*reverse*/)});
 }
 
 void CommandProcessor::ld2n(const Command& command)
 {
-	mix_.set_ri(2, IndexRegister{do_load(mix_.ri(2), command, true/*reverse*/)});
+	mix_.set_ri(2, IndexRegister{do_load(command, true/*reverse*/)});
 }
 
 void CommandProcessor::ld3n(const Command& command)
 {
-	mix_.set_ri(3, IndexRegister{do_load(mix_.ri(3), command, true/*reverse*/)});
+	mix_.set_ri(3, IndexRegister{do_load(command, true/*reverse*/)});
 }
 
 void CommandProcessor::ld4n(const Command& command)
 {
-	mix_.set_ri(4, IndexRegister{do_load(mix_.ri(4), command, true/*reverse*/)});
+	mix_.set_ri(4, IndexRegister{do_load(command, true/*reverse*/)});
 }
 
 void CommandProcessor::ld5n(const Command& command)
 {
-	mix_.set_ri(5, IndexRegister{do_load(mix_.ri(5), command, true/*reverse*/)});
+	mix_.set_ri(5, IndexRegister{do_load(command, true/*reverse*/)});
 }
 
 void CommandProcessor::ld6n(const Command& command)
 {
-	mix_.set_ri(6, IndexRegister{do_load(mix_.ri(6), command, true/*reverse*/)});
+	mix_.set_ri(6, IndexRegister{do_load(command, true/*reverse*/)});
 }
 
 void CommandProcessor::sta(const Command& command)
@@ -435,8 +426,10 @@ void CommandProcessor::mul(const Command& command)
 	// ... and most significant part to RA
 	const auto ra_part = ((abs_result >> Word::k_bits_count) & Word::k_max_abs_value);
 
-	set_rax({{WordValue{sign, static_cast<int>(ra_part)}},
-		{WordValue{sign, static_cast<int>(rx_part)}}});
+    RAX rax;
+    rax.ra.set_value(WordValue(sign, static_cast<int>(ra_part)));
+    rax.rx.set_value(WordValue(sign, static_cast<int>(rx_part)));
+    set_rax(rax);
 }
 
 void CommandProcessor::div(const Command& command)
@@ -453,16 +446,18 @@ void CommandProcessor::div(const Command& command)
 	}
 
 	const auto rx = mix_.rx().value();
-	RAX::Type rax = (RAX::Type{abs_ra} << Word::k_bits_count);
-	rax |= rx.abs_value();
+	RAX::Type rax_value = (RAX::Type{abs_ra} << Word::k_bits_count);
+    rax_value |= rx.abs_value();
 
-	const auto new_a = rax / abs_value;
-	const auto new_x = rax % abs_value;
+	const auto new_a = rax_value / abs_value;
+	const auto new_x = rax_value % abs_value;
 	const Sign prev_sign = ra.sign();
 	const Sign sign = ((prev_sign == value.sign()) ? Sign::Positive : Sign::Negative);
 
-	set_rax({{WordValue{sign, static_cast<int>(new_a)}},
-		{WordValue{prev_sign, static_cast<int>(new_x)}}});
+    RAX rax;
+    rax.ra.set_value(WordValue(sign, static_cast<int>(new_a)));
+    rax.rx.set_value(WordValue(prev_sign, static_cast<int>(new_x)));
+	set_rax(rax);
 }
 
 void CommandProcessor::enta_group(const Command& command)

@@ -1,6 +1,7 @@
 #pragma once
 #include <mix/config.h>
 #include <mix/registers.h>
+#include <mix/byte.h>
 
 #include <array>
 
@@ -16,17 +17,16 @@ public:
 
 	void process(const Command& command);
 
+    const Computer& mix() const { return mix_; }
+    Word do_load(const Command& command,
+        bool reverse_sorce_sign = false) const;
+
 private:
 	void set_rax(const RAX& rax);
 
 	const Word& memory(const Command& command) const;
 	int indexed_address(const Command& command) const;
 	int indexed_address(int address, std::size_t index) const;
-
-	Register do_load(
-		Register prev_value,
-		const Command& command,
-		bool reverse_sorce_sign = false) const;
 
 	void do_store(const Register& r, const Command& command);
 
