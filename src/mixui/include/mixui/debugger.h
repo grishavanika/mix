@@ -30,6 +30,7 @@ ProgramWithSource LoadProgramFromSourceFile(
 struct Debugger
 {
     ProgramWithSource program_;
+    bool loaded_ = false;
 
     std::stringstream device18_;
     std::vector<int> breakpoints_;

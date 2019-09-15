@@ -99,6 +99,7 @@ struct UIMix
     
     UIFlags flags_;
     UIControls controls_;
+    UIDebuggerView debugger_view_;
 };
 
 static void UIControlsInput(UIControls* ui_controls
@@ -149,6 +150,7 @@ static void UIControlsModifyMix(UIMix* ui_mix, mix::Computer* mix, Debugger* deb
     {
         SetupIODevice(debugger, mix);
         debugger->program_ = LoadProgramFromSourceFile(ui_mix->controls_.source_file_, mix);
+        debugger->loaded_ = true;
         debugger->breakpoints_.clear();
         debugger->executed_instructions_count = 0;
     }
@@ -301,27 +303,35 @@ void UIRenderOutputAndHelp(const mix::Computer& mix
     ImGui::End();
 }
 
-static void RenderAll()
+struct State
+{
+    mix::Computer mix_;
+    mix::CommandProcessor mix_processor_;
+    Debugger debugger_;
+    UIMix ui_mix_;
+    State()
+        : mix_()
+        , mix_processor_(mix_)
+        , debugger_()
+        , ui_mix_()
+    {
+    }
+};
+
+static void RenderAll(State* state)
 {
 #if (0)
     ImGui::ShowDemoWindow(nullptr);
 #endif
 
-    static mix::Computer mix;
-    static mix::CommandProcessor mix_processor(mix);
-    static mix::CommandHelp mix_help(mix_processor);
-    static Debugger debugger;
-    static UIMix ui_mix;
-    static UIDebuggerView debugger_view;
-
-    MixModifyUI(mix, &ui_mix);
-    UIRegistersInputModifyMix(&ui_mix, &mix);
-    UIFlagsAndAddressInputModifyMix(&ui_mix, &mix);
-    UIControlsInput(&ui_mix.controls_, mix, debugger);
-    UIControlsModifyMix(&ui_mix, &mix, &debugger);
-    UIDebuggerViewInput(mix, debugger, &debugger_view);
-    UIDebuggerModifyMix(debugger_view, &debugger, &mix);
-    UIRenderOutputAndHelp(mix, mix_help, debugger);
+    MixModifyUI(state->mix_, &state->ui_mix_);
+    UIRegistersInputModifyMix(&state->ui_mix_, &state->mix_);
+    UIFlagsAndAddressInputModifyMix(&state->ui_mix_, &state->mix_);
+    UIControlsInput(&state->ui_mix_.controls_, state->mix_, state->debugger_);
+    UIControlsModifyMix(&state->ui_mix_, &state->mix_, &state->debugger_);
+    UIDebuggerViewInput(state->mix_, state->debugger_, &state->ui_mix_.debugger_view_);
+    UIDebuggerModifyMix(state->ui_mix_.debugger_view_, &state->debugger_, &state->mix_);
+    UIRenderOutputAndHelp(state->mix_, mix::CommandHelp(state->mix_processor_), state->debugger_);
 }
 
 #if defined(_WIN32)
@@ -376,7 +386,37 @@ int main(int, char**)
     ImGuiCheck(ImGui_ImplSDL2_InitForOpenGL(window, gl_context));
     ImGuiCheck(ImGui_ImplOpenGL3_Init(glsl_version));
 
-    auto handle_events = [window]
+    State state;
+
+    auto handle_keyboard = [&state](int scancode)
+    {
+        if (scancode == SDL_SCANCODE_F5)
+        {
+            if (!state.debugger_.loaded_ || state.mix_.is_halted())
+            {
+                state.ui_mix_.controls_.load_from_file = true;
+            }
+            else
+            {
+                state.ui_mix_.controls_.run_to_breakpoint_ = true;
+            }
+            UIControlsModifyMix(&state.ui_mix_, &state.mix_, &state.debugger_);
+        }
+        if (scancode == SDL_SCANCODE_F10)
+        {
+            if (!state.debugger_.loaded_ || state.mix_.is_halted())
+            {
+                state.ui_mix_.controls_.load_from_file = true;
+            }
+            else
+            {
+                state.ui_mix_.controls_.run_one_ = true;
+            }
+            UIControlsModifyMix(&state.ui_mix_, &state.mix_, &state.debugger_);
+        }
+    };
+
+    auto handle_events = [window, &handle_keyboard]
     {
         bool done = false;
         SDL_Event event{};
@@ -387,6 +427,11 @@ int main(int, char**)
             done |= ((event.type == SDL_WINDOWEVENT)
                 && (event.window.event == SDL_WINDOWEVENT_CLOSE)
                 && (event.window.windowID == ::SDL_GetWindowID(window)));
+            if (event.type == SDL_KEYDOWN)
+            {
+                // Ignore ImGui::GetIO().WantCaptureKeyboard
+                handle_keyboard(event.key.keysym.scancode);
+            }
         }
         return !done;
     };
@@ -424,7 +469,7 @@ int main(int, char**)
     while (handle_events())
     {
         start_frame();
-        RenderAll();
+        RenderAll(&state);
         end_frame();
     }
 
