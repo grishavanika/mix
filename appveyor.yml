@@ -25,6 +25,8 @@ platform:
 cache: c:\tools\vcpkg\installed\
 
 install:
+  - cd /d %APPVEYOR_BUILD_FOLDER%
+  - git submodule update --init --recursive
   - cd /d c:\tools\vcpkg
   - vcpkg install gl3w:x64-windows
   - vcpkg install gl3w:x86-windows
