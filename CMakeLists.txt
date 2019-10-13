@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.8)
+# Require 3.11+ for FetchContent* support
+cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 project(mix)
 
 include(CheckCXXCompilerFlag)

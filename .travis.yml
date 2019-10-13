@@ -1,6 +1,5 @@
-dist: trusty
+dist: bionic
 language: cpp
-sudo: required
 
 notifications:
   email: false
@@ -13,16 +12,8 @@ compiler:
   #- clang
 
 before_install:
-  # - sudo apt-get update
-  # - sudo apt-get install -y libsdl2-dev
-  # - sudo apt-get install -f
-  # From: https://gist.github.com/cotsog/3ce84675af0d74438d91
-  - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
-  - if [ "$CXX" == "g++" ]; then sudo apt-get update -qq; fi
-
-install:
-  - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-6; fi
-  - if [ "$CXX" == "g++" ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90; fi
+  - g++ --version
+  - cmake --version
 
 env:
   - config=Debug
