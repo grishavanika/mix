@@ -48,7 +48,15 @@ bool UIDebuggerView::update_dragging(float mouse_y /*= ImGui::GetIO().MousePos.y
 // #XXX: hard-code bytes formatting to 18 symbols.
 // UI should be changed to really render bytes
 // instead converting to string & rendering the string.
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
+// declaration requires an exit-time destructor
+#endif
 static const std::string k_no_code(18, ' ');
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 static std::string PrintCode(const mix::Word& w, mixal::OperationId operation_id)
 {
@@ -214,7 +222,8 @@ void UIDebuggerViewInput(const mix::Computer& mix
 
         if (address < 0)
         {
-            ImGui::Text("% *c", address_width, ' ');
+            // #TODO: '.' should be ' ' (space)
+            ImGui::Text("%.*s", address_width, " ");
         }
         else
         {

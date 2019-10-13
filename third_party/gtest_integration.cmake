@@ -1,4 +1,5 @@
 # GoogleTest integration
+include(FetchContent)
 
 macro(find_gtest found_gtest)
 
@@ -46,6 +47,7 @@ macro(setup_gtest_lib lib_name)
 	if (MSVC)
 		target_compile_definitions(${lib_name} PUBLIC
 			-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+		target_compile_definitions(${lib_name} PRIVATE _CRT_SECURE_NO_WARNINGS)
 	endif ()
 
 	# Disable overloads for std::tr1::tuple type
@@ -75,17 +77,29 @@ endmacro()
 
 macro(setup_gtest_from_git)
 
+	FetchContent_Declare(
+		gtest
+		SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/gtest-src"
+		FULLY_DISCONNECTED ON)
+	FetchContent_GetProperties(gtest)
+	if (NOT gtest_POPULATED)
+		FetchContent_Populate(gtest)
+	endif ()
+
 	# GoogleTest uses static C++ runtime by default,
 	# use C++ as dll instead
 	set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-	add_subdirectory(gtest)
+	add_subdirectory(${gtest_SOURCE_DIR} ${gtest_BINARY_DIR} EXCLUDE_FROM_ALL)
 
-	setup_gtest_lib(gtest)
+	# gmock_main compiles GTest and GMock, but misses GTest include directories
+	# when using FetchContent* with predefined SOURCE_DIR that
+	# points to ${ROOT}/third_party/deps/...
+	target_include_directories(gmock_main PUBLIC $<BUILD_INTERFACE:${gtest_SOURCE_DIR}/googletest>)
+	target_include_directories(gmock_main PUBLIC $<BUILD_INTERFACE:${gtest_SOURCE_DIR}/googletest/include>)
 	setup_gtest_lib(gmock_main)
-	setup_gtest_lib(gmock)
 
 	add_library(GTest_Integrated INTERFACE)
-	target_link_libraries(GTest_Integrated INTERFACE gtest gmock_main gmock)
+	target_link_libraries(GTest_Integrated INTERFACE gmock_main)
 
 endmacro()
 

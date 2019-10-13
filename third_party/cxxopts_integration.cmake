@@ -1,6 +1,17 @@
+include(FetchContent)
+
+FetchContent_Declare(
+	cxxopts
+	SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/cxxopts-src"
+	FULLY_DISCONNECTED ON)
+FetchContent_GetProperties(cxxopts)
+if (NOT cxxopts_POPULATED)
+	FetchContent_Populate(cxxopts)
+endif ()
+
 # cxxopts integration
 set(CXXOPTS_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(cxxopts)
+add_subdirectory(${cxxopts_SOURCE_DIR} ${cxxopts_BINARY_DIR} EXCLUDE_FROM_ALL)
 
 if (clang_on_msvc)
 	target_compile_options(cxxopts INTERFACE

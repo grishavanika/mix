@@ -55,4 +55,3 @@ set_target_properties(mixal_format PROPERTIES FOLDER "app/tools")
 
 # tests
 add_subdirectory(src/tests)
-

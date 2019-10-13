@@ -134,7 +134,7 @@ int main(int, char**)
         ImGui::GetIO().FontDefault = nullptr;
     }
 
-    auto start_frame = [window, default_font]
+    auto start_frame = [window]
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame(window);
