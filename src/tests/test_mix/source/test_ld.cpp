@@ -154,7 +154,7 @@ TEST_P(LDTest, Content_Of_Source_Address_Field_Replaces_Value_Of_Registers_With_
 		expected_value(true/*reverse original sign*/));
 }
 
-DEF_INSTANTIATE_TEST_CASE_P(Load_With_Default_Field,
+INSTANTIATE_TEST_SUITE_P(Load_With_Default_Field,
 	LDTest,
 	::testing::Values(
 		/*00*/LDParam{1, WordValue{0}, Word::MaxField()},
@@ -186,7 +186,7 @@ DEF_INSTANTIATE_TEST_CASE_P(Load_With_Default_Field,
 		/*26*/LDParam{26, WordValue{-1'073'741'823}, Word::MaxField()}
 	));
 
-DEF_INSTANTIATE_TEST_CASE_P(Load_With_Partial_Field,
+INSTANTIATE_TEST_SUITE_P(Load_With_Partial_Field,
 	LDTest,
 	::testing::Values(
 		/*00*/LDParam{1, WordValue{Sign::Positive, 0}, WordField{0, 0}},

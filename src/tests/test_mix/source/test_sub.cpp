@@ -88,7 +88,7 @@ TEST_P(SubTest, Substracts_Memory_Cell_From_RA)
         , mix.overflow_flag() == OverflowFlag::Overflow);
 }
 
-DEF_INSTANTIATE_TEST_CASE_P(Sub_With_Overflow,
+INSTANTIATE_TEST_SUITE_P(Sub_With_Overflow,
 	SubTest,
 	::testing::Values(
 		/*00*/SubParam{0, true, MinRegister(), Word(1), Word::MaxField(), 1000},
@@ -100,7 +100,7 @@ DEF_INSTANTIATE_TEST_CASE_P(Sub_With_Overflow,
 		/*06*/SubParam{0, true, MinRegister(), Word(1, WordField{5, 5}), WordField{5, 5}, 1000}
 	));
 
-DEF_INSTANTIATE_TEST_CASE_P(Sub_Without_Overflow,
+INSTANTIATE_TEST_SUITE_P(Sub_Without_Overflow,
 	SubTest,
 	::testing::Values(
 		/*00*/SubParam{0, false, Register(1), Word(1), Word::MaxField(), 1000},

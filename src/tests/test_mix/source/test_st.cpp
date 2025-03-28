@@ -100,7 +100,7 @@ TEST_P(STTest, Store_RA_RX_To_Memory)
 	ASSERT_EQ(param.final_cell_value, mix.memory(param.start_address + 1));
 }
 
-DEF_INSTANTIATE_TEST_CASE_P(Store_Register_Rightmost_Bytes_To_Given_Memory_Cell_Field,
+INSTANTIATE_TEST_SUITE_P(Store_Register_Rightmost_Bytes_To_Given_Memory_Cell_Field,
 	STTest,
 	::testing::Values(
 		STParam{
@@ -199,7 +199,7 @@ TEST_P(STITest, Store_RI_To_Memory)
 	}
 }
 
-DEF_INSTANTIATE_TEST_CASE_P(Stores_Index_Registers_With_First_3_Bytes_As_Zero,
+INSTANTIATE_TEST_SUITE_P(Stores_Index_Registers_With_First_3_Bytes_As_Zero,
 	STITest,
 	::testing::Values(
 		STIParam{
