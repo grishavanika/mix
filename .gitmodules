@@ -1,9 +1,6 @@
 [submodule "third_party/deps/cxxopts-src"]
 	path = third_party/deps/cxxopts-src
 	url = https://github.com/jarro2783/cxxopts
-[submodule "third_party/deps/sdl2-src"]
-	path = third_party/deps/sdl2-src
-	url = https://github.com/SDL-mirror/SDL.git
 [submodule "third_party/deps/imgui-src"]
 	path = third_party/deps/imgui-src
 	url = https://github.com/ocornut/imgui.git
