@@ -15,7 +15,9 @@ if (clang_on_msvc)
 		# enumeration values not explicitly handled in switch
 		# Disabling since there are proper default statements and warning
 		# does not help
-		-Wno-switch-enum)
+		-Wno-switch-enum
+		-Wno-unsafe-buffer-usage
+		)
 endif()
 
 target_link_libraries(${lib_name} PUBLIC mix_lib mixal_parse_lib)

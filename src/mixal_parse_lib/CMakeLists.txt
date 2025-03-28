@@ -11,7 +11,9 @@ if (clang_on_msvc)
 		# definition of implicit copy assignment operator
 		# is deprecated because it has a user-declared destructor [...]
 		# because of usage of move-constructor in derived class
-		-Wno-deprecated)
+		-Wno-deprecated
+		-Wno-switch-default # clang missbehaves
+		)
 endif()
 
 target_link_libraries(${lib_name} PUBLIC core_lib)

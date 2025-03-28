@@ -11,7 +11,10 @@ if (clang_on_msvc)
 		# definition of implicit copy assignment operator for 'IIODevice'
 		# is deprecated because it has a user-declared destructor [...]
 		# because of usage of move-constructor for DeviceProxy class
-		-Wno-deprecated)
+		-Wno-deprecated
+        -Wno-unsafe-buffer-usage
+		-Wno-switch-default # clang missbehaves
+        )
 endif()
 
 # See internal/valarray_register_helpers.h std::copy() call.

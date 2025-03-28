@@ -7,7 +7,6 @@
 - [Build](#build)
 - [Dependencies](#dependencies)
 - [mixal command-line help](#mixal-command-line-help)
-- [TODO](#todo)
 
 ##### MIX UI debugger
 
