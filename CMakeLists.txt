@@ -5,8 +5,8 @@ project(mix)
 include(CheckCXXCompilerFlag)
 include(GenerateExportHeader)
 include(CTest)
-include(tools/cmake/utils.cmake)
-include(tools/cmake/clang_msvc_integration.cmake)
+include(cmake_utils.cmake)
+include(cmake_clang_msvc.cmake)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -56,3 +56,5 @@ set_target_properties(mixal_format PROPERTIES FOLDER "app/tools")
 
 # tests
 add_subdirectory(src/tests)
+
+set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT mixui)

@@ -1,6 +1,7 @@
 {
   "dependencies": [
     "gtest",
-    "sdl2"
+    "sdl2",
+    "cxxopts"
   ]
 }

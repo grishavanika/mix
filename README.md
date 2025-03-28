@@ -1,20 +1,23 @@
 # MIX
 
-[![Build Status (Windows)](https://ci.appveyor.com/api/projects/status/github/grishavanika/mix?svg=true)](https://ci.appveyor.com/project/grishavanika/mix)
-[![Build Status (Linux)](https://travis-ci.org/grishavanika/mix.svg)](https://travis-ci.org/grishavanika/mix)
-
-- [MIX UI (debugger) progress](#mix-ui-debugger-progress)
+- [MIX UI debugger](#mix-ui-debugger)
 - [Translating "FIRST FIVE HUNDRED PRIMES"](#translating-first-five-hundred-primes)
 - [Executing "FIRST FIVE HUNDRED PRIMES"](#executing-first-five-hundred-primes)
 - [Integration with GNU MIX Development Kit (MDK)](#integration-with-gnu-mix-development-kit-mdk)
-- [Building](#building)
+- [Build](#build)
 - [Dependencies](#dependencies)
 - [mixal command-line help](#mixal-command-line-help)
 - [TODO](#todo)
 
-##### MIX UI (debugger) progress
+##### MIX UI debugger
 
-![](docs/mix_ui_progress.png)
+Supports:
+
+ * breakpoints
+ * change of execution pointer
+ * single instruction step
+
+![](mix_ui_progress.png)
 
 ##### Translating "FIRST FIVE HUNDRED PRIMES"
 
@@ -71,7 +74,7 @@ mixal --hide-details --interactive --file src/tests/mixal_code/program_primes.mi
 mixal --file src/tests/mixal_code/program_primes.mixal
 ```
 
-![](docs/first_500_primes.png)
+![](first_500_primes.png)
 
 ##### Integration with GNU MIX Development Kit (MDK)
 
@@ -96,75 +99,21 @@ mixal.exe --execute --mdk --file program_primes.mix
 
 [MDK]: https://www.gnu.org/software/mdk/
 
-##### Building
+##### Build
 
-|         Name        | Version | Actual compiler |    Version    |        CMake command                      |
-|-------------------- |---------|-----------------|---------------|-------------------------------------------|
-| Visual Studio 2019  | 16.2.3  |     cl.exe      | 19.22.27905   | -G "Visual Studio 16 2019" -A x64         |
-| Clang (VS 2019)     | 16.2.3  |   clang-cl.exe  | 8.0.0         | -G "Visual Studio 16 2019" -A x64 -T LLVM |
-| GCC (STL/nuwen.net) | 7.3.0   |   gcc.exe       | 7.3.0         | -G "Unix Makefiles"                       |
-| GCC (WSL)           | 7.3.0   |   gcc           | 7.3.0         | -G "Unix Makefiles"                       |
-
-Third-party dependencies will be downloaded and compiled during the build 
-if they are missing.  
-
-I.e, you can install them to speed-up usual edit/compile/run cycle using Vcpkg:
-
-```
-vcpkg install gl3w
-vcpkg install sdl2
-vcpkg install gtest
-```
-
-[Vcpkg]: https://github.com/microsoft/vcpkg
-
-Examples:
-
-```
-:: Usual MSVC/x64
-cmake -G "Visual Studio 16 2019" ^
-  -DCMAKE_INSTALL_PREFIX=install ^
-  -A x64 ^
-  ..
-:: Clang on Windows/x64
-cmake -G "Visual Studio 16 2019" ^
-  -A x64 ^
-  -T LLVM ^
-  ..
-:: MSVC/x64 with Vcpkg dependencies
-:: (Vcpkg installed to C:/libs/vcpkg)
-cmake -G "Visual Studio 16 2019" ^
-  -A x64 ^
-  -DCMAKE_TOOLCHAIN_FILE=C:/libs/vcpkg/scripts/buildsystems/vcpkg.cmake ^
-  ..
-:: MinGW with custom install folder, Release configuration
-:: (MinGW installed to C:\Programs\mingw_gcc_7.3.0)
-set path=%path%;C:\Programs\mingw_gcc_7.3.0\bin
-cmake -G "Unix Makefiles" ^
-  -DCMAKE_BUILD_TYPE=Release ^
-  -DCMAKE_INSTALL_PREFIX=install ^
-  ..
-```
-
-To build use either generated .sln file or CMake:
-
-```
-cmake --build . --config Release
-:: ... and additionally install all targets
-cmake --build . --config Release --target install
-```
+Standard CMake with VCPKG, see `build.cmd` for an example.
 
 ###### Dependencies
 
-Core stuff (MIX VM, interpreter, parser, assembler) have no dependencies.  
+Handled by VCPKG and FetchContent (imgui).  
+Core stuff (MIX VM, interpreter, parser, assembler) has no dependencies.  
 Other things (tools, UI, tests) dependencies listed in third_party/ folder:
 
 * (for command line tools) cxxopts: https://github.com/jarro2783/cxxopts.git
-* (for, obviously, tests)  gtest  : https://github.com/google/googletest.git
+* (for, tests)             gtest  : https://github.com/google/googletest.git
 * (for debugger UI)        imgui  : https://github.com/ocornut/imgui.git
-* (for imgui)              gl3w   : https://github.com/skaslev/gl3w.git
 * (for imgui)              sdl2   : https://github.com/SDL-mirror/SDL.git
-* (for imgui, implicitly)  opengl
+* (for imgui, implicitly)  opengl : your OpenGL system provides
 
 ###### mixal command-line help
 
@@ -183,18 +132,3 @@ Usage:
                       (MDK) format
 ```
 
-###### TODO
-
-* write debugger/UI, see MDK for reference
-* fix static/shared libraries build (with & without Vcpkg):
-  ```
-  cmake -G "Visual Studio 16 2019" ^
-    -DBUILD_SHARED_LIBS=ON ^
-    -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=ON ..
-  ```
-  `CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS` should not be there (?)
-* use Rx & ImGui to build debugger UI
-* add index register influence to LD/ST/ADD/SUB and similar tests: `LDA 2000,3(1:3)`
-* add Travis CI build support for **Clang**
-* port everything to WASM (Emscripten)
-* clean-up CMake scripts
