@@ -1,10 +1,10 @@
 #include <imgui.h>
-#include <imgui_impl_sdl.h>
+#include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3.h>
 
 #include <SDL.h>
 
-#include <GL/gl3w.h>
+#include <SDL_opengl.h>
 
 #include <cassert>
 #include <cstdlib>
@@ -74,8 +74,6 @@ int main(int, char**)
     SDLCheck(::SDL_GL_MakeCurrent(window, gl_context));
     GLCheck(::SDL_GL_SetSwapInterval(1)); // Enable vsync
 
-    // Initialize OpenGL loader
-    GLCheck(gl3wInit());
 
     // Setup Dear ImGui context
     (void)IMGUI_CHECKVERSION();
@@ -134,10 +132,10 @@ int main(int, char**)
         ImGui::GetIO().FontDefault = nullptr;
     }
 
-    auto start_frame = [window]
+    auto start_frame = []
     {
         ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL2_NewFrame(window);
+        ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
     };
 

@@ -51,7 +51,7 @@ static bool UISignInput(const char* label, mix::Sign* sign = nullptr)
                 , ImGui::GetStyle().Alpha * 0.5f);
         }
         if (ImGui::ButtonEx(SignText(draw_sign), ImVec2()
-            , ImGuiButtonFlags_Repeat | ImGuiButtonFlags_DontClosePopups))
+            , ImGuiItemFlags_ButtonRepeat /*| ImGuiButtonFlags_DontClosePopups*/))
         {
             selected_sign = draw_sign;
         }

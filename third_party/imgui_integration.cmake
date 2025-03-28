@@ -1,3 +1,6 @@
+include(sdl2_integration.cmake)
+find_package(OpenGL REQUIRED)
+
 include(FetchContent)
 FetchContent_Declare(
   imgui
@@ -37,6 +40,8 @@ add_library(ImGui_Impl
 
 target_include_directories(ImGui_Impl PUBLIC ${imgui_SOURCE_DIR}/examples)
 target_link_libraries(ImGui_Impl PRIVATE ImGui_Core)
+target_link_libraries(ImGui_Impl PUBLIC SDL2_Integrated)
+target_link_libraries(ImGui_Impl PRIVATE ${OPENGL_gl_LIBRARY})
 
 add_library(ImGui_Integrated INTERFACE)
 target_link_libraries(ImGui_Integrated INTERFACE

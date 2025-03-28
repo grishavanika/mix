@@ -168,122 +168,126 @@ void UIDebuggerViewInput(const mix::Computer& mix
 
     const bool was_dragging_stopped = state->update_dragging();
 
-    ImGuiListClipper clipper(total_lines, line_height);
     const ImVec2 action_size(line_height, line_height);
-    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+    ImGuiListClipper clipper;
+    clipper.Begin(total_lines, line_height);
+    while (clipper.Step())
     {
-        ImGui::PushID(i);
-
-        const WordWithSource& word = debugger.program_.commands[i];
-        const int address = word.translated.original_address;
-        std::string line = word.line;
-
-        const ImVec2 pos = ImGui::GetCursorScreenPos();
-        // Draw hidden button for "actions" column.
-        const bool on_action_press = ImGui::InvisibleButton("##action", action_size);
-        const ImVec2 action_rect_min = ImGui::GetItemRectMin();
-        const ImVec2 action_rect_max = ImGui::GetItemRectMax();
-        const bool is_action_hovered = ImGui::IsItemHovered();
-
-        // Toggle (add/remove) breakpoint
-        const bool is_on_breakpoint = debugger.has_breakpoint(address);
-        // To disable breakpoints add/remove when
-        // we drop dragged cursor
-        if (!was_dragging_stopped
-            && on_action_press
-            && (address >= 0))
+        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
         {
-            int& bp = is_on_breakpoint
-                ? state->breakpoint_to_remove_
-                : state->breakpoint_to_add_;
-            bp = address;
-        }
+            ImGui::PushID(i);
 
-        if (is_on_breakpoint)
-        {
-            RenderBreakpoint(pos, action_size);
-        }
+            const WordWithSource& word = debugger.program_.commands[i];
+            const int address = word.translated.original_address;
+            std::string line = word.line;
 
-        const bool is_active_address = (address >= 0)
-            && (current_address == address);
-        if (is_active_address && !state->is_dragging_active())
-        {
-            RenderAddressCursor(pos, action_size);
-        }
+            const ImVec2 pos = ImGui::GetCursorScreenPos();
+            // Draw hidden button for "actions" column.
+            const bool on_action_press = ImGui::InvisibleButton("##action", action_size);
+            const ImVec2 action_rect_min = ImGui::GetItemRectMin();
+            const ImVec2 action_rect_max = ImGui::GetItemRectMax();
+            const bool is_action_hovered = ImGui::IsItemHovered();
 
-        ImGui::SameLine();
-        ImGui::Text("%0*i| ", line_number_width, i + 1);
-        ImGui::SameLine();
-
-        if (is_active_address)
-        {
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.5f, 0.25f, 1.0f));
-        }
-
-        if (address < 0)
-        {
-            // #TODO: '.' should be ' ' (space)
-            ImGui::Text("%.*s", address_width, " ");
-        }
-        else
-        {
-            ImGui::Text("%0*i", address_width, address);
-        }
-        ImGui::SameLine();
-
-        if (address >= 0)
-        {
-            const mix::Word memory = mix.memory(address);
-            const bool modified = (word.translated.value != memory);
-            const auto bytecode_str = PrintCode(memory, modified
-                ? mixal::QueryOperationInfo(memory).id
-                : word.operation_id);
-            if (modified)
+            // Toggle (add/remove) breakpoint
+            const bool is_on_breakpoint = debugger.has_breakpoint(address);
+            // To disable breakpoints add/remove when
+            // we drop dragged cursor
+            if (!was_dragging_stopped
+                && on_action_press
+                && (address >= 0))
             {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.0f));
+                int& bp = is_on_breakpoint
+                    ? state->breakpoint_to_remove_
+                    : state->breakpoint_to_add_;
+                bp = address;
             }
-            ImGui::TextUnformatted(bytecode_str.c_str()
-                , bytecode_str.c_str() + bytecode_str.size());
-            if (modified)
+
+            if (is_on_breakpoint)
+            {
+                RenderBreakpoint(pos, action_size);
+            }
+
+            const bool is_active_address = (address >= 0)
+                && (current_address == address);
+            if (is_active_address && !state->is_dragging_active())
+            {
+                RenderAddressCursor(pos, action_size);
+            }
+
+            ImGui::SameLine();
+            ImGui::Text("%0*i| ", line_number_width, i + 1);
+            ImGui::SameLine();
+
+            if (is_active_address)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.f, 0.5f, 0.25f, 1.0f));
+            }
+
+            if (address < 0)
+            {
+                // #TODO: '.' should be ' ' (space)
+                ImGui::Text("%.*s", address_width, " ");
+            }
+            else
+            {
+                ImGui::Text("%0*i", address_width, address);
+            }
+            ImGui::SameLine();
+
+            if (address >= 0)
+            {
+                const mix::Word memory = mix.memory(address);
+                const bool modified = (word.translated.value != memory);
+                const auto bytecode_str = PrintCode(memory, modified
+                    ? mixal::QueryOperationInfo(memory).id
+                    : word.operation_id);
+                if (modified)
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.0f));
+                }
+                ImGui::TextUnformatted(bytecode_str.c_str()
+                    , bytecode_str.c_str() + bytecode_str.size());
+                if (modified)
+                {
+                    ImGui::PopStyleColor();
+                }
+            }
+            else
+            {
+                ImGui::TextUnformatted(k_no_code.c_str()
+                    , k_no_code.c_str() + k_no_code.size());
+            }
+
+
+            ImGui::SameLine();
+            ImGui::Text("    %s", line.c_str());
+
+            if (is_active_address)
             {
                 ImGui::PopStyleColor();
             }
-        }
-        else
-        {
-            ImGui::TextUnformatted(k_no_code.c_str()
-                , k_no_code.c_str() + k_no_code.size());
-        }
 
+            ImGui::PopID();
 
-        ImGui::SameLine();
-        ImGui::Text("    %s", line.c_str());
-
-        if (is_active_address)
-        {
-            ImGui::PopStyleColor();
-        }
-
-        ImGui::PopID();
-
-        // Handle dragging part.
-        if (is_active_address
-            && is_action_hovered
-            && !state->is_dragging_active()
-            && ImGui::GetIO().MouseDown[0])
-        {
-            state->start_dragging(action_rect_min);
-        }
-        if (state->is_dragging_active()
-            && (address >= 0)
-            && !is_active_address)
-        {
-            const float y_min = action_rect_min.y;
-            const float y_max = action_rect_max.y;
-            const float drag_y = state->drag_pos_.y + (line_height / 2);
-            if ((drag_y >= y_min) && (drag_y <= y_max))
+            // Handle dragging part.
+            if (is_active_address
+                && is_action_hovered
+                && !state->is_dragging_active()
+                && ImGui::GetIO().MouseDown[0])
             {
-                state->new_address_ = address;
+                state->start_dragging(action_rect_min);
+            }
+            if (state->is_dragging_active()
+                && (address >= 0)
+                && !is_active_address)
+            {
+                const float y_min = action_rect_min.y;
+                const float y_max = action_rect_max.y;
+                const float drag_y = state->drag_pos_.y + (line_height / 2);
+                if ((drag_y >= y_min) && (drag_y <= y_max))
+                {
+                    state->new_address_ = address;
+                }
             }
         }
     }
